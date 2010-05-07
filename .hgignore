@@ -1,0 +1,4 @@
+glob:dist/
+glob:doc/build/
+glob:build/
+glob:*.pyc
