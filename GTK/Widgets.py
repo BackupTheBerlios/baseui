@@ -12,10 +12,11 @@ PATH = os.path.dirname(__file__)
 
 
 class TextView:
-    def __init__(self, widget=None, font=None, encoding='latin-1'):
+    def __init__(self, widget=None, font=None, autoscroll=True, encoding='latin-1'):
         self.widget = widget
         self.text_buffer = self.widget.get_buffer()
         self.font = font
+        self.autoscroll = autoscroll
         self.encoding = encoding
             
 
@@ -24,16 +25,23 @@ class TextView:
         return self
 
 
+    def clear(self):
+        self.text_buffer.set_text('')
+        
+        
     def write(self, *args):
         number_of_args = len(args)
         for iter in xrange(number_of_args):
             text = args[iter]
             if iter < (number_of_args - 1):
                 text += ' '
-            self.text_buffer.insert_at_cursor(unicode(text, self.encoding))
+            end_iter = self.text_buffer.get_end_iter()
+            self.text_buffer.insert(end_iter, text)
+            if self.autoscroll == True:
+                self.widget.scroll_to_mark(self.text_buffer.get_insert(), 0)
         if self.font <> None:
             self.set_font(self.font)
-            
+
 
     def populate(self, text):
         self.text_buffer.set_text(unicode(text, self.encoding))

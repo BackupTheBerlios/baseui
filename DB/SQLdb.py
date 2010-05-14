@@ -324,33 +324,6 @@ class database:
                 if not (user['User'] in lof_users):
                     lof_users.append(user['User'])
         return lof_users
-
-
-    def select(self, table_name, distinct=False, column_list=[], where=''):
-        ''' select order in sql without transformation of output. Better use the
-            more advanced select order from the table directly! '''
-            
-        if distinct == False:
-            distinct = ''
-        else:
-            distinct = 'DISTINCT '
-            
-        if column_list == []:
-            sql_command = 'SELECT %s* FROM %s' % (distinct, table_name)
-        else:
-            column_list_str = str(column_list)
-            column_list_str = column_list_str[1:len(column_list_str) - 1]
-            column_list_str = column_list_str.replace("'", "")
-            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, table_name)
-            
-        if where <> '':
-            sql_command += ' WHERE %s' % where
-        
-        try:
-            selection = self.dictresult(sql_command)
-        except:
-            raise
-        return selection
     
     
     
@@ -624,12 +597,28 @@ CREATE TABLE """ + self.name + """
         
         
     def select(self, distinct=False, column_list=[], where=''):
-        try:
-            content_lod = self.db_object.select(self.name, distinct, column_list, where)
+        ''' SELECT order in SQL with transformation of output to python data types. '''
             
-            #return content_lod
+        if distinct == False:
+            distinct = ''
+        else:
+            distinct = 'DISTINCT '
+            
+        if column_list == []:
+            sql_command = 'SELECT %s* FROM %s' % (distinct, self.name)
+        else:
+            column_list_str = str(column_list)
+            column_list_str = column_list_str[1:len(column_list_str) - 1]
+            column_list_str = column_list_str.replace("'", "")
+            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, self.name)
+            
+        if where <> '':
+            sql_command += ' WHERE %s' % where
+        
+        try:
+            content_lod = self.db_object.dictresult(sql_command)            
         except:
-            return
+            raise
             
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod)
         return content_lod
@@ -731,6 +720,10 @@ class column:
         self.name = column_name
 
 
+    def check_attributes(self, attributes_dic=None, action=None, add=False, drop=False, convert=False):
+        pass
+        
+        
     def get_attribute_layout(self, attributes_dic = None):
         ''' Returns the SQL code snippet for creating one column. It is needed
             everywhere you have to give column attributes, especially for
@@ -788,7 +781,6 @@ class column:
             self.db_object.execute(sql_command)
         except:
             raise
-
 
 
     def drop(self):
