@@ -14,7 +14,11 @@ PATH = os.path.dirname(__file__)
 class TextView:
     def __init__(self, widget=None, font=None, autoscroll=True, encoding='latin-1'):
         self.widget = widget
-        self.text_buffer = self.widget.get_buffer()
+        
+        if widget <> None:
+            self.text_buffer = self.widget.get_buffer()
+            self.clear()
+        
         self.font = font
         self.autoscroll = autoscroll
         self.encoding = encoding
@@ -22,11 +26,13 @@ class TextView:
 
     def create(self):
         self.widget = gtk.TextView()
+        self.text_buffer = self.widget.get_buffer()
+        self.clear()
         return self
 
 
     def clear(self):
-        self.text_buffer.set_text('')
+        self.set_text('')
         
         
     def write(self, *args):
@@ -35,10 +41,12 @@ class TextView:
             text = args[iter]
             if iter < (number_of_args - 1):
                 text += ' '
+            
             end_iter = self.text_buffer.get_end_iter()
+            text = text.replace('\x00', '').decode('utf-8', 'replace').encode('utf-8')
             self.text_buffer.insert(end_iter, text)
-            if self.autoscroll == True:
-                self.widget.scroll_to_mark(self.text_buffer.get_insert(), 0)
+        if self.autoscroll == True:
+            self.widget.scroll_to_mark(self.text_buffer.get_insert(), 0)
         if self.font <> None:
             self.set_font(self.font)
 
@@ -69,6 +77,7 @@ class TextView:
         
     def set_text(self, text):
         ''' Should be inserted soon! '''
+        text = text.replace('\x00', '').decode('utf-8', 'replace').encode('utf-8')
         self.text_buffer.insert_at_cursor(text)
         pass
         
