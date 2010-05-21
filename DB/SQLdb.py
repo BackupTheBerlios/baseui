@@ -518,9 +518,15 @@ CREATE TABLE """ + self.name + """
         return content_lod
 
 
-    def check_content(self, content_lod):
+    def check_content(self, content_lod, add=False, drop=False, convert=False):
+        ''' Checks rows for differences. 
+                add = If True, add not existing rows in content_lod to the table.
+                drop = If True, drop rows which are in the database but not in content_lod.
+                update = If True, try to update existing rows with the data given in content_lod. '''
+        
         source_content_lod = get_content()
-
+        target_content_lod = content_lod()
+        
         return differences_lod
 
 
