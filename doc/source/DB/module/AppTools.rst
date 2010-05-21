@@ -1,7 +1,7 @@
-:mod:`appDB` --- Abbildung von Datentypen in SQL
-================================================
+:mod:`AppTools` --- Abbildung von Datentypen in SQL
+===================================================
 
-.. module:: appDB
+.. module:: AppTools
    :synopsis:  Abbildung von Datentypen in SQL
    
 

@@ -11,8 +11,10 @@ DB Dokumentation
 
    intro
    module/SQLdb
-   module/APPdb
-   module/ExcelDB
+   module/AppTools
+   module/SyncTools
+   module/Transformations
+   module/Definitions
    suggestions
 
    
