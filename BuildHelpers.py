@@ -42,7 +42,7 @@ def get_nsi(**kwargs):
 Name "%(APP_NAME)s"
 
 ; The file to write
-OutFile "%(APP_NAME)s v%(APP_VERSION)s.exe"
+OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
 
 ; The default installation directory
 InstallDir "$PROGRAMFILES\%(APP_NAME)s"
@@ -216,7 +216,8 @@ def makeNSI(pathname, build_dir, app_name, app_version, app_icon=''):
     output_file.close()
     os.chdir(pathname)
     
-    # This mess works with Windows 7, no clue if it does with Windows XP!
+    # Now, build the whole installer ------------------------------------------
+    os.mkdir('dist')
     ProgramFiles = os.getenv("ProgramFiles")
     makeNSISw = '"' + ProgramFiles + '\\NSIS\\makensisw.exe" "build\\%s.nsi"' % app_name
     os.popen('"%s"' % makeNSISw)
