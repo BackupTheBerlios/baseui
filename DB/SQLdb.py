@@ -494,11 +494,14 @@ CREATE TABLE """ + self.name + """
 
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
+        print '... DB columns:', database_column_list
+        
         for attributes_dic in attributes_lod:
             column_name = attributes_dic['column_name']
             if column_name not in database_column_list:
                 not_in_database_lod.append(attributes_dic)                                  
         
+                
         # Is there any difference?
         if action <> 'analyze' or add == True:
             if len(not_in_database_lod) > 0:
@@ -571,16 +574,16 @@ CREATE TABLE """ + self.name + """
         
     def get_columns(self):
         ''' Returns a list of columns contained by this table. '''
+        
         if self.db_object.engine <> 'sqlite':
             column_list = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         else:
-            # Select just to get the cursor to the table description!
-            self.select()
-            table_description = self.db_object.cursor.description
-            
+            attributes_lod = self.db_object.dictresult("PRAGMA TABLE_INFO(%s)" % self.name)
             column_list = []
-            for column_tup in table_description:
-                column_list.append(column_tup[0])
+            for attributes_dic in attributes_lod:
+                for key in attributes_dic:
+                    if key == 'name':
+                        column_list.append(attributes_dic[key])
         return column_list
 
 
