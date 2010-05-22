@@ -32,7 +32,7 @@ class TextView:
 
 
     def clear(self):
-        self.set_text('')
+        self.text_buffer.set_text('')
         
         
     def write(self, *args):
