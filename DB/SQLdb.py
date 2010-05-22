@@ -7,7 +7,7 @@
 
 import Transformations
 
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
     from pprint import pprint 
@@ -575,7 +575,7 @@ CREATE TABLE """ + self.name + """
             column_list = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         else:
             # Select just to get the cursor to the table description!
-            self.db_object.select(self.name)
+            self.select()
             table_description = self.db_object.cursor.description
             
             column_list = []
@@ -781,7 +781,9 @@ class column:
             primary key column named "id". '''
 
         column_layout = self.get_attribute_layout(attributes_dic)
-        sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
+        # Does not work for msSQL, check out if it works for other DBs!
+        # sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
+        sql_command = 'ALTER TABLE %s ADD %s' % (self.table_object.name, column_layout)
 
         try:
             self.db_object.execute(sql_command)
