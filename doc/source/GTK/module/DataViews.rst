@@ -4,9 +4,16 @@
 .. module:: DataViews
    :synopsis: Datensichtungen
    
-Datensichtungen können Tabellen, Baumansichten, Formulare oder Reports sein. Wichtig ist, daß die Datenströme bei allen Ansichten auf ein möglichst einheitliches Datenaustauschformat setzen, das JSON ähnelt und leicht umzusetzen ist. Ebenfalls erwähnenswert ist, dass dieses Modul besonders gut mit dem Python-Modul ``DBapi`` zusammenarbeitet, welches die Daten gleich im richtigen Format liefert.
+Datensichtungen können Tabellen, Baumansichten, Formulare oder Reports sein. 
+Wichtig ist, daß die Datenströme bei allen Ansichten auf ein möglichst 
+einheitliches Datenaustauschformat setzen, das JSON ähnelt und leicht 
+umzusetzen ist. Ebenfalls erwähnenswert ist, dass dieses Modul besonders gut 
+mit dem Python-Modul ``DBapi`` zusammenarbeitet, welches die Daten gleich im 
+richtigen Format liefert.
 
-Wenn möglich, beschränkt sich dieses Modul auf die sogenannten `list of dictionarys`, welches entweder die Spaltenkonfiguration oder den Inhalt einer Tabelle (oder eines Baumes) enthält. 
+Wenn möglich, beschränkt sich dieses Modul auf die sogenannten 
+`list of dictionarys`, welches entweder die Spaltenkonfiguration oder den 
+Inhalt einer Tabelle (oder eines Baumes) enthält. 
 
 
 Tabellen- und Baumansicht
@@ -14,8 +21,9 @@ Tabellen- und Baumansicht
 
 .. class:: Tree(widget=None)
 
-   Die Benutzung von PyGTK Tabellen wird vereinfacht durch Festlegung eines Datenaustauschformats, 
-   das JSON ähnlich ist. Das Attribut ´´widget´´ ist ein ´´gtk.TreeView´´ Objekt.
+   Die Benutzung von PyGTK Tabellen wird vereinfacht durch Festlegung eines 
+   Datenaustauschformats, das JSON ähnlich ist. Das Attribut ´´widget´´ ist ein 
+   ´´gtk.TreeView´´ Objekt.
 
    
 .. method:: Tree.on_column_toggled(renderer=None, row=None, widget=None, col=None)
