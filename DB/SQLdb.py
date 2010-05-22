@@ -7,7 +7,7 @@
 
 import Transformations
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     from pprint import pprint 
