@@ -32,4 +32,26 @@ Nicht dokuentiert.
    ``content_lod`` transformieren zu können.
    
    
+.. function:: transform_timestamp(content)
+
+   Noch nicht implementierte Unterfunktion für ::func:: `normalize_content`
+   
+   
+.. function:: transform_bool(content)
+
+   Transformiert ``content`` zu bool-Datentyp. Viele Datenbanken geben für
+   einen ``bool``-Datentyp einen Buchstaben (z.B. 't') oder einen Integer-
+   Wert (z.B. 1) zurück. Diese Funktion macht daraus ``True`` oder ``False``,
+   je nach Bedarf.
+   
+   
+.. function:: convert_to_sql(attributes_lod, content_lod)
+
+   Noch nicht implementiert.
+   
+   
+.. function:: SQLite_DataTypes(self, data_type)
+   
+   Funktioniert noch nicht.
+   
    

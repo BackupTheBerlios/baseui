@@ -664,11 +664,3 @@ class Form:
 
 
 
-class Report:
-    ''' Databases are made to print out data. This class does all the messing
-        for you and draws the needed report onto a gtk.DrawingArea. '''
-
-    '''
-    See Documentation for BRAINWRAPPING.
-    '''
-

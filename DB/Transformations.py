@@ -75,8 +75,7 @@ def transform_timestamp(content):
 def transform_bool(content):
     if content == None or type(content) == bool:
         return content
-        
-    print '...transforming bool content:', content
+    
     transform_dic = {'f': False,
                      't': True,
                      '0': False,
