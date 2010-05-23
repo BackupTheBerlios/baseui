@@ -5,12 +5,7 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-import Transformations
-
-DEBUG = False
-
-if DEBUG:
-    from pprint import pprint 
+import Transformations    
 
 
 def get_engines():
@@ -59,7 +54,7 @@ def get_engines():
 class database:
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
-    def __init__(self, engine='', encoding="latin-1"):
+    def __init__(self, engine='', encoding="latin-1", debug=False):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
 
@@ -67,7 +62,11 @@ class database:
         self.cursor = None
         self.engine = engine.lower()
         self.encoding = encoding
-
+        self.debug = debug
+        
+        if self.debug == True:
+            from pprint import pprint
+            
         try:
             connector = None
             
@@ -209,8 +208,6 @@ class database:
         ''' Executes the given sql_command and gives back a list_of_lists if there
             is more then just one row. Else this just returns a simple list. '''
         
-        if DEBUG: print sql_command
-        
         try:
             self.cursor.execute(sql_command)
         except:
@@ -235,8 +232,6 @@ class database:
             Be careful, because the content is untransformed and thus, comes
             a little different from database to database! '''
         
-        if DEBUG: print sql_command
-        
         try:
             self.cursor.execute(sql_command)
         except:
@@ -256,7 +251,7 @@ class database:
     def execute(self, sql_command):
         ''' Executes sql_command without returning values (for db-manipulation). '''
         
-        if DEBUG: print sql_command
+        if self.debug: print sql_command
         
         try:
             self.cursor.execute(sql_command)
@@ -494,8 +489,6 @@ CREATE TABLE """ + self.name + """
 
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
-        print '... DB columns:', database_column_list
-        
         for attributes_dic in attributes_lod:
             column_name = attributes_dic['column_name']
             if column_name not in database_column_list:
@@ -605,7 +598,7 @@ CREATE TABLE """ + self.name + """
         konstrukt = ('referenced_table_name, referenced_column_name, column_name')
         
         
-    def select(self, distinct=False, column_list=[], where=''):
+    def select(self, distinct=False, column_list=[], where='', listresult=False):
         ''' SELECT order in SQL with transformation of output to python data types. '''
             
         if distinct == False:
@@ -625,7 +618,12 @@ CREATE TABLE """ + self.name + """
             sql_command += ' WHERE %s' % where
         
         try:
-            content_lod = self.db_object.dictresult(sql_command)            
+            if listresult == False:
+                content_lod = self.db_object.dictresult(sql_command)     
+            else:
+                # TODO: Here should be a transformation for LOL and lists, too!
+                content_lod = self.db_object.listresult(sql_command)
+                return content_lod       
         except:
             raise
             
