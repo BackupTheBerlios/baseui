@@ -145,7 +145,7 @@ class database:
     def close(self):
         ''' Just closes the database connection. '''
         
-        if DEBUG: print 'closing the database connection and cursor.'
+        if self.debug: print 'closing the database connection and cursor.'
         
         try:
             self.cursor.close()
