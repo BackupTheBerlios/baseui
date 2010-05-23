@@ -1,5 +1,7 @@
 #==============================================================================
-# console.pyw calls simply a console under MS Windows under containing path.
+# console simply calls a console under MS Windows under the path which contains
+# this module.
+#
 # by Mark Muzenhardt.
 #==============================================================================
 

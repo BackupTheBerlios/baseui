@@ -1,4 +1,11 @@
+# -*- coding: iso-8859-1 -*-
+
+#===============================================================================
+# BaseUI setup module.
+# by Mark Muzenhardt, published under BSD-License.
+#
 # Give "python setup.py bdist_wininst" to make windows installer.
+#===============================================================================
 
 import os, sys
 from distutils.core import setup
@@ -7,14 +14,21 @@ from distutils.core import setup
 # First, build documentation --------------------------------------------------
 pathname = os.getcwd()
 
-if sys.platform == "win32" and sys.argv[1] == "build":
-    try:
-        os.chdir(pathname + '\\doc\\')
-        os.system('make html')
-        os.chdir(pathname)
-    except Exception, inst:
-        print "Documentation build failed!", inst
 
+if sys.platform == "win32":
+    # Catch install-option before this script runs --------------------------------
+    if len(sys.argv) == 1:
+        sys.argv.append("bdist_wininst")
+    
+    
+try:
+    os.chdir(pathname + '\\doc\\')
+    os.system('make html')
+    os.chdir(pathname)
+except Exception, inst:
+    print "Documentation build failed!", inst
+
+    
 # Now, run the real setup script ----------------------------------------------
 setup(name         = 'BaseUI',
       packages     = ['BaseUI',
@@ -44,7 +58,7 @@ setup(name         = 'BaseUI',
       version      = '0.1',
       description  = 'Advanced Database and user interface API',
       license      = 'BSD',
-      url          = 'http://BaseUI.berlios.de',
+      url          = 'http://baseui.berlios.de',
       author       = 'Mark Muzenhardt',
       author_email = 'mark.muzenhardt@googlemail.com',
       platforms     = ['win32', 'linux']

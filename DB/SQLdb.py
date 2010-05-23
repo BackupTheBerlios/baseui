@@ -5,12 +5,7 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-import Transformations
-
-DEBUG = False
-
-if DEBUG:
-    from pprint import pprint 
+import Transformations    
 
 
 def get_engines():
@@ -59,7 +54,7 @@ def get_engines():
 class database:
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
-    def __init__(self, engine='', encoding="latin-1"):
+    def __init__(self, engine='', encoding="latin-1", debug=False):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
 
@@ -67,7 +62,11 @@ class database:
         self.cursor = None
         self.engine = engine.lower()
         self.encoding = encoding
-
+        self.debug = debug
+        
+        if self.debug == True:
+            from pprint import pprint
+            
         try:
             connector = None
             
@@ -146,7 +145,7 @@ class database:
     def close(self):
         ''' Just closes the database connection. '''
         
-        if DEBUG: print 'closing the database connection and cursor.'
+        if self.debug: print 'closing the database connection and cursor.'
         
         try:
             self.cursor.close()
@@ -209,8 +208,6 @@ class database:
         ''' Executes the given sql_command and gives back a list_of_lists if there
             is more then just one row. Else this just returns a simple list. '''
         
-        if DEBUG: print sql_command
-        
         try:
             self.cursor.execute(sql_command)
         except:
@@ -235,8 +232,6 @@ class database:
             Be careful, because the content is untransformed and thus, comes
             a little different from database to database! '''
         
-        if DEBUG: print sql_command
-        
         try:
             self.cursor.execute(sql_command)
         except:
@@ -256,7 +251,7 @@ class database:
     def execute(self, sql_command):
         ''' Executes sql_command without returning values (for db-manipulation). '''
         
-        if DEBUG: print sql_command
+        if self.debug: print sql_command
         
         try:
             self.cursor.execute(sql_command)
@@ -324,33 +319,6 @@ class database:
                 if not (user['User'] in lof_users):
                     lof_users.append(user['User'])
         return lof_users
-
-
-    def select(self, table_name, distinct=False, column_list=[], where=''):
-        ''' select order in sql without transformation of output. Better use the
-            more advanced select order from the table directly! '''
-            
-        if distinct == False:
-            distinct = ''
-        else:
-            distinct = 'DISTINCT '
-            
-        if column_list == []:
-            sql_command = 'SELECT %s* FROM %s' % (distinct, table_name)
-        else:
-            column_list_str = str(column_list)
-            column_list_str = column_list_str[1:len(column_list_str) - 1]
-            column_list_str = column_list_str.replace("'", "")
-            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, table_name)
-            
-        if where <> '':
-            sql_command += ' WHERE %s' % where
-        
-        try:
-            selection = self.dictresult(sql_command)
-        except:
-            raise
-        return selection
     
     
     
@@ -526,6 +494,7 @@ CREATE TABLE """ + self.name + """
             if column_name not in database_column_list:
                 not_in_database_lod.append(attributes_dic)                                  
         
+                
         # Is there any difference?
         if action <> 'analyze' or add == True:
             if len(not_in_database_lod) > 0:
@@ -545,9 +514,15 @@ CREATE TABLE """ + self.name + """
         return content_lod
 
 
-    def check_content(self, content_lod):
+    def check_content(self, content_lod, add=False, drop=False, convert=False):
+        ''' Checks rows for differences. 
+                add = If True, add not existing rows in content_lod to the table.
+                drop = If True, drop rows which are in the database but not in content_lod.
+                update = If True, try to update existing rows with the data given in content_lod. '''
+        
         source_content_lod = get_content()
-
+        target_content_lod = content_lod()
+        
         return differences_lod
 
 
@@ -592,16 +567,16 @@ CREATE TABLE """ + self.name + """
         
     def get_columns(self):
         ''' Returns a list of columns contained by this table. '''
+        
         if self.db_object.engine <> 'sqlite':
             column_list = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         else:
-            # Select just to get the cursor to the table description!
-            self.db_object.select(self.name)
-            table_description = self.db_object.cursor.description
-            
+            attributes_lod = self.db_object.dictresult("PRAGMA TABLE_INFO(%s)" % self.name)
             column_list = []
-            for column_tup in table_description:
-                column_list.append(column_tup[0])
+            for attributes_dic in attributes_lod:
+                for key in attributes_dic:
+                    if key == 'name':
+                        column_list.append(attributes_dic[key])
         return column_list
 
 
@@ -623,13 +598,34 @@ CREATE TABLE """ + self.name + """
         konstrukt = ('referenced_table_name, referenced_column_name, column_name')
         
         
-    def select(self, distinct=False, column_list=[], where=''):
-        try:
-            content_lod = self.db_object.select(self.name, distinct, column_list, where)
+    def select(self, distinct=False, column_list=[], where='', listresult=False):
+        ''' SELECT order in SQL with transformation of output to python data types. '''
             
-            #return content_lod
+        if distinct == False:
+            distinct = ''
+        else:
+            distinct = 'DISTINCT '
+            
+        if column_list == []:
+            sql_command = 'SELECT %s* FROM %s' % (distinct, self.name)
+        else:
+            column_list_str = str(column_list)
+            column_list_str = column_list_str[1:len(column_list_str) - 1]
+            column_list_str = column_list_str.replace("'", "")
+            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, self.name)
+            
+        if where <> '':
+            sql_command += ' WHERE %s' % where
+        
+        try:
+            if listresult == False:
+                content_lod = self.db_object.dictresult(sql_command)     
+            else:
+                # TODO: Here should be a transformation for LOL and lists, too!
+                content_lod = self.db_object.listresult(sql_command)
+                return content_lod       
         except:
-            return
+            raise
             
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod)
         return content_lod
@@ -731,6 +727,10 @@ class column:
         self.name = column_name
 
 
+    def check_attributes(self, attributes_dic=None, action=None, add=False, drop=False, convert=False):
+        pass
+        
+        
     def get_attribute_layout(self, attributes_dic = None):
         ''' Returns the SQL code snippet for creating one column. It is needed
             everywhere you have to give column attributes, especially for
@@ -782,13 +782,14 @@ class column:
             primary key column named "id". '''
 
         column_layout = self.get_attribute_layout(attributes_dic)
-        sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
+        # Does not work for msSQL, check out if it works for other DBs!
+        # sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
+        sql_command = 'ALTER TABLE %s ADD %s' % (self.table_object.name, column_layout)
 
         try:
             self.db_object.execute(sql_command)
         except:
             raise
-
 
 
     def drop(self):

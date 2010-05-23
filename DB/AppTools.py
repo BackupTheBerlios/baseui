@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 
 #===============================================================================
-# DBapi appDB module.
+# BaseUI AppTools module.
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
@@ -19,7 +19,7 @@ class text_table:
     def __init__(self, database, table_name):
         self.database = database
         self.table_name = table_name
-
+        
         
     def write(self, text):
         self.clear()
