@@ -1,11 +1,13 @@
-:mod:`Entrys` --- Widgets zur Dateneingabe
-==========================================
+:mod:`Portlets` --- Komplexere Widgets
+======================================
 
-.. module:: Entrys
+.. module:: Portlets
 
-   :synopsis: Widgets zur Dateneingabe
+   :synopsis: Komplexere Widgets
    
-Vereinfachung und Erweiterung von PyGTK-Entrys
+Wiederkehrende Eingabefeldgruppen, z.B. für Datenbankauswahl oder zur 
+Konfiguration serieller Schnittstellen.
+
 
 
 .. class:: ComboBoxCompletion
