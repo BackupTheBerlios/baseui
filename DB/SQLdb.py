@@ -110,6 +110,8 @@ class database:
         self.config = kwargs
 
         try:
+            if self.debug:
+                print 'Connecting database', self.name, '...',
             # The table_schema points to the location where all informations about the tables of the given database are.
             if self.engine.startswith('postgresql'):
                 self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
@@ -130,7 +132,13 @@ class database:
                 connection_string = 'DRIVER={%(driver)s};SERVER=%(host)s;DATABASE=%(database)s;UID=%(user)s;PWD=%(password)s' % kwargs
                 self.table_schema = None
                 self.connection = self.connector.connect(connection_string, autocommit=True)
+        
+            if self.debug:
+                print 'Ok.'
         except:
+            if self.debug:
+                print 'Failed!'
+                
             self.connection = None
             raise
         
@@ -526,17 +534,9 @@ CREATE TABLE """ + self.name + """
         
         if len(content_lod) > 0:
             column_list = content_lod[0].keys()
-        #    print content_pk_column, column_list
-        #    column_list.remove(content_pk_column)
-        #    column_list.append(own_pk_column)
-        
+
         for content in content_lod:
             result = self.select(column_list=column_list, where = '%s = %i' % (pk_column, content[pk_column]))
-            
-            # Swap primary keys
-            #primary_key = content[content_pk_column]
-            #del(content[content_pk_column])
-            #content[own_pk_column] = primary_key
         
             if result == []: 
                 print 'content:', content, 'not in table!'
@@ -545,23 +545,27 @@ CREATE TABLE """ + self.name + """
                 # First, exclude given columns (f.e. Timestamps)
                 check_content = copy(content)
                 check_result = copy(result[0])
-                for exclude_column in check_exclude:
-                    del(check_content[exclude_column])
-                    del(check_result[exclude_column])
-                    
+                #for exclude_column in check_exclude:
+                #    del(check_content[exclude_column])
+                #    del(check_result[exclude_column])
+                
+                # Check, which columns are to update
+                update_columns = [pk_column]
                 for content_key in check_content:
                     result_str = check_result.get(content_key)
                     content_str = check_content.get(content_key)
-                    if result_str <> content_str:
-                        print 'content:', content_key, 'differs there:', content_str, 'from result:', result_str
+                    if result_str <> content_str and content_key not in check_exclude:
+                        print 'column: %s. differs, new data is: %s. old data is: %s' % (content_key, content_str, result_str)
+                        update_columns.append(content_key)
+                
+                # Last but not least, do update.         
+                if update_columns <> [pk_column]:
+                    # Add for check excluded keys if there is any update.
+                    for content_key in check_exclude:
+                        update_columns.append(content_key)
                         
-                         
-                if check_content <> check_result:
-                    print 'content:', check_content, 'differs from result', check_result
-                    self.update(pk_column, content_dict=content)
-                #print 'content:', content, 'is already there...'
-        
-        return #differences_lod
+                    self.update(pk_column, column_list=update_columns, content_dict=content)        
+        return
 
 
     def get_primary_key_columns(self):

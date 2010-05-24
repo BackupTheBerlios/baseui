@@ -23,10 +23,11 @@ class DatabaseLogin:
     ''' Multifunctional portlet which reads a database configuration
         from an ini-File and connects it. '''
 
-    def __init__(self, ini_filename='', autosave=False, parent=None):
+    def __init__(self, ini_filename='', autosave=False, parent=None, debug=False):
         self.ini_filename = ini_filename
         self.autosave = autosave
         self.parent = parent
+        self.debug = debug
         self.database = None
 
         self.database_dialog = Portlets.Database()
@@ -121,7 +122,7 @@ password = %(password)s
     def connect(self):
         try:
             self.config_dic = self.database_dialog.get_config_dic()
-            self.database = SQLdb.database(self.config_dic['engine'])
+            self.database = SQLdb.database(self.config_dic['engine'], debug=self.debug)
             self.database.connect(database=self.config_dic['database'],
                                   driver=self.config_dic['driver'],
                                   host=self.config_dic['host'],

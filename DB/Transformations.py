@@ -45,7 +45,7 @@ def write_transform(content, engine):
     elif type(content) == str or type(content) == unicode:
         new_content = "'%s'" % content.rstrip().replace("'", "''")
     elif type(content) == datetime.datetime:
-        new_content = "'%s'" % content
+        new_content = "'%s'" % transform_timestamp(content)
     else:
         new_content = content
     return new_content
@@ -75,23 +75,23 @@ def normalize_content(attributes_lod, content_lod):
 
 
 def transform_string(content):
-    if content <> None and type(content) <> unicode:
-        print content
-        content = u'%s' % content.rstrip()
-        return content
+    if content <> None: # and type(content) <> unicode:
+        content = content.rstrip()
+        try:
+            #content = u'%s' % content
+            content = content.encode('utf-8') #, 'utf-8')
+        except Exception, inst:
+            pass
+            #print content, str(inst)
+        
+        
+            
+    return content
                           
                                 
-def transform_timestamp(content):
+def transform_timestamp(content, strformat='%d.%m.%y %H:%M:%S'):
     if type(content) == datetime.datetime:
-        year = content.year
-        month = content.month
-        day = content.day
-        hour = content.hour
-        minute = content.minute
-        second = content.second
-        content = '%04i-%02i-%02i %02i:%02i:%02i' % (year, month, day, hour, minute, second)
-        print 'datetime transformed to:', content
-    #print 'transforming timestamp:' , content, type(content)
+        content = content.strftime(strformat)
     return content
 
 
