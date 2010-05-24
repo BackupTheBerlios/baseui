@@ -42,7 +42,9 @@ def write_transform(content, engine):
         new_content = 0
     elif content == True and engine == 'sqlite':
         new_content = 1
-    elif type(content) == str:
+    elif type(content) == str or type(content) == unicode:
+        new_content = "'%s'" % content.rstrip().replace("'", "''")
+    elif type(content) == datetime.datetime:
         new_content = "'%s'" % content
     else:
         new_content = content
@@ -65,10 +67,31 @@ def normalize_content(attributes_lod, content_lod):
                         content = content_dic[column_name]
                         if data_type.startswith('bool'):
                             content_dic[column_name] = transform_bool(content)
+                        if data_type.lower() == 'datetime':
+                            content_dic[column_name] = transform_timestamp(content)
+                        if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:
+                            content_dic[column_name] = transform_string(content)
     return content_lod
 
 
+def transform_string(content):
+    if content <> None and type(content) <> unicode:
+        print content
+        content = u'%s' % content.rstrip()
+        return content
+                          
+                                
 def transform_timestamp(content):
+    if type(content) == datetime.datetime:
+        year = content.year
+        month = content.month
+        day = content.day
+        hour = content.hour
+        minute = content.minute
+        second = content.second
+        content = '%04i-%02i-%02i %02i:%02i:%02i' % (year, month, day, hour, minute, second)
+        print 'datetime transformed to:', content
+    #print 'transforming timestamp:' , content, type(content)
     return content
 
 
@@ -151,6 +174,10 @@ def Oracle_DataTypes(self, data_type):
     
     
 class FieldTransformer:
+    ''' This simply puts Data from one key to another.
+        definition = \
+            {source_column_name: 'Prename', target_column_name: 'Vorname'} '''
+            
     def __init__(self):
         pass
     
@@ -166,7 +193,21 @@ class FieldTransformer:
                     target_dict[target_column_name] = source_dict[source_column_name]
         return target_dict
         
-        
+    
+    def get_target_columns(self):
+        target_column_list = []
+        for translation_dict in self.definition:
+            target_column_list.append(translation_dict['target_column_name'])
+        return target_column_list
+    
+    
+    def get_source_columns(self):
+        source_column_list = []
+        for translation_dict in self.definition:
+            source_column_list.append(translation_dict['source_column_name'])
+        return source_column_list
+    
+            
     def build_xml_node(self, target_dict, node_name='', intendation=0):
         intend_str = ''
         for space in xrange(intendation):

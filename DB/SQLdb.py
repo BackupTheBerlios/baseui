@@ -5,7 +5,9 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-import Transformations    
+import Transformations 
+   
+from copy import copy
 
 
 def get_engines():
@@ -514,16 +516,52 @@ CREATE TABLE """ + self.name + """
         return content_lod
 
 
-    def check_content(self, content_lod, add=False, drop=False, convert=False):
+    def check_content(self, pk_column='', content_lod=[], check_exclude=[], \
+                      add=False, drop=False, convert=False):
+        
         ''' Checks rows for differences. 
                 add = If True, add not existing rows in content_lod to the table.
                 drop = If True, drop rows which are in the database but not in content_lod.
                 update = If True, try to update existing rows with the data given in content_lod. '''
         
-        source_content_lod = get_content()
-        target_content_lod = content_lod()
+        if len(content_lod) > 0:
+            column_list = content_lod[0].keys()
+        #    print content_pk_column, column_list
+        #    column_list.remove(content_pk_column)
+        #    column_list.append(own_pk_column)
         
-        return differences_lod
+        for content in content_lod:
+            result = self.select(column_list=column_list, where = '%s = %i' % (pk_column, content[pk_column]))
+            
+            # Swap primary keys
+            #primary_key = content[content_pk_column]
+            #del(content[content_pk_column])
+            #content[own_pk_column] = primary_key
+        
+            if result == []: 
+                print 'content:', content, 'not in table!'
+                self.insert(content=content)
+            else:
+                # First, exclude given columns (f.e. Timestamps)
+                check_content = copy(content)
+                check_result = copy(result[0])
+                for exclude_column in check_exclude:
+                    del(check_content[exclude_column])
+                    del(check_result[exclude_column])
+                    
+                for content_key in check_content:
+                    result_str = check_result.get(content_key)
+                    content_str = check_content.get(content_key)
+                    if result_str <> content_str:
+                        print 'content:', content_key, 'differs there:', content_str, 'from result:', result_str
+                        
+                         
+                if check_content <> check_result:
+                    print 'content:', check_content, 'differs from result', check_result
+                    self.update(pk_column, content_dict=content)
+                #print 'content:', content, 'is already there...'
+        
+        return #differences_lod
 
 
     def get_primary_key_columns(self):
@@ -804,6 +842,14 @@ class column:
 
 
 
+class row:
+    ''' This handles single table-rows. '''
+    
+    def __init__(self, table_object):
+        pass
+    
+    
+    
 class user:
     ''' This handles all user-related SQL orders. '''
 
