@@ -343,6 +343,8 @@ class table:
         self.db_object = db_object
         self.db_cursor = db_object.cursor
         self.name = table_name
+        
+        self.primary_key_list = []
 
 
     def create(self, attributes_lod = None):
@@ -416,6 +418,7 @@ CREATE TABLE """ + self.name + """
                             new_attributes_dic['is_nullable'] = 1
                     if key == 'pk':
                         new_attributes_dic['is_primary_key'] = attributes_dic[key]
+                        self.primary_key_list.append(attributes_dic['name'])
                     if key == 'type':
                         data_type = attributes_dic[key]
                         data_types_list = data_type.split(' ')
@@ -458,6 +461,7 @@ CREATE TABLE """ + self.name + """
                 attributes_dict['is_nullable'] = True
             if column_name_list[iter] in primary_key_columns_list:
                 attributes_dict['is_primary_key'] = True
+                self.primary_key_list.append(attributes_dict['column_name'])
 
             attributes_lod.append(attributes_dict)
         return attributes_lod
@@ -524,13 +528,21 @@ CREATE TABLE """ + self.name + """
         return content_lod
 
 
-    def check_content(self, pk_column='', content_lod=[], check_exclude=[], \
-                      add=False, drop=False, convert=False):
+    def check_content(self, pk_column='', content_lod=[], \
+                      check_exclude=[], duplicates_check=[], \
+                      add=True, drop=False, update=True):
         
         ''' Checks rows for differences. 
-                add = If True, add not existing rows in content_lod to the table.
-                drop = If True, drop rows which are in the database but not in content_lod.
-                update = If True, try to update existing rows with the data given in content_lod. '''
+            pk_column is the primary key column in this table.
+            content_lod is the content which has to be synchronized with this table.
+            check_exclude is a list of fields that will not cause a update, but they are written
+                          in case of updating because another field differs.
+            duplicates_check is a list of fields that will be checked if already in the table.
+                             If just one already existing dataset matches, it will be updated.
+                             If more than one datasets match, it will cause an exception.
+            add = If True, add not existing rows in content_lod to the table.
+            drop = If True, drop rows which are in the table but not in content_lod.
+            update = If True, try to update existing rows with the data given in content_lod. '''
         
         if len(content_lod) > 0:
             column_list = content_lod[0].keys()
@@ -543,12 +555,9 @@ CREATE TABLE """ + self.name + """
                 print 'content:', content, 'not in table!'
                 self.insert(content=content)
             else:
-                # First, exclude given columns (f.e. Timestamps)
+                # First, copy content and result
                 check_content = copy(content)
                 check_result = copy(result[0])
-                #for exclude_column in check_exclude:
-                #    del(check_content[exclude_column])
-                #    del(check_result[exclude_column])
                 
                 # Check, which columns are to update
                 update_columns = [pk_column]

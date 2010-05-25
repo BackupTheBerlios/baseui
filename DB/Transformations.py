@@ -182,13 +182,19 @@ class FieldTransformer:
         pass
     
     
-    def translate(self, source_dict):
+    def translate(self, source_dict, backward=False):
         target_dict = {}
         for source_key in source_dict:
             for translation_dict in self.definition:
-                source_column_name = translation_dict['source_column_name']
-                target_column_name = translation_dict['target_column_name']
+                # Swap source and target if backward-flag is True
+                if backward == False: 
+                    source_column_name = translation_dict['source_column_name']
+                    target_column_name = translation_dict['target_column_name']
+                else:
+                    source_column_name = translation_dict['target_column_name']
+                    target_column_name = translation_dict['source_column_name']
                 
+                # Build target dict on match
                 if source_column_name == source_key:
                     target_dict[target_column_name] = source_dict[source_column_name]
         return target_dict
