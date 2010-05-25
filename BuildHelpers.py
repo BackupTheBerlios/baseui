@@ -217,7 +217,11 @@ def makeNSI(pathname, build_dir, app_name, app_version, app_icon=''):
     os.chdir(pathname)
     
     # Now, build the whole installer ------------------------------------------
-    os.mkdir('dist')
+    try:
+        os.mkdir('dist')
+    except Exception, inst:
+        print str(inst)
+        
     ProgramFiles = os.getenv("ProgramFiles")
     makeNSISw = '"' + ProgramFiles + '\\NSIS\\makensisw.exe" "build\\%s.nsi"' % app_name
     os.popen('"%s"' % makeNSISw)

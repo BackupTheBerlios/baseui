@@ -12,7 +12,7 @@ PATH = os.path.dirname(__file__)
 
 
 class TextView:
-    def __init__(self, widget=None, font=None, autoscroll=True, encoding='latin-1'):
+    def __init__(self, widget=None, font=None, autoscroll=True, max_lines=None, encoding='latin-1'):
         self.widget = widget
         
         if widget <> None:
@@ -22,6 +22,7 @@ class TextView:
         self.font = font
         self.autoscroll = autoscroll
         self.encoding = encoding
+        self.max_lines = max_lines
             
 
     def create(self):
@@ -36,6 +37,8 @@ class TextView:
         
         
     def write(self, *args):
+        self.line_count = self.text_buffer.get_line_count()
+        
         number_of_args = len(args)
         for iter in xrange(number_of_args):
             text = args[iter]
@@ -45,11 +48,14 @@ class TextView:
             end_iter = self.text_buffer.get_end_iter()
             text = text.replace('\x00', '').decode('utf-8', 'replace').encode('utf-8')
             self.text_buffer.insert(end_iter, text)
+        
+        if self.max_lines < self.line_count:
+            self.text_buffer.delete(self.text_buffer.get_start_iter(), self.text_buffer.get_iter_at_line(1))
         if self.autoscroll == True:
             self.widget.scroll_to_mark(self.text_buffer.get_insert(), 0)
         if self.font <> None:
             self.set_font(self.font)
-
+            
 
     def populate(self, text):
         self.text_buffer.set_text(unicode(text, self.encoding))

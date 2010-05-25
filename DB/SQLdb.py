@@ -537,7 +537,8 @@ CREATE TABLE """ + self.name + """
 
         for content in content_lod:
             result = self.select(column_list=column_list, where = '%s = %i' % (pk_column, content[pk_column]))
-        
+            print "checking:", content 
+            
             if result == []: 
                 print 'content:', content, 'not in table!'
                 self.insert(content=content)
