@@ -6,17 +6,34 @@
 #===============================================================================
 
 
-class iniFile:
-    def __init__(self, filename):
-        import ConfigParser
+class Base:
+    ''' This Base is the parent class of all file objects. '''
+    
+    def __init__(self, path='', filename=''):
+        self.path = path
         self.filename = filename
+        
+        self.path = self.path.replace('\\', '/')
+        if self.path <> '':
+            if self.path.endswith('/'):
+                self.path += '/'
+        self.filepath = self.path + self.filename
+        
+        
+        
+class iniFile(Base):
+    def __init__(self, path='', filename=''):
+        Base.__init__(self, path, filename)
+            
+        import ConfigParser
         self.parser = ConfigParser.ConfigParser()
+        print self.filepath
         return
 
 
     def dictresult(self, section):
         try:
-            self.parser.read(self.filename)
+            self.parser.read(self.filepath)
             value_lol = self.parser.items(section)
         except:
             raise
@@ -28,29 +45,30 @@ class iniFile:
 
 
     def save(self, ini_text):
-        ini_file = open(self.filename, "w")
+        ini_file = open(self.filepath, "w")
         ini_file.write(ini_text)
         ini_file.close()
         return
 
 
 
-class xlsFile:
+class xlsFile(Base):
     ''' Helps to get data out of xlsFiles. Needs pyExcelerator, hope someday
         a kind of pyWord will appear! '''
 
-    def __init__(self, filename, encoding='cp1251'):
+    def __init__(self, path='', filename='', encoding='cp1251'):
+        Base.__init__(self, path, filename)
+        self.encoding = encoding
+        
         try:
             import pyExcelerator
         except:
             raise
 
-        self.filename = filename
-        self.encoding = encoding
         self.parser = pyExcelerator.parse_xls
 
         try:
-            self.content = self.parser(self.filename, self.encoding)
+            self.content = self.parser(self.filepath, self.encoding)
         except:
             raise
 
@@ -110,24 +128,24 @@ class xlsFile:
 
 
 
-class csvFile:
-    def __init__(self, filename, encoding='cp1251'):
-        self.filename = filename
+class csvFile(Base):
+    def __init__(self, path='', filename='', encoding='cp1251'):
+        Base.__init__(self, path, filename)
         self.encoding = encoding
 
 
 
-class rtfFile:
+class rtfFile(Base):
     ''' Transforms a string into a suitable rtf-Text and helps to read rtf-Files
         as well as Template them. '''
 
-    def __init__(self, filename, encoding='cp1251'):
-        self.filename = filename
+    def __init__(self, path='', filename='', encoding='cp1251'):
+        Base.__init__(self, path, filename)
         self.encoding = encoding
         self.content = None
 
         try:
-            self.input_file = open(self.filename, 'r')
+            self.input_file = open(self.filepath, 'r')
             self.content = input_file.read()
             self.input_file.close()
         except:
