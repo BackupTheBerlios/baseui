@@ -5,8 +5,7 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-import ftplib 
-import re, time
+import ftplib, re, time, posixpath
 
 from datetime import datetime
 
@@ -52,11 +51,14 @@ class FTP:
         extended.
         """
         
-        _calmonths = dict( (x, i+1) for i, x in
-                   enumerate(('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec')) )
+        _calmonths = dict((x, i+1) 
+            for i, x in enumerate(
+                ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                )
+            )
+        )
 
-        
         dirs, nondirs = [], []
         listing = []
         self.connection.retrlines('LIST', listing.append)
@@ -111,38 +113,32 @@ class FTP:
         return dirs, nondirs
 
 
-#"""
-#ftpwalk -- Walk a hierarchy of files using FTP (Adapted from os.walk()).
-#"""
-
-#def ftpwalk(ftp, top, topdown=True, onerror=None):
-#    """
-#    Generator that yields tuples of (root, dirs, nondirs).
-#    """
-#    # Make the FTP object's current directory to the top dir.
-#    ftp.cwd(top)
-
-    # We may not have read permission for top, in which case we can't
-    # get a list of the files the directory contains.  os.path.walk
-    # always suppressed the exception then, rather than blow up for a
-    # minor reason when (say) a thousand readable directories are still
-    # left to visit.  That logic is copied here.
-#    try:
-#        dirs, nondirs = _ftp_listdir(ftp)
-#    except os.error, err:
-#        if onerror is not None:
-#            onerror(err)
-#        return
-
-#    if topdown:
-#        yield top, dirs, nondirs
-#    for entry in dirs:
-#        dname = entry[0]
-#        path = posixjoin(top, dname)
-#        if entry[-1] is None: # not a link
-#            for x in ftpwalk(ftp, path, topdown, onerror):
-#                yield x
-#    if not topdown:
-#        yield top, dirs, nondirs
-
+    def walk(self, top, topdown=True, onerror=None):
+        """
+        Generator that yields tuples of (root, dirs, nondirs).
+        """
+        # Make the FTP object's current directory to the top dir.
+        try:
+            self.connection.cwd(top)
+        except:
+            raise
+        
+        try:
+            dirs, nondirs = self.listdir()
+        except os.error, err:
+            if onerror is not None:
+                onerror(err)
+            return
+    
+        if topdown:
+            yield top, dirs, nondirs
+        for entry in dirs:
+            dname = entry[0]
+            path = posixpath.join(top, dname)
+            if entry[-1] is None: # not a link
+                for x in self.walk(path, topdown, onerror):
+                    yield x
+        if not topdown:
+            yield top, dirs, nondirs
+    
 
