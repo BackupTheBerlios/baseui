@@ -91,7 +91,10 @@ def transform_string(content):
                                 
 def transform_timestamp(content, strformat='%d.%m.%y %H:%M:%S'):
     if type(content) == datetime.datetime:
-        content = content.strftime(strformat)
+        try:
+            content = content.strftime(strformat)
+        except Exception, inst:
+            print inst
     return content
 
 
