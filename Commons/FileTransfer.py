@@ -44,6 +44,16 @@ class FTP:
                 print "Could not close connection because there is none opened!"
 
 
+    def get_filenames(self, top):
+        self.connection.cwd(top)
+        raw_list = self.listdir()
+        
+        file_list = []
+        for tuple in raw_list[1]:
+            file_list.append(tuple[0])
+        return file_list
+    
+    
     def listdir(self):
         """
         List the contents of the FTP opbject's cwd and return two tuples of
@@ -151,10 +161,13 @@ class FTP:
     
         
     def download(self, ftp_filepath, local_filepath):
+        ftp_command = 'RETR %s' % ftp_filepath
+        if self.debug:
+            print ftp_command
+        
         try:
-            print 'RETR %s' % ftp_filepath
             file_object = open(local_filepath, 'wb')
-            self.connection.retrbinary('RETR %s' % ftp_filepath, file_object.write)
+            self.connection.retrbinary(ftp_command, file_object.write)
             file_object.close()
         except:
             raise
@@ -162,11 +175,13 @@ class FTP:
         
     
     def upload(self, local_filepath, ftp_filepath):
-        try:
-            print 'STOR %s' % ftp_filepath
+        ftp_command = 'STOR %s' % ftp_filepath
+        if self.debug:
+            print ftp_command
+            
+        try:                
             file_object = open(local_filepath, 'rb')
-            print 'file:', local_filepath
-            self.connection.storbinary('STOR %s' % ftp_filepath, file_object)
+            self.connection.storbinary(ftp_command, file_object)
             file_object.close()
         except:
             raise

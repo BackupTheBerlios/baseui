@@ -5,6 +5,8 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
+import os
+
 
 class Base:
     ''' This Base is the parent class of all file objects. '''
@@ -170,5 +172,21 @@ class rtfFile(Base):
             output_file.close()
         except:
             raise
+
+
+def get_filenames(top):
+    iter = os.walk(top=top)
+    tuple = iter.next()
+    file_list = tuple[2]
+    return file_list
+
+
+def makedirs(dirlist):
+    for dirname in dirlist:
+        try:
+            os.mkdir(dirname)
+        except:
+            pass
+    return
 
 
