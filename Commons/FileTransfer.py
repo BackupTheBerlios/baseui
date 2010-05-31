@@ -15,6 +15,7 @@ class FTP:
         self.hostname = ''
         self.username = ''
         self.password = ''
+        
         self.connection = None
         
         
@@ -111,8 +112,8 @@ class FTP:
             else:
                 nondirs.append(entry)
         return dirs, nondirs
-
-
+    
+    
     def walk(self, top, topdown=True, onerror=None):
         """
         Generator that yields tuples of (root, dirs, nondirs).
@@ -141,4 +142,25 @@ class FTP:
         if not topdown:
             yield top, dirs, nondirs
     
+        
+    def download(self, ftp_filepath, local_filepath):
+        try:
+            print 'RETR %s' % ftp_filepath
+            file_object = open(local_filepath, 'wb')
+            self.connection.retrbinary('RETR %s' % ftp_filepath, file_object.write)
+            file_object.close()
+        except:
+            raise
+        return
+        
+    
+    def upload(self, local_filepath, ftp_filepath):
+        try:
+            file_object = open(local_filepath, 'rb')
+            self.connection.storbinary('STOR %s' % ftp_filepath, file_object)
+            file_object.close()
+        except:
+            raise
+        return
+
 
