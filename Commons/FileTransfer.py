@@ -11,7 +11,9 @@ from datetime import datetime
 
 
 class FTP:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = debug
+        
         self.hostname = ''
         self.username = ''
         self.password = ''
@@ -35,7 +37,11 @@ class FTP:
         
         
     def close(self):
-        self.connection.quit()
+        if self.connection <> None:
+            self.connection.quit()
+        else:
+            if self.debug:
+                print "Could not close connection because there is none opened!"
 
 
     def listdir(self):
@@ -121,6 +127,7 @@ class FTP:
         # Make the FTP object's current directory to the top dir.
         try:
             self.connection.cwd(top)
+            print 'walking top:', top
         except:
             raise
         
@@ -156,7 +163,9 @@ class FTP:
     
     def upload(self, local_filepath, ftp_filepath):
         try:
+            print 'STOR %s' % ftp_filepath
             file_object = open(local_filepath, 'rb')
+            print 'file:', local_filepath
             self.connection.storbinary('STOR %s' % ftp_filepath, file_object)
             file_object.close()
         except:
