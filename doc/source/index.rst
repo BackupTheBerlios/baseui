@@ -14,6 +14,7 @@ BaseUI Dokumentation
    module/Dialogs
    module/BuildHelpers
    GTK/index
+   wx/index
    Commons/index
    DB/index
    suggestions
