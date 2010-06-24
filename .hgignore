@@ -3,3 +3,4 @@ glob:doc/build/
 glob:build/
 glob:*.pyc
 glob:*.orig
+glob:*.bak
