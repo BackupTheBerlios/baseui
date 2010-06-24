@@ -8,7 +8,7 @@ file_list = os.listdir(path)
 
 for filename in file_list:
     img2py(image_file=path + filename,
-           python_file='images.py', 
+           python_file='Images.py', 
            append=True, 
            compressed=False, 
            maskClr=None, 
