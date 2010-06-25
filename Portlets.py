@@ -91,6 +91,7 @@ Soll die Konfigurationsdatei neu erstellt werden?""" % str(inst)
 
 
     def get_odbc_from_winreg(self):
+        # TODO: Added to Commons.Windows, please refactor!
         import _winreg
         key =  _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\ODBC\\ODBCINST.INI")
         info = _winreg.QueryInfoKey(key)

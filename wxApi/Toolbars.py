@@ -7,7 +7,7 @@
 
 import wx
 
-from res import Images
+from resources import Images
 
 
 class DatasetToolbar(wx.ToolBar):

@@ -1,13 +1,13 @@
 import wx
-import res.Portlets
+import resources.Portlets
 
-from res import Images
+from resources import Images
 from Buttons import BitmapToggleButton
 
 
-class Database(res.Portlets.Database):
+class Database(resources.Portlets.Database):
     def __init__(self, parent):
-        res.Portlets.Database.__init__(self, parent)
+        resources.Portlets.Database.__init__(self, parent)
 
         self.connect_function = None
         self.disconnect_function = None
@@ -26,7 +26,7 @@ class Database(res.Portlets.Database):
         
         
         
-class Login(res.Portlets.Login):
+class Login(resources.Portlets.Login):
     def __init__(self, parent):
-        res.Portlets.Login.__init__(self, parent)
+        resources.Portlets.Login.__init__(self, parent)
         
