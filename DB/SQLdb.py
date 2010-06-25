@@ -219,6 +219,7 @@ class database:
             is more then just one row. Else this just returns a simple list. '''
         
         try:
+            if self.debug: print sql_command
             self.cursor.execute(sql_command)
         except:
             raise
@@ -243,6 +244,7 @@ class database:
             a little different from database to database! '''
         
         try:
+            if self.debug: print sql_command
             self.cursor.execute(sql_command)
         except:
             raise
