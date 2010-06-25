@@ -20,7 +20,7 @@ class DatasetToolbar(wx.ToolBar):
         
         self.AddLabelTool(id=-1, label="Neu",        bitmap=Images.getfilenew_16Bitmap())
         self.AddLabelTool(id=-1, label="Bearbeiten", bitmap=Images.getedit_16Bitmap())
-        self.AddLabelTool(id=-1, label="Löschen",    bitmap=Images.getdelete_16Bitmap())
+        self.AddLabelTool(id=-1, label=u"Löschen",    bitmap=Images.getdelete_16Bitmap())
         
         self.AddSeparator()
         self.AddLabelTool(id=-1, label="Drucken",       bitmap=Images.getprint_16Bitmap())
