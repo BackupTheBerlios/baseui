@@ -8,6 +8,7 @@
 import wx
 
 from resources import Images
+from Buttons import BitmapTextToggleButton
 
 
 class DatasetToolbar(wx.ToolBar):
@@ -48,4 +49,16 @@ class DatasetToolbar(wx.ToolBar):
         
         self.Realize()
         
+
+
+class LookoutSidebar(wx.Panel):
+    def __init__(self, parent, content_lod=None):
+        """ content_lod = 
+            [
+                {'bitmap': wx.Bitmap, 'label': str, 'on_activate': func},
+            ]
+        """
         
+        wx.Panel.__init__(self, parent, id=-1)
+        
+        BitmapTextToggleButton(parent, label)

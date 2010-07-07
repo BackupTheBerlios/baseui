@@ -1,6 +1,6 @@
 import wx
 
-from wx.lib.buttons import GenBitmapToggleButton
+from wx.lib.buttons import GenBitmapToggleButton, ThemedGenBitmapTextToggleButton
 
 
 class BitmapToggleButton(GenBitmapToggleButton):
@@ -20,3 +20,16 @@ class BitmapToggleButton(GenBitmapToggleButton):
         
         self.SetToggle(toggled)
         self.SetInitialSize()
+
+
+class BitmapTextToggleButton(ThemedGenBitmapTextToggleButton):
+    def __init__(self, parent, label='', bitmap=''):
+        ThemedGenBitmapTextToggleButton.__init__(self, parent, id=-1, bitmap=bitmap, label=label) #, pos, size, style, validator, name)
+        
+        self.SetToggle(False)
+        self.SetInitialSize()
+        font = wx.Font(pointSize=10, family=wx.FONTFAMILY_DEFAULT, 
+                       style=wx.FONTSTYLE_NORMAL, weight=wx.FONTWEIGHT_BOLD)
+
+       # font.SetFaceName('Tahoma')
+        self.SetFont(font)
