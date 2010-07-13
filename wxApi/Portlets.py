@@ -30,3 +30,5 @@ class Login(resources.Portlets.Login):
     def __init__(self, parent):
         resources.Portlets.Login.__init__(self, parent)
         
+        
+        
