@@ -9,7 +9,7 @@ append_file = False
 
 for filename in file_list:
     img2py(image_file=path + filename,
-           python_file='res/Images.py', 
+           python_file='resources/Images.py', 
            append=append_file, 
            compressed=False, 
            maskClr=None, 

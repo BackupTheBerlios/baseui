@@ -5,55 +5,35 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-# import sys
-import cairo
+import wx
+
+# Here should be asked, if that components are installed!
+import wx.lib.wxcairo
 import rsvg
-# import gtk
+import cairo
 
+class TestFrame(wx.Frame):
+    def __init__(self, parent, id, title, pos, size):
+        wx.Frame.__init__(self, parent, id, title, pos, size)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Show()
+        
+        
+    def OnPaint(self, event):
+        dc = wx.BufferedPaintDC(self)
+        self.Render(dc)
+        
 
-BORDER_WIDTH = 10
+    def Render(self, dc):
+        ctx = wx.lib.wxcairo.ContextFromDC(dc)
+        rsvg.set_default_dpi(900)
+        svg = rsvg.Handle('resources/Auge.svg')
+        svg.render_cairo(ctx)
 
-
-def delete_cb(win, event):
-    gtk.main_quit()
-
-
-def expose_cairo(win, event, svg):
-
-    x, y, w, h = win.allocation
-    cr = win.window.cairo_create()
-    cr.set_source_color(win.style.fg[win.state])
-    cr.rectangle(BORDER_WIDTH, BORDER_WIDTH,
-                w - 2*BORDER_WIDTH, h - 2*BORDER_WIDTH)
-    cr.set_line_width(5.0)
-    cr.set_line_join(cairo.LINE_JOIN_ROUND)
-    cr.stroke()
-
-    if svg != None:
-        matrix = cairo.Matrix(3,0,0,3,0, 0)
-        #cairo.Matrix.rotate( matrix, prop.rot )
-        cr.transform (matrix)
-        svg.render_cairo(cr)
-
-    return True
-
-def main():
-    win = gtk.Window ()
-    win.connect("delete-event", delete_cb)
-
-    svg = None
-    if (len (sys.argv) > 1):
-        svg = rsvg.Handle(file=sys.argv[1])
-    else:
-        raise SystemExit("need svg file")
-
-    win.connect("expose-event", expose_cairo, svg)
-
-    print svg.props.width, svg.props.height, svg.props.em, svg.props.ex
-
-    win.show_all()
-    win.connect("destroy", lambda w: gtk.main_quit())
-    gtk.main()
-
+        
 if __name__ == '__main__':
-    main()
+    app = wx.PySimpleApp()
+    frame = TestFrame(None, wx.ID_ANY, 'test rsvg', (200, 200), (800, 800))
+    app.MainLoop()
+    
+    
