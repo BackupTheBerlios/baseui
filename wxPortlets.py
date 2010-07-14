@@ -43,3 +43,6 @@ class DatabaseLogin(wx.Panel):
         db_engines_list = SQLdb.get_engines()
         self.portlet_database.combobox_engine.AppendItems(db_engines_list)
         
+        
+        
+        
