@@ -1,20 +1,20 @@
 import wx
-import resources.Portlets
+import res.Portlets
 
-from resources import Images
+from res import IconSet16
 from Buttons import BitmapToggleButton
 
 
-class Database(resources.Portlets.Database):
+class Database(res.Portlets.Database):
     def __init__(self, parent):
-        resources.Portlets.Database.__init__(self, parent)
+        res.Portlets.Database.__init__(self, parent)
 
         self.connect_function = None
         self.disconnect_function = None
         
         self.togglebutton_connect = BitmapToggleButton(self, \
-            label_bitmap=Images.getconnect_no_16Bitmap(), \
-            selected_bitmap = Images.getconnect_creating_16Bitmap()
+            label_bitmap=IconSet16.getconnect_no_16Bitmap(), \
+            selected_bitmap = IconSet16.getconnect_creating_16Bitmap()
         )
         
         self.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled, self.togglebutton_connect)
@@ -26,9 +26,9 @@ class Database(resources.Portlets.Database):
         
         
         
-class Login(resources.Portlets.Login):
+class Login(res.Portlets.Login):
     def __init__(self, parent):
-        resources.Portlets.Login.__init__(self, parent)
+        res.Portlets.Login.__init__(self, parent)
         
         
         
