@@ -60,18 +60,16 @@ class LookoutSidebar(wx.Panel):
         """
 
         wx.Panel.__init__(self, parent, id=wx.ID_ANY, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.TAB_TRAVERSAL)
+        
         self.sizer = wx.FlexGridSizer(2, 1, 0, 0)
         self.sizer.AddGrowableCol(0)
-        
         self.SetSizer(self.sizer)
         
         for content_dic in content_lod:
             self.sizer.Add(BitmapTextToggleButton(self, label=content_dic.get('label'), bitmap=content_dic.get('bitmap')), 0, wx.ALL|wx.EXPAND)
             
         self.Show()
-        #BitmapTextToggleButton(parent, label)
-        #BitmapTextToggleButton(parent, label)
-        
+
         
         
         
