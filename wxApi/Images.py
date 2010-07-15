@@ -5,6 +5,8 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
+from pprint import pprint
+
 import wx
 import wx.lib.wxcairo
 
@@ -13,12 +15,17 @@ import cairo
         
 
 class SVG(wx.Panel):
-    def __init__(self, parent, image_path): #, pos=(0,0), size=(1,1)):
-        wx.Panel.__init__(self, parent, id = wx.ID_ANY) #, pos = wx.DefaultPosition, size = wx.Size( 200,460 ))
+    def __init__(self, parent, image_path): 
+        wx.Panel.__init__(self, parent, id = wx.ID_ANY) 
         
-        # self.parent = parent
         self.image_path = image_path
+        self.svg = rsvg.Handle(self.image_path)
         
+        x_size = self.svg.get_dimension_data()[2]
+        y_size = self.svg.get_dimension_data()[3]
+        self.SetSize((x_size, y_size))
+        
+        print "size: x=%d, y=%d" % (x_size, y_size)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         
         
@@ -28,16 +35,8 @@ class SVG(wx.Panel):
         
 
     def Render(self, dc):
-        ctx = wx.lib.wxcairo.ContextFromDC(dc)
-        
-        #ctx.scale(3, 3)
-        #ctx.rotate(45)
-        #ctx.translate(80, 10)
-        #rsvg.set_default_dpi(100)
-        
-        svg = rsvg.Handle(self.image_path)
-        svg.render_cairo(ctx)
-        
+        self.ctx = wx.lib.wxcairo.ContextFromDC(dc)
+        self.svg.render_cairo(self.ctx)
         
         
 if __name__ == '__main__':

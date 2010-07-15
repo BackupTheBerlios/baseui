@@ -60,5 +60,12 @@ class LookoutSidebar(wx.Panel):
         """
         
         wx.Panel.__init__(self, parent, id=-1)
+        sizer = wx.FlexGridSizer()
+        self.SetSizer(sizer)
         
         BitmapTextToggleButton(parent, label)
+        BitmapTextToggleButton(parent, label)
+        
+        
+        
+        
