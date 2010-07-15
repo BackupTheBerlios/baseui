@@ -40,12 +40,14 @@ class DatabaseLogin(wx.Panel):
         self.SetSizer(self.sizer)
         self.Layout()
         
+        # Populate comboboxes -------------------------------------------------
         odbc_drivers = dbTools.get_odbc_drivers()
         self.portlet_database.combobox_odbc.AppendItems(odbc_drivers)
         
         db_engines_list = SQLdb.get_engines()
         self.portlet_database.combobox_engine.AppendItems(db_engines_list)
         
+        # Add bottom panel with buttons ---------------------------------------
         bottom_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.sizer.Add(bottom_panel, 1, wx.ALL|wx.EXPAND)
         
@@ -57,12 +59,12 @@ class DatabaseLogin(wx.Panel):
         self.togglebutton_preferences.Bind(wx.EVT_TOGGLEBUTTON, self.on_togglebutton_preferences_toggled, id=wx.ID_ANY)
         bottom_sizer.Add(self.togglebutton_preferences, 1, wx.ALL|wx.ALIGN_LEFT, 5)
         
-        self.button_ok = wx.Button(bottom_panel, label='Ok')
-        bottom_sizer.Add(self.button_ok, 1, wx.ALL|wx.ALIGN_RIGHT, 5)
-        
         self.button_cancel = wx.Button(bottom_panel, label='Abbruch')
         bottom_sizer.Add(self.button_cancel, 1, wx.ALL|wx.ALIGN_RIGHT, 5)
         
+        self.button_ok = wx.Button(bottom_panel, label='Ok')
+        bottom_sizer.Add(self.button_ok, 1, wx.ALL|wx.ALIGN_RIGHT, 5)
+
         bottom_panel.SetSizer(bottom_sizer)
         
         

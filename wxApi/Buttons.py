@@ -23,9 +23,11 @@ class BitmapToggleButton(GenBitmapToggleButton):
 
 
 class BitmapTextToggleButton(ThemedGenBitmapTextToggleButton):
-    def __init__(self, parent, label='', bitmap=''):
-        ThemedGenBitmapTextToggleButton.__init__(self, parent, id=-1, bitmap=bitmap, label=label) #, pos, size, style, validator, name)
+    def __init__(self, parent, label='', bitmap='', style=wx.NO_3D):
+        ThemedGenBitmapTextToggleButton.__init__(self, parent, id=-1, bitmap=bitmap, label=label, style=style) #, pos, size, style, validator, name)
         
+        wx.NO
+
         self.SetToggle(False)
         self.SetInitialSize()
         font = wx.Font(pointSize=10, family=wx.FONTFAMILY_DEFAULT, 
