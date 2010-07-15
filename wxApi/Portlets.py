@@ -17,7 +17,7 @@ class Database(res.Portlets.Database):
             selected_bitmap = IconSet16.getconnect_creating_16Bitmap()
         )
         
-        self.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled, self.togglebutton_connect)
+        self.togglebutton_connect.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled) #, self.togglebutton_connect)
         self.sizer_button.Add( self.togglebutton_connect, 1, wx.ALIGN_RIGHT, 5 )
         
         
