@@ -11,8 +11,8 @@ pygtk.require('2.0')
 import gtk
 import Portlets
 
-from GTK import Dialogs 
-from GTK import DataViews
+from gtkApi import Dialogs 
+from gtkApi import DataViews
 
 
 class TranslationEditor:
