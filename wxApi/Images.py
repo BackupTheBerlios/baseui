@@ -10,9 +10,10 @@ from pprint import pprint
 import wx
 import wx.lib.wxcairo
 
+#import gobject
 import rsvg
-import cairo
-        
+import cairo #, pango, pangocairo
+
 
 class SVG(wx.Panel):
     def __init__(self, parent, image_path): 
