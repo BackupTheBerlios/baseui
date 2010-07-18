@@ -13,10 +13,10 @@ BaseUI Dokumentation
    module/Portlets
    module/Dialogs
    module/BuildHelpers
-   GTK/index
-   wx/index
-   Commons/index
-   DB/index
+   gtkApi/index
+   wxApi/index
+   misc/index
+   dbApi/index
    suggestions
    roadmap
    license
