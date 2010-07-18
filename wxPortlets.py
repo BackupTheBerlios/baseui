@@ -7,7 +7,7 @@
 
 import wx
 
-from wxApi import Portlets, Images
+from wxApi import Portlets #, Images
 from misc import FileSystem
 from dbApi import SQLdb, Tools as dbTools
 
@@ -32,9 +32,13 @@ class DatabaseLogin(wx.Panel):
         self.portlet_database = Portlets.Database(parent=self)
         self.portlet_database.Hide()
         self.portlet_login = Portlets.Login(parent=self)
-        self.svg = Images.SVG( self, self.image_path )
         
-        self.sizer.Add(self.svg, 0, wx.ALL|wx.EXPAND)
+        png = wx.Image(self.image_path, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        self.logo = wx.StaticBitmap(self, -1, png, (10, 5), (png.GetWidth(), png.GetHeight()))
+
+        # = Images.SVG( self, self.image_path )
+        
+        self.sizer.Add(self.logo, 0, wx.ALL|wx.EXPAND)
         self.sizer.Add(self.portlet_login, 0, wx.ALL|wx.EXPAND)
         
         self.SetSizer(self.sizer)
