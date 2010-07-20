@@ -133,7 +133,7 @@ def makeGTK(gtk_dir, pathname, build_dir, localized=False):
             os.system('xcopy ' + gtk_dir + 'share\\locale\\* "' + pathname + build_dir + 'share\\locale\\" /E /Y')
         
 
-def makeRessources(pathname, build_dir):
+def makeResources(pathname, build_dir):
     if sys.platform.startswith('win'):
         os.system('xcopy "' + pathname + '\\res\\*" "' + pathname + build_dir + 'res\\" /E /Y')
         os.system('xcopy "' + pathname + '\\usr\\*" "' + pathname + build_dir + 'usr\\" /E /Y')

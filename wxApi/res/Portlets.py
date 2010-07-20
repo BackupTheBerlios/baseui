@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*- 
+
 ###########################################################################
-## Python code generated with wxFormBuilder (version Jun 11 2009)
+## Python code generated with wxFormBuilder (version May  4 2010)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO "NOT" EDIT THIS FILE!
@@ -14,7 +16,7 @@ import wx
 class Database ( wx.Panel ):
 	
 	def __init__( self, parent ):
-		wx.Panel.__init__  ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,260 ), style = wx.TAB_TRAVERSAL )
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,260 ), style = wx.TAB_TRAVERSAL )
 		
 		self.SetMinSize( wx.Size( 200,260 ) )
 		
@@ -70,7 +72,7 @@ class Database ( wx.Panel ):
 		sizer_content.Add( self.entry_password, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		
-		sizer_content.AddSpacer( ( 0, 0 ) )
+		sizer_content.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 		
 		self.sizer_button = wx.BoxSizer( wx.VERTICAL )
 		
@@ -92,7 +94,7 @@ class Database ( wx.Panel ):
 class Login ( wx.Panel ):
 	
 	def __init__( self, parent ):
-		wx.Panel.__init__  ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,100 ), style = wx.TAB_TRAVERSAL )
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,100 ), style = wx.TAB_TRAVERSAL )
 		
 		self.SetMinSize( wx.Size( 200,100 ) )
 		

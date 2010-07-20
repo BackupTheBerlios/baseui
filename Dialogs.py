@@ -8,8 +8,8 @@
 import gtk
 import Portlets
 
-from GTK import Buttons
-from GTK.Dialogs import BottomBox
+from gtkApi import Buttons
+from gtkApi.Dialogs import BottomBox
 
 
 class StartDialog:

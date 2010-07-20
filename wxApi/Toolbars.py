@@ -7,7 +7,8 @@
 
 import wx
 
-from res import Images
+from res import IconSet16
+from Buttons import BitmapTextToggleButton
 
 
 class DatasetToolbar(wx.ToolBar):
@@ -18,12 +19,12 @@ class DatasetToolbar(wx.ToolBar):
         
         self.SetToolBitmapSize(wx.Size(22, 22))
         
-        self.AddLabelTool(id=-1, label="Neu",        bitmap=Images.getfilenew_16Bitmap())
-        self.AddLabelTool(id=-1, label="Bearbeiten", bitmap=Images.getedit_16Bitmap())
-        self.AddLabelTool(id=-1, label=u"Löschen",    bitmap=Images.getdelete_16Bitmap())
+        self.AddLabelTool(id=-1, label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
+        self.AddLabelTool(id=-1, label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
+        self.AddLabelTool(id=-1, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
         
         self.AddSeparator()
-        self.AddLabelTool(id=-1, label="Drucken",       bitmap=Images.getprint_16Bitmap())
+        self.AddLabelTool(id=-1, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
         
         if filter == True:
             self.AddSeparator()
@@ -41,11 +42,34 @@ class DatasetToolbar(wx.ToolBar):
             self.AddSeparator()
         
         if preferences == True:
-            self.AddLabelTool(id=-1, label="Einstellungen", bitmap=Images.getpreferences_16Bitmap())
+            self.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
         
         if help == True:
-            self.AddLabelTool(id=-1, label="Hilfe",         bitmap=Images.gethelp_16Bitmap())
+            self.AddLabelTool(id=-1, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
         
         self.Realize()
+        
+
+
+class LookoutSidebar(wx.Panel):
+    def __init__(self, parent, content_lod=None):
+        """ content_lod = 
+            [
+                {'bitmap': wx.Bitmap, 'label': str, 'on_activate': func},
+            ]
+        """
+
+        wx.Panel.__init__(self, parent, id=wx.ID_ANY, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.TAB_TRAVERSAL)
+        
+        self.sizer = wx.FlexGridSizer(2, 1, 0, 0)
+        self.sizer.AddGrowableCol(0)
+        self.SetSizer(self.sizer)
+        
+        for content_dic in content_lod:
+            self.sizer.Add(BitmapTextToggleButton(self, label=content_dic.get('label'), bitmap=content_dic.get('bitmap')), 0, wx.ALL|wx.EXPAND)
+            
+        self.Show()
+
+        
         
         

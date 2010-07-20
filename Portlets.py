@@ -8,10 +8,10 @@
 import sys
 import gtk
 
-from Commons import FileSystem, HelpFile, FileTransfer
-from GTK import Containers, Dialogs, DataViews, Buttons, Glade, Portlets
-from GTK import Transformations as GtkTransformations
-from DB  import SQLdb
+from misc import FileSystem, HelpFile, FileTransfer
+from gtkApi import Containers, Dialogs, DataViews, Buttons, Glade, Portlets
+from gtkApi import Transformations as GtkTransformations
+from dbApi  import SQLdb
 
 DEBUG = False
 
@@ -91,6 +91,7 @@ Soll die Konfigurationsdatei neu erstellt werden?""" % str(inst)
 
 
     def get_odbc_from_winreg(self):
+        # TODO: Added to Commons.Windows, please refactor!
         import _winreg
         key =  _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\ODBC\\ODBCINST.INI")
         info = _winreg.QueryInfoKey(key)
