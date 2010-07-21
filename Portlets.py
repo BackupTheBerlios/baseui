@@ -8,10 +8,10 @@
 import sys
 import gtk
 
-from misc import FileSystem, HelpFile, FileTransfer
+from misc   import FileSystem, HelpFile, FileTransfer
 from gtkApi import Containers, Dialogs, DataViews, Buttons, Glade, Portlets
 from gtkApi import Transformations as GtkTransformations
-from dbApi  import SQLdb
+from dbApi  import SQLdb, Tools as dbTools
 
 DEBUG = False
 
@@ -39,7 +39,7 @@ class DatabaseLogin:
         self.config_dic = self.get_settings_from_ini()
         
         if sys.platform.startswith('win'):
-            odbc_drivers_list = self.get_odbc_from_winreg()
+            odbc_drivers_list = dbTools.get_odbc_from_winreg()
         else:
             odbc_drivers_list = []
             
@@ -88,19 +88,6 @@ Soll die Konfigurationsdatei neu erstellt werden?""" % str(inst)
             if answer == 'YES':
                 self.config_dic = self.save_settings_to_ini()
                 return self.config_dic
-
-
-    def get_odbc_from_winreg(self):
-        # TODO: Added to Commons.Windows, please refactor!
-        import _winreg
-        key =  _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\ODBC\\ODBCINST.INI")
-        info = _winreg.QueryInfoKey(key)
-        
-        drivers_list = []
-        number_of_keys = info[0]
-        for number in xrange(number_of_keys):
-            drivers_list.append(unicode(_winreg.EnumKey(key, number), 'latin-1'))
-        return drivers_list
         
         
     def save_settings_to_ini(self):
