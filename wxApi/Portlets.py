@@ -18,13 +18,14 @@ class Database(res.Portlets.Database):
         )
         
         self.togglebutton_connect.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled) #, self.togglebutton_connect)
-        self.sizer_button.Add( self.togglebutton_connect, 1, wx.ALIGN_RIGHT, 5 )
+        self.sizer_button.Add( self.togglebutton_connect, 1, wx.ALIGN_RIGHT|wx.ALL, 5 )
         
         
     def on_togglebutton_connect_toggled(self, event):
         is_down = event.GetIsDown() 
         
         if is_down:
+            print self.get_content()
             if self.on_connect <> None:
                 try:
                     self.on_connect()
@@ -36,7 +37,31 @@ class Database(res.Portlets.Database):
                     self.on_disconnect()
                 except:
                     raise
-            
+    
+    
+    def populate(self, content_dict):
+        """ content_dict = \
+            {'engines':      ['SQLite'],
+             'database':     'customer.db',
+             'odbc_drivers': ['list of drivers'],
+             'host':         'hostname:port',
+             'user':         'Mustermann',
+             'password':     '123456'}"""
+        
+        # Populate comboboxes -------------------------------------------------
+        self.combobox_odbc.AppendItems(content_dict.get('odbc_drivers'))
+        self.combobox_engine.AppendItems(content_dict.get('engines'))
+        
+        
+    def get_content(self):
+        content_dict = {'engine': self.combobox_engine.GetStringSelection(),
+                        'odbc_driver': self.combobox_odbc.GetStringSelection(),
+                        'database': self.entry_database.GetValue(),
+                        'host': self.entry_host.GetValue(),
+                        'user': self.entry_user.GetValue(),
+                        'password': self.entry_password.GetValue()}
+        return content_dict
+        
         
         
 class Login(res.Portlets.Login):
@@ -44,4 +69,12 @@ class Login(res.Portlets.Login):
         res.Portlets.Login.__init__(self, parent)
         
         
+    def populate(self, content_lod):
+        """ content_lod = \
+            [
+                {'user': 'Mustermann, Max', 'password': '123456'}
+            ] """
         
+        for content in content_lod:
+            user_list.append(content.get('user'))
+            

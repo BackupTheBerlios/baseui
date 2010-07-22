@@ -7,3 +7,7 @@
 
 import wx
 
+
+class Start:
+    pass
+
