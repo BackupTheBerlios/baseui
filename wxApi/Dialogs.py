@@ -23,12 +23,12 @@ class Error(res.Dialogs.Error):
         self.m_toggleBtn_detail.Bind(wx.EVT_TOGGLEBUTTON, self.on_togglebutton_detail_toggled)
         
         
-    def show(self, title='Fehler', instance=None, text='Error'):
+    def show(self, title='Fehler', instance=None, message='Error'):
         if instance <> None:
             detail = traceback.format_exc()
             self.m_textCtrl_traceback.SetValue(detail)
         
-        self.m_staticText_text.SetLabel(text)
+        self.m_staticText_text.SetLabel(message)
         self.SetTitle(title)
         
         self.SetInitialSize()

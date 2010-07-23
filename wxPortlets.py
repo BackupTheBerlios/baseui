@@ -7,23 +7,21 @@
 
 import wx
 
-from config import *
 from wxApi import Portlets, Dialogs
 from dbApi import SQLdb, Tools as dbTools
 from misc import FileSystem
 
 
 class DatabaseLogin(wx.Panel):
-    def __init__(self, parent, image_path='', ini_filename='', autosave=False, debug=False):
+    def __init__(self, parent, image_path='', ini_path='', autosave=False, debug=False):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
         self.image_path = image_path
-        self.ini_filename = ini_filename
+        self.ini_path = ini_path
         self.autosave = autosave
         self.debug = debug
-        
-        self.database = None        
+              
         self.sizer = wx.FlexGridSizer( 2, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
         self.sizer.AddGrowableRow( 0, 1 )
@@ -63,6 +61,11 @@ class DatabaseLogin(wx.Panel):
         bottom_sizer.Add(self.button_ok, 1, wx.ALL|wx.ALIGN_RIGHT, 5)
 
         bottom_panel.SetSizer(bottom_sizer)
+        
+        # Get the database settings -------------------------------------------
+        self.database = None  
+        self.ini_file = FileSystem.iniFile(self.ini_path)
+        self.config_dic = self.get_settings_from_ini()
         self.populate()
         
         self.portlet_database.on_connect = self.connect
@@ -112,14 +115,16 @@ class DatabaseLogin(wx.Panel):
             self.config_dic = self.ini_file.dictresult('db')
             return self.config_dic
         except Exception, inst:
-            error_text = """\
-Während des Einlesens der Datenbank-Konfiguration ist folgender Fehler aufgetreten:
+            dialog = wx.MessageDialog(self, caption='Fehler', 
+                                            message='''\
+Die Datenbank Konfigurationsdatei ist fehlerhaft
+oder nicht vorhanden.
 
-<b>%s</b>
-
-Soll die Konfigurationsdatei neu erstellt werden?""" % str(inst)
-            answer = self.DialogBox.show(dialog_type='yesno', title='Frage', text=error_text)
-            if answer == 'YES':
+Soll die Konfigurationsdatei neu erstellt werden?''', 
+                                            style=(wx.YES_NO | wx.ICON_EXCLAMATION))
+            result = dialog.ShowModal()
+            
+            if result == wx.ID_YES:
                 self.config_dic = self.save_settings_to_ini()
                 return self.config_dic
         
@@ -156,12 +161,12 @@ password = %(password)s
             if self.autosave == True:
                 self.save_settings_to_ini()
         except Exception, inst:
-            self.ErrorDialog.show(text='Datenbank konnte nicht verbunden werden.', instance=inst)
+            self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
             self.portlet_database.set_disconnected()
         return self.database
 
 
-    def disconnect(self):
+    def disconnect(self):        
         if self.database.connection <> None:
             self.database.close()
         self.portlet_database.set_disconnected()
