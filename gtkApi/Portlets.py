@@ -370,7 +370,7 @@ class FTP:
                            ]
                            
         vbox = gtk.VBox()
-
+        
         # Table itself
         table = Entrys.Table().create(table_definition)
 

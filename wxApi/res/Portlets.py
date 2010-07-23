@@ -16,13 +16,13 @@ import wx
 class Database ( wx.Panel ):
 	
 	def __init__( self, parent ):
-		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,260 ), style = wx.TAB_TRAVERSAL )
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,-1 ), style = wx.TAB_TRAVERSAL )
 		
-		self.SetMinSize( wx.Size( 200,260 ) )
+		self.SetMinSize( wx.Size( 200,-1 ) )
 		
 		frame_database = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Datenbank" ), wx.VERTICAL )
 		
-		sizer_content = wx.FlexGridSizer( 2, 2, 0, 0 )
+		sizer_content = wx.FlexGridSizer( 5, 2, 0, 0 )
 		sizer_content.AddGrowableCol( 1 )
 		sizer_content.SetFlexibleDirection( wx.BOTH )
 		sizer_content.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
