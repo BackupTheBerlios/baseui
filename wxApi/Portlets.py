@@ -6,9 +6,12 @@ from Buttons import BitmapToggleButton
 
 
 class Database(res.Portlets.Database):
-    def __init__(self, parent):
+    def __init__(self, parent, autosave=False):
+        """ If autosave = False, there is a save-button appearing! """
+        
+        # TODO: Save button for autosave has to be implemented! 
         res.Portlets.Database.__init__(self, parent)
-
+        
         self.on_connect = None
         self.on_disconnect = None
         
@@ -40,26 +43,36 @@ class Database(res.Portlets.Database):
     
     def populate(self, content_dict):
         """ content_dict = \
-            {'engines':      ['SQLite'],
-             'database':     'customer.db',
-             'odbc_drivers': ['list of drivers'],
-             'host':         'hostname:port',
-             'user':         'Mustermann',
-             'password':     '123456'}"""
+            {'engines':  ['SQLite'],
+             'database': 'customer.db',
+             'drivers':  ['list of drivers'],
+             'host':     'hostname:port',
+             'user':     'Mustermann',
+             'password': '123456'}"""
         
         # Populate comboboxes -------------------------------------------------
-        self.combobox_odbc.AppendItems(content_dict.get('odbc_drivers'))
+        self.combobox_odbc.AppendItems(content_dict.get('drivers'))
         self.combobox_engine.AppendItems(content_dict.get('engines'))
         
         
     def get_content(self):
         content_dict = {'engine': self.combobox_engine.GetStringSelection(),
-                        'odbc_driver': self.combobox_odbc.GetStringSelection(),
+                        'driver': self.combobox_odbc.GetStringSelection(),
                         'database': self.entry_database.GetValue(),
                         'host': self.entry_host.GetValue(),
                         'user': self.entry_user.GetValue(),
                         'password': self.entry_password.GetValue()}
         return content_dict
+    
+    
+    def set_connected(self):
+        print "now, i have to connect"
+        
+        
+    def set_disconnected(self):
+        print "yet, i have to disconnect"
+        
+        
         
         
         

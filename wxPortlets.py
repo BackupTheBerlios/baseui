@@ -7,9 +7,10 @@
 
 import wx
 
+from config import *
 from wxApi import Portlets, Dialogs
-from misc import FileSystem
 from dbApi import SQLdb, Tools as dbTools
+from misc import FileSystem
 
 
 class DatabaseLogin(wx.Panel):
@@ -30,7 +31,7 @@ class DatabaseLogin(wx.Panel):
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        self.portlet_database = Portlets.Database(parent=self)
+        self.portlet_database = Portlets.Database(parent=self, autosave=self.autosave)
         self.portlet_database.Hide()
         self.portlet_login = Portlets.Login(parent=self)
         
@@ -65,7 +66,8 @@ class DatabaseLogin(wx.Panel):
         self.populate()
         
         self.portlet_database.on_connect = self.connect
-        
+        self.portlet_database.on_disconnect = self.disconnect
+                
         
     def on_togglebutton_preferences_toggled(self, event):
         selection = event.GetSelection()
@@ -85,16 +87,83 @@ class DatabaseLogin(wx.Panel):
     def populate(self):
         # First, populate database_portlet                    
         self.portlet_database.populate({'engines': SQLdb.get_engines(),
-                                        'odbc_drivers': dbTools.get_odbc_drivers()})
+                                        'drivers': dbTools.get_odbc_drivers()})
         
         # Then, populate login portlet
         
     
-    def connect(self):
-        print self.portlet_database.get_content()
+    def get_settings_from_db(self, database):
+        self.database = database
+        if self.database <> None:
+            self.config_dic = database.config
+        else:
+            self.portlet_database.set_disconnected()
+            return
+
+        if self.database.connection <> None:
+            self.portlet_database.set_connected()
+        else:
+            self.portlet_database.set_disconnected()
+        return self.config_dic
+
+
+    def get_settings_from_ini(self):
         try:
-            x = 5 / 0
+            self.config_dic = self.ini_file.dictresult('db')
+            return self.config_dic
         except Exception, inst:
-            self.ErrorDialog.show(text='Division durch Null!', instance=inst)
+            error_text = """\
+Während des Einlesens der Datenbank-Konfiguration ist folgender Fehler aufgetreten:
+
+<b>%s</b>
+
+Soll die Konfigurationsdatei neu erstellt werden?""" % str(inst)
+            answer = self.DialogBox.show(dialog_type='yesno', title='Frage', text=error_text)
+            if answer == 'YES':
+                self.config_dic = self.save_settings_to_ini()
+                return self.config_dic
+        
+        
+    def save_settings_to_ini(self):
+        self.config_dic = self.portlet_database.get_content()
+        ini_text = """\
+[db]
+engine = %(engine)s
+driver = %(driver)s
+database = %(database)s
+host = %(host)s
+user = %(user)s
+password = %(password)s
+
+""" % self.config_dic
+
+        self.ini_file.save(ini_text)
+        return self.config_dic
+
+
+    def connect(self):
+        try:
+            self.config_dic = self.portlet_database.get_content()
+            self.database = SQLdb.database(self.config_dic.get('engine'), debug=self.debug)
+            self.database.connect(database=self.config_dic.get('database'),
+                                  driver=self.config_dic.get('driver'),
+                                  host=self.config_dic.get('host'),
+                                  user=self.config_dic.get('user'),
+                                  password=self.config_dic.get('password'))
+            self.portlet_database.set_connected()
             
-            
+            # Save .ini-file automatically on connection
+            if self.autosave == True:
+                self.save_settings_to_ini()
+        except Exception, inst:
+            self.ErrorDialog.show(text='Datenbank konnte nicht verbunden werden.', instance=inst)
+            self.portlet_database.set_disconnected()
+        return self.database
+
+
+    def disconnect(self):
+        if self.database.connection <> None:
+            self.database.close()
+        self.portlet_database.set_disconnected()
+        
+        
