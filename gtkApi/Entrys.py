@@ -164,10 +164,10 @@ class Simple(Base):
         return
 
 
-    def set_verification_function(self, verification_function=None):
-        # TODO: Shut that crap off!
-        self.verification_function = verification_function
-        self.widget.connect('changed', on_changed)
+    # def set_verification_function(self, verification_function=None):
+   
+    #     self.verification_function = verification_function
+    #     self.widget.connect('changed', on_changed)
 
 
 

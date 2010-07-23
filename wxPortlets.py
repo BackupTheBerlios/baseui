@@ -21,6 +21,9 @@ class DatabaseLogin(wx.Panel):
         self.ini_path = ini_path
         self.autosave = autosave
         self.debug = debug
+        
+        self.on_connect = None
+        self.on_disconnect = None
               
         self.sizer = wx.FlexGridSizer( 2, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
@@ -115,8 +118,8 @@ class DatabaseLogin(wx.Panel):
         else:
             self.portlet_database.set_disconnected()
         return self.config_dic
-
-
+    
+    
     def get_settings_from_ini(self):
         try:
             self.config_dic = self.ini_file.dictresult('db')
@@ -167,6 +170,8 @@ password = %(password)s
             # Save .ini-file automatically on connection
             if self.autosave == True:
                 self.save_settings_to_ini()
+            if self.on_connect <> None:
+                self.on_connect()
         except Exception, inst:
             self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
             self.portlet_database.set_disconnected()
@@ -177,5 +182,7 @@ password = %(password)s
         if self.database.connection <> None:
             self.database.close()
         self.portlet_database.set_disconnected()
+        if self.on_disconnect <> None:
+            self.on_disconnect()
         
         

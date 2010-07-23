@@ -651,16 +651,16 @@ class Form:
         return self.content_dict
 
 
-    def validate_widget(self, widget_definition_dict):
-        #TODO: Shut that fuck up!
-        validation_function = widget_definition_dict['validation_function']
-        widget_name = widget_definition_dict['widget_name']
-        widget_content = self.content_dict[widget_name]
-        widget_validity = validation_function(widget_content)
+#    def validate_widget(self, widget_definition_dict):
+    
+#        validation_function = widget_definition_dict['validation_function']
+#        widget_name = widget_definition_dict['widget_name']
+#        widget_content = self.content_dict[widget_name]
+#        widget_validity = validation_function(widget_content)
 
-        if widget_validity == True:
-            pass
-        return
+#        if widget_validity == True:
+#            pass
+#        return
 
 
 

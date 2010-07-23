@@ -65,8 +65,8 @@ class Database(res.Portlets.Database):
         
         
     def get_content(self):
-        content_dict = {'engine': self.combobox_engine.GetStringSelection(),
-                        'driver': self.combobox_odbc.GetStringSelection(),
+        content_dict = {'engine': self.combobox_engine.GetValue(),
+                        'driver': self.combobox_odbc.GetValue(),
                         'database': self.entry_database.GetValue(),
                         'host': self.entry_host.GetValue(),
                         'user': self.entry_user.GetValue(),

@@ -10,7 +10,6 @@ import wx
 import res.Dialogs
 
 from res import IconSet32
-from pprint import pprint
 
 
 class Error(res.Dialogs.Error):
