@@ -43,16 +43,25 @@ class Database(res.Portlets.Database):
     
     def populate(self, content_dict):
         """ content_dict = \
-            {'engines':  ['SQLite'],
+            {'engines_list':  ['SQLite'],
+             'drivers_list':  ['list of drivers'],
+             'engine':   'SQLite',
+             'driver':   '',
              'database': 'customer.db',
-             'drivers':  ['list of drivers'],
              'host':     'hostname:port',
              'user':     'Mustermann',
              'password': '123456'}"""
         
         # Populate comboboxes -------------------------------------------------
-        self.combobox_odbc.AppendItems(content_dict.get('drivers'))
-        self.combobox_engine.AppendItems(content_dict.get('engines'))
+        self.combobox_odbc.AppendItems(content_dict.get('drivers_list'))
+        self.combobox_engine.AppendItems(content_dict.get('engines_list'))
+        
+        self.combobox_odbc.SetValue(content_dict.get('driver'))
+        self.combobox_engine.SetValue(content_dict.get('engine'))
+        self.entry_database.SetValue(content_dict.get('database'))
+        self.entry_host.SetValue(content_dict.get('host'))
+        self.entry_user.SetValue(content_dict.get('user'))
+        self.entry_password.SetValue(content_dict.get('password'))
         
         
     def get_content(self):

@@ -13,7 +13,7 @@ from misc import FileSystem
 
 
 class DatabaseLogin(wx.Panel):
-    def __init__(self, parent, image_path='', ini_path='', autosave=False, debug=False):
+    def __init__(self, parent, image_path='', ini_path='', autosave=True, debug=False):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
@@ -88,11 +88,18 @@ class DatabaseLogin(wx.Panel):
         
     # Actions -----------------------------------------------------------------
     def populate(self):
-        # First, populate database_portlet                    
-        self.portlet_database.populate({'engines': SQLdb.get_engines(),
-                                        'drivers': dbTools.get_odbc_drivers()})
+        # First, populate database_portlet        
+        self.portlet_database.populate({'engines_list':  SQLdb.get_engines(),
+                                        'drivers_list':  dbTools.get_odbc_drivers(),
+                                        'engine':   self.config_dic.get('engine'),
+                                        'driver':   self.config_dic.get('driver'),
+                                        'database': self.config_dic.get('database'),
+                                        'host':     self.config_dic.get('host'),
+                                        'user':     self.config_dic.get('user'),
+                                        'password': self.config_dic.get('password')})
         
-        # Then, populate login portlet
+        # TODO: Populate the login portlet
+        pass
         
     
     def get_settings_from_db(self, database):
