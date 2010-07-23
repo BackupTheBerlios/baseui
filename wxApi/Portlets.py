@@ -25,7 +25,6 @@ class Database(res.Portlets.Database):
         is_down = event.GetIsDown() 
         
         if is_down:
-            print self.get_content()
             if self.on_connect <> None:
                 try:
                     self.on_connect()

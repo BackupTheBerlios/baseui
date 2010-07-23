@@ -7,7 +7,7 @@
 
 import wx
 
-from wxApi import Portlets
+from wxApi import Portlets, Dialogs
 from misc import FileSystem
 from dbApi import SQLdb, Tools as dbTools
 
@@ -15,6 +15,7 @@ from dbApi import SQLdb, Tools as dbTools
 class DatabaseLogin(wx.Panel):
     def __init__(self, parent, image_path='', ini_filename='', autosave=False, debug=False):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
+        self.ErrorDialog = Dialogs.Error(parent=self)
         
         self.image_path = image_path
         self.ini_filename = ini_filename
@@ -63,6 +64,8 @@ class DatabaseLogin(wx.Panel):
         bottom_panel.SetSizer(bottom_sizer)
         self.populate()
         
+        self.portlet_database.on_connect = self.connect
+        
         
     def on_togglebutton_preferences_toggled(self, event):
         selection = event.GetSelection()
@@ -86,3 +89,12 @@ class DatabaseLogin(wx.Panel):
         
         # Then, populate login portlet
         
+    
+    def connect(self):
+        print self.portlet_database.get_content()
+        try:
+            x = 5 / 0
+        except Exception, inst:
+            self.ErrorDialog.show(text='Division durch Null!', instance=inst)
+            
+            
