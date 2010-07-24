@@ -5,6 +5,7 @@
 # published under BSD license by Mark Muzenhardt.
 #===============================================================================
 
+import time
 import wx
 
 from wxApi import Portlets, Dialogs
@@ -173,8 +174,8 @@ password = %(password)s
             if self.on_connect <> None:
                 self.on_connect()
         except Exception, inst:
-            self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
             self.portlet_database.set_disconnected()
+            self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
         return self.database
 
 

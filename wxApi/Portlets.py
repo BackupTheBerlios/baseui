@@ -19,7 +19,7 @@ class Database(res.Portlets.Database):
             label_bitmap=IconSet16.getconnect_no_16Bitmap(), \
             selected_bitmap = IconSet16.getconnect_creating_16Bitmap()
         )
-        
+
         self.togglebutton_connect.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled) #, self.togglebutton_connect)
         self.sizer_button.Add( self.togglebutton_connect, 1, wx.ALIGN_RIGHT|wx.ALL, 5 )
         
@@ -75,11 +75,20 @@ class Database(res.Portlets.Database):
     
     
     def set_connected(self):
-        print "now, i have to connect"
+        bitmap = IconSet16.getconnect_established_16Bitmap()
+        self.togglebutton_connect.SetBitmapSelected(bitmap)
+        
+        self.togglebutton_connect.SetToggle(True)
         
         
     def set_disconnected(self):
-        print "yet, i have to disconnect"
+        bitmap = IconSet16.getconnect_no_16Bitmap()
+        self.togglebutton_connect.SetBitmapLabel(bitmap)
+        
+        bitmap = IconSet16.getconnect_creating_16Bitmap()
+        self.togglebutton_connect.SetBitmapSelected(bitmap)
+        
+        self.togglebutton_connect.SetToggle(False)
         
         
         
