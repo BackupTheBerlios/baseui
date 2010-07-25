@@ -6,7 +6,10 @@
 #===============================================================================
 
 import os
-import wx #, gobject
+import wx
+
+from wx.gizmos import TreeListCtrl
+ #, gobject
 #import Glade, Entrys, Widgets
 
 from pprint import pprint
@@ -15,22 +18,40 @@ from Transformations import *
 PATH = os.path.dirname(__file__)
 
 
-class Tree:
+class Tree(TreeListCtrl):
     ''' This is a framework for the famous wxTreeControl. It builds tables
         from JSON-Definitions to make database-tables easy to draw. '''
 
-    def __init__(self, widget=None, encoding='latin-1'):
-        self.widget = widget
-        self.encoding = encoding
+    def __init__(self, parent=None):
+        TreeListCtrl.__init__(self, parent=parent)
         
-        self.sort_column = None
-        self.store = None
-
-
+        self.AddColumn('Fliecher')
+        self.AddColumn('Dübb')
+        
+        root = self.AddRoot(text='Belvedere')
+                
+        self.SetItemText(root, '7781', 0)
+        self.SetItemText(root, 'Muzzi', 1)
+                
+        #self.tree = gizmos.TreeListCtrl(self, -1, style =
+                                        #wx.TR_DEFAULT_STYLE
+                                        #| wx.TR_HAS_BUTTONS
+                                        #| wx.TR_TWIST_BUTTONS
+                                        #| wx.TR_ROW_LINES
+                                        #| wx.TR_COLUMN_LINES
+                                        #| wx.TR_NO_LINES 
+        #                                | wx.TR_FULL_ROW_HIGHLIGHT
+        #                                )
+        #self.widget = widget
+        #self.encoding = encoding
+        
+        #self.sort_column = None
+        #self.store = None
+    
+    
     # Events ------------------------------------------------------------------
     def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
-        model = widget.get_model()
-        model[row][col] = not model[row][col]
+        pass
 
 
     def on_row_activated(self, widget=None, path=None, column=None):
@@ -45,57 +66,33 @@ class Tree:
 
     # Actions -----------------------------------------------------------------
     def create(self):
-        self.widget = gtk.TreeView()
+        pass
 
 
     def set_headers_visible(self, visible=True):
-        self.widget.set_headers_visible(visible)
+        pass
 
 
     def get_content(self):
-        model = self.widget.get_model()
-        
-        content_lod = []
-        for row in model:
-            row_dic = {}
-            for column in enumerate(row):
-                column_number = column[0]
-                cell_content = column[1]
-                
-                definition_dic = search_lod(self.definition_lod, 'column_number', column_number)               
-                row_dic[definition_dic['column_name']] = cell_content
-            content_lod.append(row_dic)
+        ''' Returns the content as list_of_dictionarys, just like the content_lod
+            uses at populate. '''
+            
+        content_lod = None    
         return content_lod
-
 
 
     def get_selected_row_content(self, widget=None):
         ''' Returns a dictionary which holds the row content like this:
                {'id': 1, 'name': 'Heinz Becker'} '''
         
-        if widget == None:
-            widget=self.widget
-            
-        selection = widget.get_selection()
-        selected_tuple = selection.get_selected()
-        model = widget.get_model()
-
-        row_content = {}
-        for item in xrange(len(model[selected_tuple[1]])):
-            definition_dic = search_lod(self.definition_lod, 'column_number', item)
-            cell_content = model.get_value(selected_tuple[1], item)
-            row_content[definition_dic['column_name']] = cell_content
+        row_content = None
         return row_content
 
 
     def clear(self):
-        number = 1
-        while number > 0:
-            column = self.widget.get_column(0)
-            if column <> None:
-                number = self.widget.remove_column(column)
-            else:
-                number = 0
+        ''' Just clears the whole content down to an empty tabel. '''
+        
+        return
 
 
     def initialize(self, definition_lod=None, attributes_lod=None):
@@ -130,22 +127,22 @@ class Tree:
                               'is_nullable' = True}]'''
 
         self.definition_lod = definition_lod
-
+        
         treeview_column_list = []
         self.type_list = []
-
+        
         # Merge definition_lod and attributes_lod together.
         self.definition_lod = merge_two_lods(self.definition_lod, attributes_lod, 'column_name')
-
+        
         # First off, the columns has to be sorted in given order.
         try:
             self.definition_lod.sort(compare_by('column_number'))
         except:
             raise
-
+        
         # Before anything else happens on the treeview, clear it.
         self.clear()
-
+        
         # This makes table column-setup.
         column_number = 0
         for column_dict in self.definition_lod:
@@ -386,9 +383,9 @@ class Tree:
             column_label = column_list[column_number]
 
             definition_lod.append({'column_name': column_name,
-                                         'data_type': data_type,
-                                         'column_label': column_label,
-                                         'column_number': column_number})
+                                   'data_type': data_type,
+                                   'column_label': column_label,
+                                   'column_number': column_number})
         return definition_lod
 
 

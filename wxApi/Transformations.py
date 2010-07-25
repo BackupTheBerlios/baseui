@@ -99,7 +99,7 @@ def merge_two_lods(left_lod=None, right_lod=None, matching_key=''):
 def compare_by(dict_key):
     ''' Called like dict.sort(compare_by(dict_key)), this sorts the dict
         by the values given at dict_key (string which has to be a key in dict). '''
-        
+
     def compare_two_dicts (dict_a, dict_b):
         if dict_a.has_key(dict_key) and dict_b.has_key(dict_key):
             return cmp(dict_a[dict_key], dict_b[dict_key])

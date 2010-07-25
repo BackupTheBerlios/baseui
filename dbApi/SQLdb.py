@@ -12,38 +12,38 @@ from copy import copy
 
 def get_engines():
     ''' Returns a list of available database-connectors. '''
-
+    
     engine_list = []
     try:
         import pgdb
         engine_list.append('PostgreSQL')
     except:
         pass
-
+    
     try:
         import MySQLdb
         engine_list.append('MySQL')
     except:
         pass
-
+    
     try:
         import pymssql
         engine_list.append('msSQL')
     except:
         pass
-
+    
     try:
         import cx_Oracle
         engine_list.append('Oracle')
     except:
         pass
-
+    
     try:
         import sqlite3
         engine_list.append('SQLite')
     except:
         pass
-
+    
     try:
         import pyodbc
         engine_list.append('ODBC')
@@ -90,13 +90,13 @@ class database:
             if self.engine == "odbc":
                 import pyodbc
                 connector = pyodbc
-
+                
             self.connector = connector
         except:
             raise
         return
-
-
+    
+    
     # Connection handling -----------------------------------------------------
     def connect(self, **kwargs):
         ''' Connects the database and gives back the connector which is used to give SQL commands to the database.
@@ -108,7 +108,7 @@ class database:
         
         self.name = kwargs['database']
         self.config = kwargs
-
+        
         try:
             if self.debug:
                 print 'Connecting database', self.name, '...',
@@ -132,7 +132,7 @@ class database:
                 connection_string = 'DRIVER={%(driver)s};SERVER=%(host)s;DATABASE=%(database)s;UID=%(user)s;PWD=%(password)s' % kwargs
                 self.table_schema = None
                 self.connection = self.connector.connect(connection_string, autocommit=True)
-        
+                
             if self.debug:
                 print 'Ok.'
         except:
@@ -146,7 +146,7 @@ class database:
             raise Exception, 'Fehler beim verbinden der Datenbank'
         
         self.cursor = self.connection.cursor()
-
+        
         if self.engine.startswith('postgresql'):# or self.engine.startswith('mysql'):
             self.commit()
         return self.connection
@@ -160,7 +160,7 @@ class database:
         try:
             self.cursor.close()
             self.cursor = None
-
+            
             if self.engine == 'sqlite':
                 self.connection.commit()
                 
