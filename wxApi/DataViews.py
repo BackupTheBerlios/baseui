@@ -23,30 +23,18 @@ class Tree(TreeListCtrl):
         from JSON-Definitions to make database-tables easy to draw. '''
 
     def __init__(self, parent=None):
-        TreeListCtrl.__init__(self, parent=parent)
+        TreeListCtrl.__init__(self, parent=parent, 
+                                    style=(wx.TR_HIDE_ROOT |
+                                           wx.TR_FULL_ROW_HIGHLIGHT))
         
-        self.AddColumn('Fliecher')
-        self.AddColumn('Dübb')
         
-        root = self.AddRoot(text='Belvedere')
+        #self.AddColumn('Fliecher')
+        #self.AddColumn('Dübb')
+        
+        #root = self.AddRoot(text='Root')
                 
-        self.SetItemText(root, '7781', 0)
-        self.SetItemText(root, 'Muzzi', 1)
-                
-        #self.tree = gizmos.TreeListCtrl(self, -1, style =
-                                        #wx.TR_DEFAULT_STYLE
-                                        #| wx.TR_HAS_BUTTONS
-                                        #| wx.TR_TWIST_BUTTONS
-                                        #| wx.TR_ROW_LINES
-                                        #| wx.TR_COLUMN_LINES
-                                        #| wx.TR_NO_LINES 
-        #                                | wx.TR_FULL_ROW_HIGHLIGHT
-        #                                )
-        #self.widget = widget
-        #self.encoding = encoding
-        
-        #self.sort_column = None
-        #self.store = None
+        #self.SetItemText(root, '7781', 0)
+        #self.SetItemText(root, 'Muzzi', 1)
     
     
     # Events ------------------------------------------------------------------
@@ -144,131 +132,153 @@ class Tree(TreeListCtrl):
         self.clear()
         
         # This makes table column-setup.
-        column_number = 0
         for column_dict in self.definition_lod:
-            if column_dict.has_key('data_type'):
+            column_label = column_dict.get('column_label')
+            if column_label == None:
+                column_label = column_dict.get('column_name')
+            self.AddColumn(text=column_label)
+            
+            #print column_dict
+        
+        #column_number = 0
+        #for column_dict in self.definition_lod:
+        #    if column_dict.has_key('data_type'):
                 # Use SQL data_types except image (this is a Tree-only data_type).
-                if column_dict['data_type'] == '#image':
-                    entry_type = gtk.gdk.Pixbuf
-                elif column_dict['data_type'] == '#combobox':
-                    entry_type = str
-                else:
-                    if column_dict.has_key('referenced_column_name'):
-                        entry_type = str
-                    else:
-                        entry_type = SQL_to_DataType(column_dict['data_type'], datetime_offset=True)
-            self.type_list += [entry_type]
+        #        if column_dict['data_type'] == '#image':
+        #            entry_type = gtk.gdk.Pixbuf
+        #        elif column_dict['data_type'] == '#combobox':
+        #            entry_type = str
+        #        else:
+        #            if column_dict.has_key('referenced_column_name'):
+        #                entry_type = str
+        #            else:
+        #                entry_type = SQL_to_DataType(column_dict['data_type'], datetime_offset=True)
+        #    self.type_list += [entry_type]
 
             # If no column_label entry is found in column_dict, name it like db_field_name.
-            if column_dict.has_key('column_label'):
-                column_label = unicode(str(column_dict['column_label']), self.encoding)
-            else:
+        #    if column_dict.has_key('column_label'):
+        #        column_label = unicode(str(column_dict['column_label']), self.encoding)
+        #    else:
                 # column_dict must have the key 'column_name' at least.
-                try:
-                    column_label = unicode(str(column_dict['column_name']), self.encoding)
-                except:
-                    raise
+        #        try:
+        #            column_label = unicode(str(column_dict['column_name']), self.encoding)
+        #        except:
+        #            raise
                 
             # The next question is, of which type the column should be (Toggle, Pixbuf, Text, Combobox or Progressbar).
-            column_is_combobox = False
-            if column_dict.has_key('data_type'):
-                if column_dict['data_type'] == '#combobox':
-                    column_is_combobox = True
+        #    column_is_combobox = False
+        #    if column_dict.has_key('data_type'):
+        #        if column_dict['data_type'] == '#combobox':
+        #            column_is_combobox = True
                                 
-            if entry_type <> bool and \
-               entry_type <> gtk.gdk.Pixbuf and \
-               column_is_combobox <> True:
-                cell_renderer_text = gtk.CellRendererText()
-                if column_dict.has_key('editable'):
-                    cell_renderer_text.set_property('editable', column_dict['editable'])
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_text, text=column_number))
-            if entry_type == bool:
-                cell_renderer_toggle = gtk.CellRendererToggle()
-                if column_dict.has_key('editable'):
-                    cell_renderer_toggle.set_property('activatable', column_dict['editable'])
-                    cell_renderer_toggle.connect('toggled', self.on_column_toggled, self.widget, column_number)
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_toggle))
-                treeview_column_list[column_number].add_attribute(cell_renderer_toggle, "active", column_number)
-            if entry_type == gtk.gdk.Pixbuf:
-                cell_renderer_pixbuf = gtk.CellRendererPixbuf()
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_pixbuf, pixbuf=column_number))
-            if column_is_combobox:
-                cell_renderer_combo = gtk.CellRendererCombo()
-                column_dict['#liststore'] = gtk.ListStore(int, str)
-                cell_renderer_combo.set_property('model', column_dict['#liststore'])
-                cell_renderer_combo.set_property('text-column', 1)
-                if column_dict.has_key('editable'):
-                    cell_renderer_combo.set_property('editable', column_dict['editable'])
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_combo, text=column_number))
+        #    if entry_type <> bool and \
+        #       entry_type <> gtk.gdk.Pixbuf and \
+        #       column_is_combobox <> True:
+        #        cell_renderer_text = gtk.CellRendererText()
+        #        if column_dict.has_key('editable'):
+        #            cell_renderer_text.set_property('editable', column_dict['editable'])
+        #        treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_text, text=column_number))
+        #    if entry_type == bool:
+        #        cell_renderer_toggle = gtk.CellRendererToggle()
+        #        if column_dict.has_key('editable'):
+        #            cell_renderer_toggle.set_property('activatable', column_dict['editable'])
+        #            cell_renderer_toggle.connect('toggled', self.on_column_toggled, self.widget, column_number)
+        #        treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_toggle))
+        #        treeview_column_list[column_number].add_attribute(cell_renderer_toggle, "active", column_number)
+        #    if entry_type == gtk.gdk.Pixbuf:
+        #        cell_renderer_pixbuf = gtk.CellRendererPixbuf()
+        #        treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_pixbuf, pixbuf=column_number))
+        #    if column_is_combobox:
+        #        cell_renderer_combo = gtk.CellRendererCombo()
+        #        column_dict['#liststore'] = gtk.ListStore(int, str)
+        #        cell_renderer_combo.set_property('model', column_dict['#liststore'])
+        #        cell_renderer_combo.set_property('text-column', 1)
+        #        if column_dict.has_key('editable'):
+        #            cell_renderer_combo.set_property('editable', column_dict['editable'])
+        #        treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_combo, text=column_number))
                 
-            self.widget.append_column(treeview_column_list[column_number])
+        #    self.widget.append_column(treeview_column_list[column_number])
 
             # Resizeable by default.
-            if column_dict.has_key('resizeable'):
-                treeview_column_list[column_number].set_resizable(column_dict['resizeable'])
-            else:
-                treeview_column_list[column_number].set_resizable(True)
+        #    if column_dict.has_key('resizeable'):
+        #        treeview_column_list[column_number].set_resizable(column_dict['resizeable'])
+        #    else:
+        #        treeview_column_list[column_number].set_resizable(True)
 
             # Expand by default.
-            if column_dict.has_key('expand'):
-                treeview_column_list[column_number].set_expand(column_dict['expand'])
-            else:
-                treeview_column_list[column_number].set_expand(True)
+        #    if column_dict.has_key('expand'):
+        #        treeview_column_list[column_number].set_expand(column_dict['expand'])
+        #    else:
+        #        treeview_column_list[column_number].set_expand(True)
 
             # Sortable by default.
-            if column_dict.has_key('sortable'):
-                if column_dict['sortable'] == True:
-                    treeview_column_list[column_number].set_sort_column_id(column_number)
-                    treeview_column_list[column_number].set_sort_indicator(column_number)
-            else:
-                treeview_column_list[column_number].set_sort_column_id(column_number)
-                treeview_column_list[column_number].set_sort_indicator(column_number)
+        #    if column_dict.has_key('sortable'):
+        #        if column_dict['sortable'] == True:
+        #            treeview_column_list[column_number].set_sort_column_id(column_number)
+        #            treeview_column_list[column_number].set_sort_indicator(column_number)
+        #    else:
+        #        treeview_column_list[column_number].set_sort_column_id(column_number)
+        #        treeview_column_list[column_number].set_sort_indicator(column_number)
 
             # Not reorderable by default.
-            if column_dict.has_key('reorderable'):
-                treeview_column_list[column_number].set_reorderable(column_dict['reorderable'])
+        #    if column_dict.has_key('reorderable'):
+        #        treeview_column_list[column_number].set_reorderable(column_dict['reorderable'])
 
             # Visible by gtk default, thus only effective if visible=False.
-            if column_dict.has_key('visible'):
-                treeview_column_list[column_number].set_visible(column_dict['visible'])
+        #    if column_dict.has_key('visible'):
+        #        treeview_column_list[column_number].set_visible(column_dict['visible'])
 
-            column_number += 1
-        return
+        #    column_number += 1
+        #return
 
 
     def populate(self, content_lod=None):
         ''' content_lod = [{'id': 1}] '''
+        
+        root = self.AddRoot(text='Root')
+        for content_dict in content_lod:
+            item = self.AppendItem(root, text='')
+            for definition_dict in self.definition_lod:
+                column_number = definition_dict.get('column_number')
+                column_name = definition_dict.get('column_name')
+                content = str(content_dict.get(column_name))
+                
+                if content == None:
+                    content = ''
+                    
+                self.SetItemText(item, content, column_number)
+
 
         # If there is no content, bail out for good.
-        if content_lod == None:
-            return
+    #    if content_lod == None:
+    #        return
             
-        self.content_lod = content_lod
-
+    #    self.content_lod = content_lod
+    
         # First, look up content_lod for child nodes.
-        self.has_child_node = False
-        for row_dict in self.content_lod:
-            if row_dict.has_key('#child'):
-                self.has_child_node = True
-
+    #    self.has_child_node = False
+    #    for row_dict in self.content_lod:
+    #        if row_dict.has_key('#child'):
+    #            self.has_child_node = True
+    
         # Let store be a TreeStore if data has child node(s) or a ListStore if not.
-        if self.has_child_node:
-            self.store = gtk.TreeStore(*self.type_list)
-            self.widget.set_enable_tree_lines(True)
-        else:
-            self.store = gtk.ListStore(*self.type_list)
+    #    if self.has_child_node:
+    #        self.store = gtk.TreeStore(*self.type_list)
+    #        self.widget.set_enable_tree_lines(True)
+    #    else:
+    #        self.store = gtk.ListStore(*self.type_list)
 
         # Build and populate TreeView or ListStore.
-        try:
-            for row_dict in self.content_lod:
-                self.build_store(row_parent=None, row_dict=row_dict)
-        except:
-            raise
-
-        self.widget.set_model(self.store)
-        if self.sort_column <> None:
-            self.sort_liststore()
-        return
+    #    try:
+    #        for row_dict in self.content_lod:
+    #            self.build_store(row_parent=None, row_dict=row_dict)
+    #    except:
+    #        raise
+     
+    #   self.widget.set_model(self.store)
+    #   if self.sort_column <> None:
+    #       self.sort_liststore()
+    #   return
 
 
     def build_store(self, row_parent, row_dict):
