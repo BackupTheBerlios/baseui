@@ -26,30 +26,32 @@ class Tree(TreeListCtrl):
         TreeListCtrl.__init__(self, parent=parent, 
                                     style=(wx.TR_HIDE_ROOT |
                                            wx.TR_FULL_ROW_HIGHLIGHT))
+    
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_activated, id=wx.ID_ANY)
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_cursor_changed,   id=wx.ID_ANY)
         
-        
-        #self.AddColumn('Fliecher')
-        #self.AddColumn('Dübb')
-        
-        #root = self.AddRoot(text='Root')
-                
-        #self.SetItemText(root, '7781', 0)
-        #self.SetItemText(root, 'Muzzi', 1)
+        #self.Bind(event, handler, source, id, id2)
     
     
     # Events ------------------------------------------------------------------
+    #def on_activate(self):
     def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
         pass
 
 
-    def on_row_activated(self, widget=None, path=None, column=None):
-        row_content = self.get_selected_row_content(widget)
-        self.row_activate_function(row_content)
+    def on_row_activated(self, event=None):
+        print 'row activated, event:', event
+        #print dir(event)
+        print self.GetItemText(event.GetItem())
+        print 'data_dir:', dir(self.GetItemData(event.GetItem()).GetId())
+        #row_content = self.get_selected_row_content(widget)
+        #self.row_activate_function(row_content)
 
 
-    def on_cursor_changed(self, widget=None, path=None, column=None):
-        row_content = self.get_selected_row_content(widget)
-        self.cursor_changed_function(row_content)
+    def on_cursor_changed(self, event=None):
+        print 'cursor changed, event:', event
+        #row_content = self.get_selected_row_content(widget)
+        #self.cursor_changed_function(row_content)
 
 
     # Actions -----------------------------------------------------------------
