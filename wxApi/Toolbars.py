@@ -60,16 +60,24 @@ class LookoutSidebar(wx.Panel):
         """
 
         wx.Panel.__init__(self, parent, id=wx.ID_ANY, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.TAB_TRAVERSAL)
-        
+        self.content_lod = content_lod
+
         self.sizer = wx.FlexGridSizer(2, 1, 0, 0)
         self.sizer.AddGrowableCol(0)
         self.SetSizer(self.sizer)
         
-        for content_dic in content_lod:
-            self.sizer.Add(BitmapTextToggleButton(self, label=content_dic.get('label'), bitmap=content_dic.get('bitmap')), 0, wx.ALL|wx.EXPAND)
-            
+        for content_dic in self.content_lod:
+            bitmap = wx.Image(content_dic.get('picture'), wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+            content_dic['button'] = BitmapTextToggleButton(self, label=content_dic.get('label'), bitmap=bitmap)
+            content_dic['button'].Bind(wx.EVT_BUTTON, self.on_toggled)
+            self.sizer.Add(content_dic['button'], 0, wx.ALL|wx.EXPAND)
         self.Show()
 
-        
+    
+    def on_toggled(self, event=None):
+        button = event.GetButtonObj()
+        for content_dic in self.content_lod:
+            if content_dic['button'] <> button:
+                content_dic['button'].SetToggle(False)
         
         
