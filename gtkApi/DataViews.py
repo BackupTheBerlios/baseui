@@ -25,6 +25,9 @@ class Tree:
         
         self.sort_column = None
         self.store = None
+        
+        self.row_activate_function = None
+        self.cursor_changed_function = None
 
 
     # Events ------------------------------------------------------------------
@@ -35,12 +38,14 @@ class Tree:
 
     def on_row_activated(self, widget=None, path=None, column=None):
         row_content = self.get_selected_row_content(widget)
-        self.row_activate_function(row_content)
+        if self.row_activate_function <> None:
+            self.row_activate_function(row_content)
 
 
     def on_cursor_changed(self, widget=None, path=None, column=None):
         row_content = self.get_selected_row_content(widget)
-        self.cursor_changed_function(row_content)
+        if self.cursor_changed_function <> None:
+            self.cursor_changed_function(row_content)
 
 
     # Actions -----------------------------------------------------------------

@@ -9,8 +9,6 @@ import os
 import wx
 
 from wx.gizmos import TreeListCtrl
- #, gobject
-#import Glade, Entrys, Widgets
 
 from pprint import pprint
 from Transformations import *
@@ -25,35 +23,32 @@ class Tree(TreeListCtrl):
     def __init__(self, parent=None):
         TreeListCtrl.__init__(self, parent=parent, 
                                     style=(wx.TR_HIDE_ROOT |
-                                           wx.TR_FULL_ROW_HIGHLIGHT))
+                                           wx.TR_FULL_ROW_HIGHLIGHT))    
     
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_activated, id=wx.ID_ANY)
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_cursor_changed,   id=wx.ID_ANY)
+
+        self.row_activate_function = None
+        self.cursor_changed_function = None
         
-        #self.Bind(event, handler, source, id, id2)
-    
-    
+
     # Events ------------------------------------------------------------------
-    #def on_activate(self):
-    def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
-        pass
+#    def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
+#        pass
 
 
     def on_row_activated(self, event=None):
-        print 'row activated, event:', event
-        #print dir(event)
-        print self.GetItemText(event.GetItem())
-        print 'data_dir:', dir(self.GetItemData(event.GetItem()).GetId())
-        #row_content = self.get_selected_row_content(widget)
-        #self.row_activate_function(row_content)
+        row_content = self.get_selected_row_content()
+        if self.row_activate_function <> None:
+            self.row_activate_function(row_content)
 
 
     def on_cursor_changed(self, event=None):
-        print 'cursor changed, event:', event
-        #row_content = self.get_selected_row_content(widget)
-        #self.cursor_changed_function(row_content)
-
-
+        row_content = self.get_selected_row_content()
+        if self.cursor_changed_function <> None:
+            self.cursor_changed_function(row_content)
+    
+    
     # Actions -----------------------------------------------------------------
     def create(self):
         pass
@@ -71,12 +66,19 @@ class Tree(TreeListCtrl):
         return content_lod
 
 
-    def get_selected_row_content(self, widget=None):
+    def get_selected_row_content(self):
         ''' Returns a dictionary which holds the row content like this:
                {'id': 1, 'name': 'Heinz Becker'} '''
-        
-        row_content = None
-        return row_content
+               
+        item = self.GetSelection()
+        content_dict = {}
+        for definition_dict in self.definition_lod:
+            column_number = definition_dict.get('column_number')
+            column_name = definition_dict.get('column_name')
+            content = self.GetItemText(item, column_number)
+            content_dict[column_name] = content
+            
+        return content_dict
 
 
     def clear(self):
@@ -138,7 +140,11 @@ class Tree(TreeListCtrl):
             column_label = column_dict.get('column_label')
             if column_label == None:
                 column_label = column_dict.get('column_name')
-            self.AddColumn(text=column_label)
+            
+            visible = column_dict.get('visible')
+            if visible <> False:
+                visible = True
+            self.AddColumn(text=column_label, shown=visible)
             
             #print column_dict
         
@@ -239,18 +245,19 @@ class Tree(TreeListCtrl):
         
         root = self.AddRoot(text='Root')
         for content_dict in content_lod:
-            item = self.AppendItem(root, text='')
-            for definition_dict in self.definition_lod:
+            item = self.AppendItem(parent=root, text='')
+           # print item
+            
+            for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
                 column_name = definition_dict.get('column_name')
-                content = str(content_dict.get(column_name))
+                content = content_dict.get(column_name)
                 
                 if content == None:
                     content = ''
-                    
-                self.SetItemText(item, content, column_number)
-
-
+                
+                self.SetItemText(item, str(content), column_number)
+               # pprint(dir(self))
         # If there is no content, bail out for good.
     #    if content_lod == None:
     #        return
