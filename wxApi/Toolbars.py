@@ -33,7 +33,7 @@ class DatasetToolbar(wx.ToolBar):
                 size=(150,-1), style=wx.CB_DROPDOWN)
             self.AddControl(self.combobox_filter)
         
-        if search == True:   
+        if search == True:
             self.AddSeparator() 
             self.entry_search = wx.SearchCtrl(parent=self, id=-1)
             self.AddControl(self.entry_search) 
@@ -58,7 +58,7 @@ class LookoutSidebar(wx.Panel):
                 {'bitmap': wx.Bitmap, 'label': str, 'on_activate': func},
             ]
         """
-
+        
         wx.Panel.__init__(self, parent, id=wx.ID_ANY, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.TAB_TRAVERSAL)
         self.content_lod = content_lod
 
@@ -72,6 +72,8 @@ class LookoutSidebar(wx.Panel):
             content_dic['button'].Bind(wx.EVT_BUTTON, self.on_toggled)
             self.sizer.Add(content_dic['button'], 0, wx.ALL|wx.EXPAND)
         self.Show()
+        
+        self.content_lod[0]['button'].SetToggle(True)
 
     
     def on_toggled(self, event=None):
@@ -79,5 +81,14 @@ class LookoutSidebar(wx.Panel):
         for content_dic in self.content_lod:
             if content_dic['button'] <> button:
                 content_dic['button'].SetToggle(False)
-        
+            else:
+                function = content_dic.get('on_activate')
+                if function <> None and button.GetToggle() == True:
+                    function()
+                if button.GetToggle() == False:
+                    button.SetToggle(True)
+                    
+                    
+                
+                
         
