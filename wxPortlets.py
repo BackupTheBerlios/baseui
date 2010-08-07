@@ -9,7 +9,7 @@ import sys
 import wx
 
 from misc import FileSystem, HelpFile, FileTransfer
-from wxApi import Portlets, Dialogs, DataViews
+from wxApi import Portlets, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
 from dbApi import SQLdb, Tools as dbTools
 
@@ -198,12 +198,15 @@ class Table:
         self.help_file = help_file
         self.filter_lod = []
         
+        self.portlet = None
+        self.toolbar = Toolbars.TableToolbar #(parent=self)
+        
         #self.Table = DataViews.Tree()
         #self.Table.create()
         #self.Table.set_row_activate_function(self.on_row_activate)
         #self.Table.set_cursor_changed_function(self.on_cursor_changed)
 
-        self.create_toolbar(dataset, report, search, filter, help)
+        #self.create_toolbar(dataset, report, search, filter, help)
         self.form = form_object
         self.form.set_update_function(self.update)
         
@@ -222,8 +225,6 @@ class Table:
         
         #self.DialogBox = Dialogs.Simple(parent=None)
         self.HTMLhelp = HelpFile.HTML()
-        self.portlet = None
-        self.toolbar = None
     
     
     # Callbacks ---------------------------------------------------------------
@@ -294,69 +295,6 @@ class Table:
     def show_help(self):
         if self.help_file <> None:
             self.HTMLhelp.show(self.help_file)
-
-
-    def create_toolbar(self, dataset, report, search, filter, help):
-        #self.toolbar = gtk.Toolbar()
-
-        # Dataset widgets
-        #if dataset == True:
-        #    self.button_new = Buttons.Simple().create(stock_image=gtk.STOCK_NEW, height=32)
-        #    self.button_new.connect('clicked', self.on_button_new_clicked)
-        #    self.toolbar.add(self.button_new)
-        #    self.button_edit = Buttons.Simple().create(stock_image=gtk.STOCK_EDIT, height=32)
-        #    self.button_edit.connect('clicked', self.on_button_edit_clicked)
-        #    self.button_edit.set_sensitive(0)
-        #    self.toolbar.add(self.button_edit)
-        #    self.button_delete = Buttons.Simple().create(stock_image=gtk.STOCK_DELETE, height=32)
-        #    self.button_delete.connect('clicked', self.on_button_delete_clicked)
-        #    self.button_delete.set_sensitive(0)
-        #    self.toolbar.add(self.button_delete)
-        #    separator = gtk.VSeparator()
-        #    separator.set_size_request(8, 32)
-        #    self.toolbar.add(separator)
-
-        # Report widgets
-        #if report == True:
-        #    self.button_print = Buttons.Simple().create(stock_image=gtk.STOCK_PRINT, height=32)
-        #    self.button_print.connect('clicked', self.on_button_print_clicked)
-        #    self.toolbar.add(self.button_print)
-        #    separator = gtk.VSeparator()
-        #    separator.set_size_request(8, 32)
-        #    self.toolbar.add(separator)
-
-        # Search widgets
-        #if search == True:
-        #    self.entry_search = gtk.Entry()
-        #    self.entry_search.set_size_request(200, 24)
-        #    self.toolbar.add(self.entry_search)
-        #    self.button_search = Buttons.Simple().create(stock_image=gtk.STOCK_FIND, height=32)
-        #    self.button_search.connect('clicked', self.on_button_search_clicked)
-        #    self.toolbar.add(self.button_search)
-        #    separator = gtk.VSeparator()
-        #    separator.set_size_request(8, 32)
-        #    self.toolbar.add(separator)
-
-        # Filter widgets
-        #if filter == True:
-        #    self.comboboxentry_filter = gtk.ComboBoxEntry()
-        #    self.comboboxentry_filter.set_size_request(200, 24)
-        #    vbox = gtk.VBox()
-        #    vbox.pack_start(gtk.Fixed(), expand=True, fill=True, padding=0)
-        #    vbox.pack_start(self.comboboxentry_filter, expand=False, fill=False, padding=0)
-        #    vbox.pack_start(gtk.Fixed(), expand=True, fill=True, padding=0)
-        #    self.toolbar.add(vbox)
-        #    separator = gtk.VSeparator()
-        #    separator.set_size_request(8, 32)
-        #    self.toolbar.add(separator)
-
-        #if help == True:
-        #    self.button_help = Buttons.Simple().create(stock_image=gtk.STOCK_HELP, width=-1, height=32)
-        #    self.button_help.connect('clicked', self.on_button_help_clicked)
-        #    self.toolbar.add(self.button_help)
-
-        #self.toolbar.show_all()
-        return
     
 
     def initialize(self, db_table_object=None, definition_lod=None):
