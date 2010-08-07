@@ -8,7 +8,6 @@
 import traceback
 import wx
 import res.Dialogs
-
 from res import IconSet32
 
 
