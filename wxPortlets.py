@@ -198,10 +198,10 @@ class Table:
         self.help_file = help_file
         self.filter_lod = []
         
-        self.Table = DataViews.Tree()
-        self.Table.create()
-        self.Table.set_row_activate_function(self.on_row_activate)
-        self.Table.set_cursor_changed_function(self.on_cursor_changed)
+        #self.Table = DataViews.Tree()
+        #self.Table.create()
+        #self.Table.set_row_activate_function(self.on_row_activate)
+        #self.Table.set_cursor_changed_function(self.on_cursor_changed)
 
         self.create_toolbar(dataset, report, search, filter, help)
         self.form = form_object
@@ -222,6 +222,8 @@ class Table:
         
         #self.DialogBox = Dialogs.Simple(parent=None)
         self.HTMLhelp = HelpFile.HTML()
+        self.portlet = None
+        self.toolbar = None
     
     
     # Callbacks ---------------------------------------------------------------
@@ -391,11 +393,11 @@ class Table:
         if result <> None: 
             self.primary_key_column = result['column_name']
 
-        self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
+        #self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
         
         # Just populate immideately if this is not a child-table of a form!
-        if self.parent_form == None:
-            self.populate()
+        #if self.parent_form == None:
+            #self.populate()
 
 
     def populate(self, content_lod=None):        
@@ -645,7 +647,7 @@ class Form:
         self.attributes_lod = attributes_lod
         self.portlets_lod = portlets_lod
         
-        result = GtkTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
+        result = WxTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
         if result <> None: 
             self.primary_key_column = result['column_name']
                         
