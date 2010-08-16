@@ -29,23 +29,22 @@ class iniFile(Base):
             
         import ConfigParser
         self.parser = ConfigParser.ConfigParser()
-        print self.filepath
         return
-
-
+        
+        
     def dictresult(self, section):
         try:
             self.parser.read(self.filepath)
             value_lol = self.parser.items(section)
         except:
             raise
-
+        
         value_dic = {}
         for value in value_lol:
              value_dic[value[0]] = value[1]
         return value_dic
-
-
+        
+        
     def save(self, ini_text):
         ini_file = open(self.filepath, "w")
         ini_file.write(ini_text)
