@@ -18,7 +18,7 @@ class iniFile:
         self.ini_path = ini_path
         
         ini_file = open(self.ini_path, 'r')
-        
+        self.content_dod = None
         
         
     def save(self, settings_dod):
@@ -26,4 +26,15 @@ class iniFile:
         
         
         
+    #def load(self):
+    #    pass
         
+        
+class doc:        
+    '''
+    
+    +-- screen
+      +-- containers
+        +-- widgets
+  
+    '''
