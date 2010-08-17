@@ -11,8 +11,8 @@ from res import IconSet16
 from Buttons import BitmapTextToggleButton
 
 
-class DatasetToolbar(wx.ToolBar):
-    def __init__(self, parent, filter=False, search=False, preferences=False, help=True):
+class TableToolbar(wx.ToolBar):
+    def __init__(self, parent, filter=True, search=True, preferences=True, help=True):
         wx.ToolBar.__init__(self, parent, id=-1, pos=wx.DefaultPosition, 
                             size=wx.DefaultSize, 
                             style=wx.TB_FLAT | wx.TB_NODIVIDER)
@@ -51,6 +51,33 @@ class DatasetToolbar(wx.ToolBar):
         
 
 
+class FormToolbar(wx.ToolBar):
+    def __init__(self, parent, preferences=True, help=True):
+        wx.ToolBar.__init__(self, parent, id=-1, pos=wx.DefaultPosition, 
+                            size=wx.DefaultSize, 
+                            style=wx.TB_FLAT | wx.TB_NODIVIDER) 
+        
+        self.SetToolBitmapSize(wx.Size(22, 22))
+               
+        self.AddLabelTool(id=wx.ID_ANY, label="Speichern",  bitmap=IconSet16.getfilesave_16Bitmap())
+        self.AddLabelTool(id=wx.ID_ANY, label="Löschen",    bitmap=IconSet16.getdelete_16Bitmap())
+        
+        self.AddSeparator()
+        self.AddLabelTool(id=wx.ID_ANY, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
+            
+        if preferences == True or help == True:
+            self.AddSeparator()
+        
+        if preferences == True:
+            self.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+        
+        if help == True:
+            self.AddLabelTool(id=-1, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
+        
+        self.Realize()
+        
+        
+        
 class LookoutSidebar(wx.Panel):
     def __init__(self, parent, content_lod=None):
         """ content_lod = 
@@ -84,7 +111,7 @@ class LookoutSidebar(wx.Panel):
             else:
                 function = content_dic.get('on_activate')
                 if function <> None and button.GetToggle() == True:
-                    function()
+                    function(event)
                 if button.GetToggle() == False:
                     button.SetToggle(True)
                     
