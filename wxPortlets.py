@@ -190,7 +190,8 @@ password = %(password)s
         
         
 class Table:
-    def __init__(self, form_object=None, parent_form=None, \
+    def __init__(self, parent,
+                       form_object=None, parent_form=None, \
                        dataset=True, report=False, search=False, filter=True, help=True, \
                        db_table=None, help_file=None, separate_toolbar=True):
         self.parent_form = parent_form
@@ -199,7 +200,7 @@ class Table:
         self.filter_lod = []
         
         self.portlet = None
-        self.toolbar = Toolbars.TableToolbar #(parent=self)
+        self.toolbar = Toolbars.TableToolbar(parent)
         
         #self.Table = DataViews.Tree()
         #self.Table.create()

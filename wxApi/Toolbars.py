@@ -82,7 +82,7 @@ class LookoutSidebar(wx.Panel):
     def __init__(self, parent, content_lod=None):
         """ content_lod = 
             [
-                {'bitmap': wx.Bitmap, 'label': str, 'on_activate': func},
+                {'bitmap': wx.Bitmap, 'label': str, 'on_activate': func, 'id': 1},
             ]
         """
         
@@ -111,7 +111,8 @@ class LookoutSidebar(wx.Panel):
             else:
                 function = content_dic.get('on_activate')
                 if function <> None and button.GetToggle() == True:
-                    function(event)
+                    id = content_dic.get('id')
+                    function(event, id)
                 if button.GetToggle() == False:
                     button.SetToggle(True)
                     
