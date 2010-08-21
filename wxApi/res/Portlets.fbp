@@ -32,10 +32,10 @@
             <property name="hidden">0</property>
             <property name="id">wxID_ANY</property>
             <property name="maximum_size"></property>
-            <property name="minimum_size">200,260</property>
+            <property name="minimum_size">200,-1</property>
             <property name="name">Database</property>
             <property name="pos"></property>
-            <property name="size">200,260</property>
+            <property name="size">200,-1</property>
             <property name="subclass"></property>
             <property name="tooltip"></property>
             <property name="validator_data_type"></property>
@@ -91,7 +91,7 @@
                         <property name="name">sizer_content</property>
                         <property name="non_flexible_grow_mode">wxFLEX_GROWMODE_SPECIFIED</property>
                         <property name="permission">none</property>
-                        <property name="rows">2</property>
+                        <property name="rows">5</property>
                         <property name="vgap">0</property>
                         <object class="sizeritem" expanded="1">
                             <property name="border">5</property>

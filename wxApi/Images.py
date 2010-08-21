@@ -5,16 +5,25 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-from pprint import pprint
+#from pprint import pprint
 
 import wx
-import wx.lib.wxcairo
+#import wx.lib.wxcairo
 
 #import gobject
-import rsvg
-import cairo #, pango, pangocairo
+#import rsvg
+#import cairo #, pango, pangocairo
 
 
+class Bitmap(wx.Image):
+    def __init__(self, file_path=''):
+        wx.Image.__init__(self, file_path, wx.BITMAP_TYPE_ANY)
+        self.ConvertToBitmap()
+        
+        #(file_path, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+    
+    
+    
 class SVG(wx.Panel):
     def __init__(self, parent, image_path): 
         wx.Panel.__init__(self, parent, id = wx.ID_ANY) 

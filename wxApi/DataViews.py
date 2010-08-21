@@ -6,8 +6,9 @@
 #===============================================================================
 
 import os
-import wx #, gobject
-#import Glade, Entrys, Widgets
+import wx
+
+from wx.gizmos import TreeListCtrl
 
 from pprint import pprint
 from Transformations import *
@@ -15,87 +16,72 @@ from Transformations import *
 PATH = os.path.dirname(__file__)
 
 
-class Tree:
+class Tree(TreeListCtrl):
     ''' This is a framework for the famous wxTreeControl. It builds tables
         from JSON-Definitions to make database-tables easy to draw. '''
 
-    def __init__(self, widget=None, encoding='latin-1'):
-        self.widget = widget
-        self.encoding = encoding
+    def __init__(self, parent=None):
+        TreeListCtrl.__init__(self, parent=parent, 
+                                    style=(wx.TR_HIDE_ROOT |
+                                           wx.TR_FULL_ROW_HIGHLIGHT))    
+    
+        self.row_activate_function = None
+        self.cursor_changed_function = None
         
-        self.sort_column = None
-        self.store = None
-
 
     # Events ------------------------------------------------------------------
-    def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
-        model = widget.get_model()
-        model[row][col] = not model[row][col]
+#    def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
+#        pass
 
 
-    def on_row_activated(self, widget=None, path=None, column=None):
-        row_content = self.get_selected_row_content(widget)
-        self.row_activate_function(row_content)
+    def on_row_activated(self, event=None):
+        row_content = self.get_selected_row_content()
+        if self.row_activate_function <> None:
+            self.row_activate_function(row_content)
 
 
-    def on_cursor_changed(self, widget=None, path=None, column=None):
-        row_content = self.get_selected_row_content(widget)
-        self.cursor_changed_function(row_content)
-
-
+    def on_cursor_changed(self, event=None):
+        row_content = self.get_selected_row_content()
+        if self.cursor_changed_function <> None:
+            self.cursor_changed_function(row_content)
+    
+    
     # Actions -----------------------------------------------------------------
     def create(self):
-        self.widget = gtk.TreeView()
+        pass
 
 
     def set_headers_visible(self, visible=True):
-        self.widget.set_headers_visible(visible)
+        pass
 
 
     def get_content(self):
-        model = self.widget.get_model()
-        
-        content_lod = []
-        for row in model:
-            row_dic = {}
-            for column in enumerate(row):
-                column_number = column[0]
-                cell_content = column[1]
-                
-                definition_dic = search_lod(self.definition_lod, 'column_number', column_number)               
-                row_dic[definition_dic['column_name']] = cell_content
-            content_lod.append(row_dic)
+        ''' Returns the content as list_of_dictionarys, just like the content_lod
+            uses at populate. '''
+            
+        content_lod = None    
         return content_lod
 
 
-
-    def get_selected_row_content(self, widget=None):
+    def get_selected_row_content(self):
         ''' Returns a dictionary which holds the row content like this:
                {'id': 1, 'name': 'Heinz Becker'} '''
-        
-        if widget == None:
-            widget=self.widget
+               
+        item = self.GetSelection()
+        content_dict = {}
+        for definition_dict in self.definition_lod:
+            column_number = definition_dict.get('column_number')
+            column_name = definition_dict.get('column_name')
+            content = self.GetItemText(item, column_number)
+            content_dict[column_name] = content
             
-        selection = widget.get_selection()
-        selected_tuple = selection.get_selected()
-        model = widget.get_model()
-
-        row_content = {}
-        for item in xrange(len(model[selected_tuple[1]])):
-            definition_dic = search_lod(self.definition_lod, 'column_number', item)
-            cell_content = model.get_value(selected_tuple[1], item)
-            row_content[definition_dic['column_name']] = cell_content
-        return row_content
+        return content_dict
 
 
     def clear(self):
-        number = 1
-        while number > 0:
-            column = self.widget.get_column(0)
-            if column <> None:
-                number = self.widget.remove_column(column)
-            else:
-                number = 0
+        ''' Just clears the whole content down to an empty tabel. '''
+        
+        return
 
 
     def initialize(self, definition_lod=None, attributes_lod=None):
@@ -130,148 +116,50 @@ class Tree:
                               'is_nullable' = True}]'''
 
         self.definition_lod = definition_lod
-
+        
         treeview_column_list = []
         self.type_list = []
-
+        
         # Merge definition_lod and attributes_lod together.
         self.definition_lod = merge_two_lods(self.definition_lod, attributes_lod, 'column_name')
-
+        
         # First off, the columns has to be sorted in given order.
         try:
             self.definition_lod.sort(compare_by('column_number'))
         except:
             raise
-
+        
         # Before anything else happens on the treeview, clear it.
         self.clear()
-
+        
         # This makes table column-setup.
-        column_number = 0
         for column_dict in self.definition_lod:
-            if column_dict.has_key('data_type'):
-                # Use SQL data_types except image (this is a Tree-only data_type).
-                if column_dict['data_type'] == '#image':
-                    entry_type = gtk.gdk.Pixbuf
-                elif column_dict['data_type'] == '#combobox':
-                    entry_type = str
-                else:
-                    if column_dict.has_key('referenced_column_name'):
-                        entry_type = str
-                    else:
-                        entry_type = SQL_to_DataType(column_dict['data_type'], datetime_offset=True)
-            self.type_list += [entry_type]
-
-            # If no column_label entry is found in column_dict, name it like db_field_name.
-            if column_dict.has_key('column_label'):
-                column_label = unicode(str(column_dict['column_label']), self.encoding)
-            else:
-                # column_dict must have the key 'column_name' at least.
-                try:
-                    column_label = unicode(str(column_dict['column_name']), self.encoding)
-                except:
-                    raise
-                
-            # The next question is, of which type the column should be (Toggle, Pixbuf, Text, Combobox or Progressbar).
-            column_is_combobox = False
-            if column_dict.has_key('data_type'):
-                if column_dict['data_type'] == '#combobox':
-                    column_is_combobox = True
-                                
-            if entry_type <> bool and \
-               entry_type <> gtk.gdk.Pixbuf and \
-               column_is_combobox <> True:
-                cell_renderer_text = gtk.CellRendererText()
-                if column_dict.has_key('editable'):
-                    cell_renderer_text.set_property('editable', column_dict['editable'])
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_text, text=column_number))
-            if entry_type == bool:
-                cell_renderer_toggle = gtk.CellRendererToggle()
-                if column_dict.has_key('editable'):
-                    cell_renderer_toggle.set_property('activatable', column_dict['editable'])
-                    cell_renderer_toggle.connect('toggled', self.on_column_toggled, self.widget, column_number)
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_toggle))
-                treeview_column_list[column_number].add_attribute(cell_renderer_toggle, "active", column_number)
-            if entry_type == gtk.gdk.Pixbuf:
-                cell_renderer_pixbuf = gtk.CellRendererPixbuf()
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_pixbuf, pixbuf=column_number))
-            if column_is_combobox:
-                cell_renderer_combo = gtk.CellRendererCombo()
-                column_dict['#liststore'] = gtk.ListStore(int, str)
-                cell_renderer_combo.set_property('model', column_dict['#liststore'])
-                cell_renderer_combo.set_property('text-column', 1)
-                if column_dict.has_key('editable'):
-                    cell_renderer_combo.set_property('editable', column_dict['editable'])
-                treeview_column_list.append(gtk.TreeViewColumn(column_label, cell_renderer_combo, text=column_number))
-                
-            self.widget.append_column(treeview_column_list[column_number])
-
-            # Resizeable by default.
-            if column_dict.has_key('resizeable'):
-                treeview_column_list[column_number].set_resizable(column_dict['resizeable'])
-            else:
-                treeview_column_list[column_number].set_resizable(True)
-
-            # Expand by default.
-            if column_dict.has_key('expand'):
-                treeview_column_list[column_number].set_expand(column_dict['expand'])
-            else:
-                treeview_column_list[column_number].set_expand(True)
-
-            # Sortable by default.
-            if column_dict.has_key('sortable'):
-                if column_dict['sortable'] == True:
-                    treeview_column_list[column_number].set_sort_column_id(column_number)
-                    treeview_column_list[column_number].set_sort_indicator(column_number)
-            else:
-                treeview_column_list[column_number].set_sort_column_id(column_number)
-                treeview_column_list[column_number].set_sort_indicator(column_number)
-
-            # Not reorderable by default.
-            if column_dict.has_key('reorderable'):
-                treeview_column_list[column_number].set_reorderable(column_dict['reorderable'])
-
-            # Visible by gtk default, thus only effective if visible=False.
-            if column_dict.has_key('visible'):
-                treeview_column_list[column_number].set_visible(column_dict['visible'])
-
-            column_number += 1
-        return
+            column_label = column_dict.get('column_label')
+            if column_label == None:
+                column_label = column_dict.get('column_name')
+            
+            visible = column_dict.get('visible')
+            if visible <> False:
+                visible = True
+            self.AddColumn(text=column_label, shown=visible)
 
 
     def populate(self, content_lod=None):
         ''' content_lod = [{'id': 1}] '''
-
-        # If there is no content, bail out for good.
-        if content_lod == None:
-            return
+        
+        root = self.AddRoot(text='Root')
+        for content_dict in content_lod:
+            item = self.AppendItem(parent=root, text='')
             
-        self.content_lod = content_lod
-
-        # First, look up content_lod for child nodes.
-        self.has_child_node = False
-        for row_dict in self.content_lod:
-            if row_dict.has_key('#child'):
-                self.has_child_node = True
-
-        # Let store be a TreeStore if data has child node(s) or a ListStore if not.
-        if self.has_child_node:
-            self.store = gtk.TreeStore(*self.type_list)
-            self.widget.set_enable_tree_lines(True)
-        else:
-            self.store = gtk.ListStore(*self.type_list)
-
-        # Build and populate TreeView or ListStore.
-        try:
-            for row_dict in self.content_lod:
-                self.build_store(row_parent=None, row_dict=row_dict)
-        except:
-            raise
-
-        self.widget.set_model(self.store)
-        if self.sort_column <> None:
-            self.sort_liststore()
-        return
+            for definition_dict in self.definition_lod: 
+                column_number = definition_dict.get('column_number')
+                column_name = definition_dict.get('column_name')
+                content = content_dict.get(column_name)
+                
+                if content == None:
+                    content = ''
+                
+                self.SetItemText(item, str(content), column_number)
 
 
     def build_store(self, row_parent, row_dict):
@@ -386,20 +274,20 @@ class Tree:
             column_label = column_list[column_number]
 
             definition_lod.append({'column_name': column_name,
-                                         'data_type': data_type,
-                                         'column_label': column_label,
-                                         'column_number': column_number})
+                                   'data_type': data_type,
+                                   'column_label': column_label,
+                                   'column_number': column_number})
         return definition_lod
 
 
     def set_row_activate_function(self, row_activate_function):
         self.row_activate_function = row_activate_function
-        self.widget.connect('row_activated', self.on_row_activated)
+        self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_activated, id=wx.ID_ANY)
 
 
     def set_cursor_changed_function(self, cursor_changed_function):
         self.cursor_changed_function = cursor_changed_function
-        self.widget.connect('cursor_changed', self.on_cursor_changed)
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_cursor_changed,   id=wx.ID_ANY)
 
 
     def set_sort_column(self, column_name='', sort_ascending=True):
@@ -651,16 +539,16 @@ class Form:
         return self.content_dict
 
 
-    def validate_widget(self, widget_definition_dict):
-        #TODO: Shut that fuck up!
-        validation_function = widget_definition_dict['validation_function']
-        widget_name = widget_definition_dict['widget_name']
-        widget_content = self.content_dict[widget_name]
-        widget_validity = validation_function(widget_content)
+#    def validate_widget(self, widget_definition_dict):
+    
+#        validation_function = widget_definition_dict['validation_function']
+#        widget_name = widget_definition_dict['widget_name']
+#        widget_content = self.content_dict[widget_name]
+#        widget_validity = validation_function(widget_content)
 
-        if widget_validity == True:
-            pass
-        return
+#        if widget_validity == True:
+#            pass
+#        return
 
 
 

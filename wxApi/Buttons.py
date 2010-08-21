@@ -2,7 +2,6 @@ import wx
 
 from wx.lib.buttons import GenBitmapToggleButton, ThemedGenBitmapTextToggleButton
 
-import wx.lib.platebtn as platebtn
 
 class BitmapToggleButton(GenBitmapToggleButton):
     def __init__(self, parent, label_bitmap=None, selected_bitmap=None, toggled=False):
@@ -21,6 +20,7 @@ class BitmapToggleButton(GenBitmapToggleButton):
         
         self.SetToggle(toggled)
         self.SetInitialSize()
+
 
 
 class BitmapTextToggleButton(ThemedGenBitmapTextToggleButton):

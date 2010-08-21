@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 
 #===============================================================================
-# BaseUI.Commons.Windows module.
+# BaseUI.misc.Windows module.
 # published under BSD license by Mark Muzenhardt.
 #===============================================================================
 

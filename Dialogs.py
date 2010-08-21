@@ -14,8 +14,6 @@ from gtkApi.Dialogs import BottomBox
 
 class StartDialog:
     def __init__(self):
-        #self.database_portlet = DatabaseLogin()
-        #self.user_portlet = UserLogin()
         self.window = gtk.Window()
         self.window.set_position(gtk.WIN_POS_CENTER)
         
@@ -23,7 +21,6 @@ class StartDialog:
         self.window.set_icon(icon_pixbuf)
         
         self.database = None
-       # self.start_image = start_image
         
         
     def on_button_preferences_clicked(self, widget=None, data=None):
@@ -37,7 +34,6 @@ class StartDialog:
 
 
     def on_button_ok_clicked(self, widget=None, data=None):
-        #self.database_dialog.save_settings_to_ini()
         pass
         
         
@@ -70,9 +66,7 @@ class StartDialog:
         self.database_dialog = Portlets.DatabaseLogin(ini_filename, parent=self.window, autosave=True)
         self.database_portlet = self.database_dialog.portlet
         self.database_dialog.set_connect_function(self.on_connect)
-        #self.database_dialog.set_disconnect_function(self.on_disconnect)
-        
-        print 'database:', self.database
+        self.database_dialog.set_disconnect_function(self.on_disconnect)
         
         self.togglebutton_preferences = Buttons.Toggle().create(label_text='_Einstellungen', width=96)
         self.button_cancel      = Buttons.Simple().create(label_text='_Abbruch', width=96)

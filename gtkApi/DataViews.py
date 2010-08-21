@@ -25,6 +25,9 @@ class Tree:
         
         self.sort_column = None
         self.store = None
+        
+        self.row_activate_function = None
+        self.cursor_changed_function = None
 
 
     # Events ------------------------------------------------------------------
@@ -35,12 +38,14 @@ class Tree:
 
     def on_row_activated(self, widget=None, path=None, column=None):
         row_content = self.get_selected_row_content(widget)
-        self.row_activate_function(row_content)
+        if self.row_activate_function <> None:
+            self.row_activate_function(row_content)
 
 
     def on_cursor_changed(self, widget=None, path=None, column=None):
         row_content = self.get_selected_row_content(widget)
-        self.cursor_changed_function(row_content)
+        if self.cursor_changed_function <> None:
+            self.cursor_changed_function(row_content)
 
 
     # Actions -----------------------------------------------------------------
@@ -293,7 +298,7 @@ class Tree:
                     if column_dict['data_type'] == "date":
                         column_content = date_to_str(column_content)
                     if column_dict['data_type'].startswith("int"):
-                        #TODO: Remove that 'NULL' crap after getting it into Transformations!
+                        # TODO: Remove that 'NULL' crap after getting it into Transformations!
                         if column_content not in [None, 'NULL']:
                             column_content = int(column_content)
                         else:
@@ -651,16 +656,16 @@ class Form:
         return self.content_dict
 
 
-    def validate_widget(self, widget_definition_dict):
-        #TODO: Shut that fuck up!
-        validation_function = widget_definition_dict['validation_function']
-        widget_name = widget_definition_dict['widget_name']
-        widget_content = self.content_dict[widget_name]
-        widget_validity = validation_function(widget_content)
+    # def validate_widget(self, widget_definition_dict):
 
-        if widget_validity == True:
-            pass
-        return
+    #     validation_function = widget_definition_dict['validation_function']
+    #     widget_name = widget_definition_dict['widget_name']
+    #     widget_content = self.content_dict[widget_name]
+    #     widget_validity = validation_function(widget_content)
+
+    #     if widget_validity == True:
+    #         pass
+    #     return
 
 
 
