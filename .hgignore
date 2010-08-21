@@ -4,3 +4,4 @@ glob:build/
 glob:*.pyc
 glob:*.orig
 glob:*.bak
+glob:misc/*.png
