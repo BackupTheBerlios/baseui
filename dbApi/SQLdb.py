@@ -12,38 +12,38 @@ from copy import copy
 
 def get_engines():
     ''' Returns a list of available database-connectors. '''
-
+    
     engine_list = []
     try:
         import pgdb
         engine_list.append('PostgreSQL')
     except:
         pass
-
+    
     try:
         import MySQLdb
         engine_list.append('MySQL')
     except:
         pass
-
+    
     try:
         import pymssql
         engine_list.append('msSQL')
     except:
         pass
-
+    
     try:
         import cx_Oracle
         engine_list.append('Oracle')
     except:
         pass
-
+    
     try:
         import sqlite3
         engine_list.append('SQLite')
     except:
         pass
-
+    
     try:
         import pyodbc
         engine_list.append('ODBC')
@@ -548,7 +548,7 @@ CREATE TABLE """ + self.name + """
         
         if len(content_lod) > 0:
             column_list = content_lod[0].keys()
-
+            
         for content in content_lod:
             result = self.select(column_list=column_list, where = '%s = %i' % (pk_column, content[pk_column]))
             print "checking:", content 
@@ -605,6 +605,8 @@ CREATE TABLE """ + self.name + """
                 referenced_column_name = foreign column_name which holds the primary key. '''
 
         # TODO: Foreign keys are not implemented. DoIt.
+        
+        print "Foreign keys are not implemented now!"
         fk_columns_list = []
         return fk_columns_list
 
@@ -683,8 +685,8 @@ CREATE TABLE """ + self.name + """
             
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod)
         return content_lod
-
-
+    
+    
     # Data manipulation -------------------------------------------------------
     def insert(self, primary_key_column='', content=None):
         ''' Inserts content in this table.
@@ -700,13 +702,13 @@ CREATE TABLE """ + self.name + """
             content_lod = [content]
         else:
             content_lod = content
-
+            
         # Iterate the rows and insert it in the table.
         for content_dict in content_lod:
             if primary_key_column <> '':
                 actual_pk = self.get_last_primary_key(primary_key_column = primary_key_column) + 1
                 content_dict[primary_key_column] = actual_pk
-
+                
             sql_command = 'INSERT INTO %s (\n' % self.name
             column_list = content_dict.keys()
             column_names_list = ''
@@ -741,7 +743,7 @@ CREATE TABLE """ + self.name + """
                                      column-names of the table. '''
 
         sql_command = 'UPDATE %s SET \n' % self.name
-
+        
         if column_list == None:
             column_list = content_dict.keys()
         if column_list <> []:

@@ -179,7 +179,7 @@ def Oracle_DataTypes(self, data_type):
 class FieldTransformer:
     ''' This simply puts Data from one key to another.
         definition = \
-            {source_column_name: 'Prename', target_column_name: 'Vorname'} '''
+            {source_column_name: 'firstname', target_column_name: 'Vorname'} '''
             
     def __init__(self):
         pass
