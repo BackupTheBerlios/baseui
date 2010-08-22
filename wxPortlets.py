@@ -11,6 +11,7 @@ import wx
 from misc import FileSystem, HelpFile, FileTransfer
 from wxApi import Portlets, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
+from wxApi.res import IconSet16
 from dbApi import SQLdb, Tools as dbTools
 
 
@@ -200,7 +201,7 @@ class Table:
         self.filter_lod = []
         
         self.portlet = None
-        self.toolbar = Toolbars.TableToolbar(parent)
+        self.toolbar = None #Toolbars.TableToolbar(parent)
         
         #self.Table = DataViews.Tree()
         #self.Table.create()
@@ -209,7 +210,7 @@ class Table:
 
         #self.create_toolbar(dataset, report, search, filter, help)
         self.form = form_object
-        self.form.set_update_function(self.update)
+        #self.form.set_update_function(self.update)
         
         #self.scrolledwindow = gtk.ScrolledWindow()
         #self.scrolledwindow.set_policy(hscrollbar_policy=gtk.POLICY_AUTOMATIC, 
@@ -377,6 +378,40 @@ class Table:
         self.populate()
 
 
+    def populate_toolbar(self, toolbar):
+        toolbar.SetToolBitmapSize(wx.Size(22, 22))
+        
+        toolbar.AddLabelTool(id=-1, label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
+        toolbar.AddLabelTool(id=-1, label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
+        toolbar.AddLabelTool(id=-1, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
+        
+        toolbar.AddSeparator()
+        toolbar.AddLabelTool(id=-1, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
+        
+        #if filter == True:
+        toolbar.AddSeparator()
+        combobox_filter = wx.ComboBox(
+            parent=toolbar, id=-1, choices=["", "This", "is a", "wx.ComboBox"],
+            size=(150,-1), style=wx.CB_DROPDOWN)
+        toolbar.AddControl(combobox_filter)
+        
+        #if search == True:
+        toolbar.AddSeparator() 
+        entry_search = wx.SearchCtrl(parent=toolbar, id=-1)
+        toolbar.AddControl(entry_search) 
+            
+        #if preferences == True or help == True:
+        toolbar.AddSeparator()
+        
+        #if preferences == True:
+        toolbar.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+        
+        #if help == True:
+        toolbar.AddLabelTool(id=-1, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
+        
+        toolbar.Realize()
+        
+        
     def add_filter(self, filter_name=None, filter_function=None):
         self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
 
