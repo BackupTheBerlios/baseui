@@ -58,7 +58,10 @@ class TextView:
             
 
     def populate(self, text):
-        self.text_buffer.set_text(unicode(text, self.encoding))
+        if type(text) <> unicode:
+            text = unicode(text, self.encoding)
+            
+        self.text_buffer.set_text(text)
         if self.font <> None:
             self.set_font(self.font)
     

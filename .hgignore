@@ -5,3 +5,4 @@ glob:*.pyc
 glob:*.orig
 glob:*.bak
 glob:*.db
+glob:misc/*.png
