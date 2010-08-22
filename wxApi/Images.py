@@ -5,14 +5,12 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-#from pprint import pprint
-
 import wx
 #import wx.lib.wxcairo
 
 #import gobject
 #import rsvg
-#import cairo #, pango, pangocairo
+#import cairo, pango, pangocairo
 
 
 class Bitmap(wx.Image):
@@ -49,11 +47,13 @@ class SVG(wx.Panel):
         self.svg.render_cairo(self.ctx)
         
         
-if __name__ == '__main__':
-    app = wx.PySimpleApp()
-    frame = wx.Frame(None, id=wx.ID_ANY)
-    svg = SVG(frame, 'res/Auge.svg')
-    frame.Show()
-    app.MainLoop()
+        
+#if __name__ == '__main__':
+#    app = wx.PySimpleApp()
+#    frame = wx.Frame(None, id=wx.ID_ANY)
+#    image_path = raw_input('SVG Pfad > ')
+#    svg = SVG(frame, image_path)
+#    frame.Show()
+#    app.MainLoop()
     
     

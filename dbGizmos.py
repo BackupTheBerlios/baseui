@@ -9,18 +9,32 @@ from misc.FileSystem import iniFile
 from dbApi import SQLdb
 
 
-class Login:
-    def __init__(self):
+class iniFile:
+    def __init__(self, ini_path='', standard_dod):
+        ''' {'database': {'driver':    'odbc'},
+             'user':     {'firstname': 'parker',
+                          'lastname':  'lewis}} '''
+        
+        self.ini_path = ini_path
+        
+        ini_file = open(self.ini_path, 'r')
+        self.content_dod = None
+        
+        
+    def save(self, settings_dod):
         pass
         
         
-    def load_settings_from_ini(self, ini_path=''):
-        pass
+        
+    #def load(self):
+    #    pass
         
         
-    def save_settings_to_ini(self, ini_path=''):
-        pass
-        
-        
-        
-        
+class doc:        
+    '''
+    
+    +-- screen
+      +-- containers
+        +-- widgets
+  
+    '''

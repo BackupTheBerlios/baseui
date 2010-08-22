@@ -83,11 +83,19 @@ class Aircraft:
                     },
             },
         }
+        
+        
     def __init__(self):
-        pass
+        self.minimum_takeoff_weight = ''
+        self.maximum_takeoff_weight = ''
+        self.country = ''
+        self.registration = ''
         
     
     def decode_registration(self, country, registration):
+        ''' country = DE, FR, etc. as string,
+            registration = EOMO, ENFR, KOEL, etc. as a string '''
+            
         pass
         
         
