@@ -40,6 +40,7 @@ def get_nsi(**kwargs):
 
 ;------------------------------------------------------------------------------
 Name "%(APP_NAME)s"
+; Icon "../res/%(APP_ICON)s"
 
 ; The file to write
 OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
@@ -48,8 +49,10 @@ OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
 InstallDir "$PROGRAMFILES\%(APP_NAME)s"
 
 ; Request application privileges for Windows Vista
-RequestExecutionLevel user
+RequestExecutionLevel highest
 
+; This makes the Installer-Icon.
+!define MUI_ICON "../res/%(APP_ICON)s"
 
 ; Pages -----------------------------------------------------------------------
   !insertmacro MUI_PAGE_LICENSE "..\doc\source\license.rst"
