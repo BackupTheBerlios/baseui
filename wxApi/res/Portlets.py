@@ -129,3 +129,49 @@ class Login ( wx.Panel ):
 		pass
 	
 
+###########################################################################
+## Class Webserver
+###########################################################################
+
+class Webserver ( wx.Panel ):
+	
+	def __init__( self, parent ):
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.TAB_TRAVERSAL )
+		
+		frame_webserver = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Webserver" ), wx.VERTICAL )
+		
+		sizer_content = wx.FlexGridSizer( 5, 2, 0, 0 )
+		sizer_content.AddGrowableCol( 1 )
+		sizer_content.SetFlexibleDirection( wx.BOTH )
+		sizer_content.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.label_host = wx.StaticText( self, wx.ID_ANY, u"Host", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.label_host.Wrap( -1 )
+		sizer_content.Add( self.label_host, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.entry_host = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		sizer_content.Add( self.entry_host, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		self.label_port = wx.StaticText( self, wx.ID_ANY, u"Port", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.label_port.Wrap( -1 )
+		sizer_content.Add( self.label_port, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.entry_port = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_PASSWORD )
+		sizer_content.Add( self.entry_port, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		
+		sizer_content.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+		
+		self.sizer_button = wx.BoxSizer( wx.VERTICAL )
+		
+		sizer_content.Add( self.sizer_button, 1, wx.EXPAND, 5 )
+		
+		frame_webserver.Add( sizer_content, 1, wx.EXPAND, 5 )
+		
+		self.SetSizer( frame_webserver )
+		self.Layout()
+	
+	def __del__( self ):
+		pass
+	
+
