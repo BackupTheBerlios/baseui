@@ -25,6 +25,7 @@ class Tree(TreeListCtrl):
                                     style=(wx.TR_HIDE_ROOT |
                                            wx.TR_FULL_ROW_HIGHLIGHT))    
     
+        self.Hide()
         self.row_activate_function = None
         self.cursor_changed_function = None
         

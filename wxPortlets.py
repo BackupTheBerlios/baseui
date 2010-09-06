@@ -201,7 +201,7 @@ class Table:
         self.filter_lod = []
         
         self.portlet = None
-        self.toolbar = None #Toolbars.TableToolbar(parent)
+        #self.toolbar = None #Toolbars.TableToolbar(parent)
         
         #self.Table = DataViews.Tree()
         #self.Table.create()
