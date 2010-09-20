@@ -38,6 +38,16 @@ class WebserverToolbar(wx.ToolBar):
         
                             
 class TableToolbar(wx.ToolBar):
+    ID_NEW = 101
+    ID_EDIT = 102
+    ID_DELETE = 103
+    
+    ID_PRINT = 201
+    
+    ID_PREFERENCES = 401
+    ID_HELP = 402
+    
+    
     def __init__(self, parent, filter=True, search=True, preferences=True, help=True):
         wx.ToolBar.__init__(self, parent, id=-1, pos=wx.DefaultPosition, 
                             size=wx.DefaultSize, 
@@ -45,12 +55,12 @@ class TableToolbar(wx.ToolBar):
         
         self.SetToolBitmapSize(wx.Size(22, 22))
         
-        self.AddLabelTool(id=-1, label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
-        self.AddLabelTool(id=-1, label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
-        self.AddLabelTool(id=-1, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
+        self.AddLabelTool(self.ID_NEW,    label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
+        self.AddLabelTool(self.ID_EDIT,   label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
+        self.AddLabelTool(self.ID_DELETE, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
         
         self.AddSeparator()
-        self.AddLabelTool(id=-1, label="Drucken", bitmap=IconSet16.getprint_16Bitmap())
+        self.AddLabelTool(self.ID_PRINT, label="Drucken", bitmap=IconSet16.getprint_16Bitmap())
         
         if filter == True:
             self.AddSeparator()
@@ -68,10 +78,10 @@ class TableToolbar(wx.ToolBar):
             self.AddSeparator()
         
         if preferences == True:
-            self.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+            self.AddLabelTool(self.ID_PREFERENCES, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
         
         if help == True:
-            self.AddLabelTool(id=-1, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
+            self.AddLabelTool(self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
         
         self.Realize()
         
