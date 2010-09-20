@@ -229,7 +229,8 @@ class Table:
         #    vbox.pack_start(child=self.scrolledwindow, expand=True,  fill=True, padding=0)
         #    self.portlet = vbox
         #self.portlet.show()
-        
+        self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
+        self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         #self.DialogBox = Dialogs.Simple(parent=None)
         #self.HTMLhelp = HelpFile.HTML()
     
@@ -333,16 +334,12 @@ class Table:
         
         self.definition_lod = definition_lod
         self.attributes_lod = self.db_table.attributes
+        
+        print 'Initialize', db_table_object
             
         result = WxTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
         if result <> None: 
             self.primary_key_column = result['column_name']
-
-        #self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
-        
-        # Just populate immideately if this is not a child-table of a form!
-        #if self.parent_form == None:
-            #self.populate()
 
 
     def populate(self, content_lod=None):        
@@ -421,6 +418,13 @@ class Table:
         self.Table = DataViews.Tree(self.portlet_parent)
         sizer = self.portlet_parent.GetSizer()
         sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+
+        self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
+        
+        # Just populate immideately if this is not a child-table of a form!
+        if self.parent_form == None:
+            self.populate()
+            
         self.Table.Show()
         sizer.Layout()
         return self.Table
