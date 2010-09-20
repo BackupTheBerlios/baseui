@@ -253,18 +253,15 @@ class Table:
 
 
     def on_cursor_changed(self, content_dic=None):
-        self.toolbar_parent.EnableTool(self.toolbar_parent.ID_EDIT, True)
-        self.toolbar_parent.EnableTool(self.toolbar_parent.ID_DELETE, True)
+        self.toolbar_parent.EnableTool(self.ID_EDIT, True)
+        self.toolbar_parent.EnableTool(self.ID_DELETE, True)
         
         self.primary_key = content_dic[self.primary_key_column]
         print self.primary_key
         
 
     # Actions -----------------------------------------------------------------
-    def new_dataset(self, event=None):
-        self.toolbar_parent.EnableTool(self.toolbar_parent.ID_NEW, False)
-        self.toolbar_parent.EnableTool(self.toolbar_parent.ID_EDIT, False)
-        
+    def new_dataset(self, event=None):       
         try:
             self.form.show(primary_key=None)
         except Exception, inst:
@@ -280,11 +277,9 @@ class Table:
         response = self.form.delete_dataset()
 
         if response == True:
-            self.toolbar_parent.EnableTool(self.toolbar_parent.ID_DELETE, False)
-            self.toolbar_parent.EnableTool(self.toolbar_parent.ID_EDIT, False)
+            self.toolbar_parent.EnableTool(self.ID_DELETE, False)
+            self.toolbar_parent.EnableTool(self.ID_EDIT, False)
             
-            #self.button_delete.set_sensitive(0)
-            #self.button_edit.set_sensitive(0)
             #self.update()
 
 
@@ -369,7 +364,7 @@ class Table:
             if definition_dic.has_key('populate_function'):
                 definition_dic['populate_function'](definition_dic)
                 
-
+                
     def update(self):
         self.button_new.set_sensitive(1)
         self.button_delete.set_sensitive(0)
@@ -381,18 +376,18 @@ class Table:
     def populate_toolbar(self):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
-        self.toolbar_parent.AddLabelTool(self.ID_NEW,    label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.new_dataset, id=self.ID_NEW)
 
-        self.toolbar_parent.AddLabelTool(self.ID_EDIT,   label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit_dataset, id=self.ID_EDIT)
 
-        self.toolbar_parent.AddLabelTool(self.ID_DELETE, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",   IconSet16.getdelete_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete_dataset, id=self.ID_DELETE)
 
         self.toolbar_parent.AddSeparator()
         
-        self.toolbar_parent.AddLabelTool(self.ID_PRINT, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",       IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.print_dataset, id=self.ID_PRINT)
 
         #if filter == True:
@@ -406,12 +401,12 @@ class Table:
         self.toolbar_parent.AddSeparator() 
         entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
         self.toolbar_parent.AddControl(entry_search) 
-            
+        
         #if preferences == True or help == True:
         self.toolbar_parent.AddSeparator()
         
         #if preferences == True:
-        self.toolbar_parent.AddLabelTool(self.ID_PREFERENCES, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_preferences, id=self.ID_PREFERENCES)
         
         if self.help_file <> None:
@@ -419,7 +414,7 @@ class Table:
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_help, id=self.ID_HELP)
         
         self.toolbar_parent.Realize()
-        
+    
     
     def populate_portlet(self):
         self.Table = DataViews.Tree(self.portlet_parent)
