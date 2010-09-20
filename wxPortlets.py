@@ -191,25 +191,30 @@ password = %(password)s
         
         
 class Table:
-    def __init__(self, parent,
+    def __init__(self, db_object, toolbar_parent, portlet_parent, \
+                 
                        form_object=None, parent_form=None, \
                        dataset=True, report=False, search=False, filter=True, help=True, \
                        db_table=None, help_file=None, separate_toolbar=True):
+        
+        self.db_object = db_object
+        self.portlet_parent = portlet_parent
+        self.toolbar_parent = toolbar_parent
+        
         self.parent_form = parent_form
         
-        self.help_file = help_file
-        self.filter_lod = []
+        #self.help_file = help_file
+        #self.filter_lod = []
         
-        self.portlet = None
         #self.toolbar = None #Toolbars.TableToolbar(parent)
+        #print '........', portlet_parent
         
-        #self.Table = DataViews.Tree()
         #self.Table.create()
         #self.Table.set_row_activate_function(self.on_row_activate)
         #self.Table.set_cursor_changed_function(self.on_cursor_changed)
 
         #self.create_toolbar(dataset, report, search, filter, help)
-        self.form = form_object
+        #self.form = form_object
         #self.form.set_update_function(self.update)
         
         #self.scrolledwindow = gtk.ScrolledWindow()
@@ -226,7 +231,7 @@ class Table:
         #self.portlet.show()
         
         #self.DialogBox = Dialogs.Simple(parent=None)
-        self.HTMLhelp = HelpFile.HTML()
+        #self.HTMLhelp = HelpFile.HTML()
     
     
     # Callbacks ---------------------------------------------------------------
@@ -378,38 +383,47 @@ class Table:
         self.populate()
 
 
-    def populate_toolbar(self, toolbar):
-        toolbar.SetToolBitmapSize(wx.Size(22, 22))
+    def populate_toolbar(self):
+        self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
-        toolbar.AddLabelTool(id=-1, label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
-        toolbar.AddLabelTool(id=-1, label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
-        toolbar.AddLabelTool(id=-1, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
+        self.toolbar_parent.AddLabelTool(id=-1, label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
+        self.toolbar_parent.AddLabelTool(id=-1, label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
+        self.toolbar_parent.AddLabelTool(id=-1, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
         
-        toolbar.AddSeparator()
-        toolbar.AddLabelTool(id=-1, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
+        self.toolbar_parent.AddSeparator()
+        self.toolbar_parent.AddLabelTool(id=-1, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
         
         #if filter == True:
-        toolbar.AddSeparator()
+        self.toolbar_parent.AddSeparator()
         combobox_filter = wx.ComboBox(
-            parent=toolbar, id=-1, choices=["", "This", "is a", "wx.ComboBox"],
+            parent=self.toolbar_parent, id=-1, choices=["", "This", "is a", "wx.ComboBox"],
             size=(150,-1), style=wx.CB_DROPDOWN)
-        toolbar.AddControl(combobox_filter)
+        self.toolbar_parent.AddControl(combobox_filter)
         
         #if search == True:
-        toolbar.AddSeparator() 
-        entry_search = wx.SearchCtrl(parent=toolbar, id=-1)
-        toolbar.AddControl(entry_search) 
+        self.toolbar_parent.AddSeparator() 
+        entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
+        self.toolbar_parent.AddControl(entry_search) 
             
         #if preferences == True or help == True:
-        toolbar.AddSeparator()
+        self.toolbar_parent.AddSeparator()
         
         #if preferences == True:
-        toolbar.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+        self.toolbar_parent.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
         
         #if help == True:
-        toolbar.AddLabelTool(id=-1, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
+        self.toolbar_parent.AddLabelTool(id=-1, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
         
-        toolbar.Realize()
+        self.toolbar_parent.Realize()
+        
+    
+    def populate_portlet(self):
+        self.Table = DataViews.Tree(self.portlet_parent)
+        sizer = self.portlet_parent.GetSizer()
+        sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+        self.Table.Show()
+        sizer.Layout()
+        return self.Table
         
         
     def add_filter(self, filter_name=None, filter_function=None):
