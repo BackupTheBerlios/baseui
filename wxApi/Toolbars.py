@@ -137,8 +137,8 @@ class LookoutSidebar(wx.Panel):
             else:
                 function = content_dic.get('on_activate')
                 if function <> None and button.GetToggle() == True:
-                    id = content_dic.get('id')
-                    function(event, id)
+                    name = content_dic.get('name')
+                    function(event, name)
                 if button.GetToggle() == False:
                     button.SetToggle(True)
                     

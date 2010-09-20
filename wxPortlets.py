@@ -191,7 +191,7 @@ password = %(password)s
         
         
 class Table:
-    def __init__(self, db_object, toolbar_parent, portlet_parent, \
+    def __init__(self, db_object, toolbar_parent=None, portlet_parent=None, \
                  
                        form_object=None, parent_form=None, \
                        dataset=True, report=False, search=False, filter=True, help=True, \
