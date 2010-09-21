@@ -138,7 +138,9 @@ class Tree(TreeListCtrl):
             column_label = column_dict.get('column_label')
             if column_label == None:
                 column_label = column_dict.get('column_name')
-            
+            else:
+                column_label = unicode(column_label, 'cp1252')
+                
             visible = column_dict.get('visible')
             if visible <> False:
                 visible = True
