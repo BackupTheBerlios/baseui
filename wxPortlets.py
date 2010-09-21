@@ -8,6 +8,7 @@
 import sys
 import wx
 
+from pprint import pprint
 from misc import FileSystem, HelpFile, FileTransfer
 from wxApi import Portlets, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
@@ -195,25 +196,41 @@ password = %(password)s
         
         
 class Table:
-    def __init__(self, parent,
+    ID_NEW = 101
+    ID_EDIT = 102
+    ID_DELETE = 103
+    
+    ID_PRINT = 201
+    
+    ID_PREFERENCES = 401
+    ID_HELP = 402
+    
+    
+    def __init__(self, db_object, toolbar_parent=None, portlet_parent=None, \
+                 
                        form_object=None, parent_form=None, \
-                       dataset=True, report=False, search=False, filter=True, help=True, \
+                       
+                       dataset=True, report=False, search=False, filter=True, \
                        db_table=None, help_file=None, separate_toolbar=True):
+        
+        self.db_object = db_object
+        self.portlet_parent = portlet_parent
+        self.toolbar_parent = toolbar_parent
+        
+        self.form_object = form_object
         self.parent_form = parent_form
         
         self.help_file = help_file
-        self.filter_lod = []
+        #self.filter_lod = []
         
-        self.portlet = None
         #self.toolbar = None #Toolbars.TableToolbar(parent)
+        #print '........', portlet_parent
         
-        #self.Table = DataViews.Tree()
         #self.Table.create()
-        #self.Table.set_row_activate_function(self.on_row_activate)
-        #self.Table.set_cursor_changed_function(self.on_cursor_changed)
+
 
         #self.create_toolbar(dataset, report, search, filter, help)
-        self.form = form_object
+        #self.form = form_object
         #self.form.set_update_function(self.update)
         
         #self.scrolledwindow = gtk.ScrolledWindow()
@@ -229,75 +246,59 @@ class Table:
         #    self.portlet = vbox
         #self.portlet.show()
         
-        #self.DialogBox = Dialogs.Simple(parent=None)
-        self.HTMLhelp = HelpFile.HTML()
-    
+        self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
+        self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
+        
     
     # Callbacks ---------------------------------------------------------------
-    def on_button_new_clicked(self, widget=None, data=None):
-        self.new_dataset()
-
-
-    def on_button_edit_clicked(self, widget=None, data=None):
-        self.edit_dataset()
-
-
-    def on_button_delete_clicked(self, widget=None, data=None):
-        self.delete_dataset()
-
-
-    def on_button_print_clicked(self, widget=None, data=None):
-        self.print_dataset()
-
-
-    def on_button_search_clicked(self, widget=None, data=None):
-        self.search_dataset()
-
-
-    def on_button_help_clicked(self, widget=None, data=None):
-        self.show_help()
-
-
     def on_row_activate(self, content_dic=None):
         self.primary_key = content_dic[self.primary_key_column]
         self.edit_dataset()
 
 
     def on_cursor_changed(self, content_dic=None):
-        self.button_edit.set_sensitive(1)
-        self.button_delete.set_sensitive(1)
+        self.toolbar_parent.EnableTool(self.ID_EDIT, True)
+        self.toolbar_parent.EnableTool(self.ID_DELETE, True)
+        
         self.primary_key = content_dic[self.primary_key_column]
+        print self.primary_key
         
 
     # Actions -----------------------------------------------------------------
-    def new_dataset(self):
-        self.button_new.set_sensitive(0)
-        self.button_edit.set_sensitive(0)
-        self.form.show(primary_key=None)
+    def new_dataset(self, event=None):       
+        try:
+            self.form.show(primary_key=None)
+        except Exception, inst:
+            self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
-    def edit_dataset(self):
+    def edit_dataset(self, event=None):
         self.form.show(self.primary_key)
 
 
-    def delete_dataset(self):
+    def delete_dataset(self, event=None):
         self.form.primary_key = self.primary_key
         response = self.form.delete_dataset()
 
         if response == True:
-            self.button_delete.set_sensitive(0)
-            self.button_edit.set_sensitive(0)
-            self.update()
+            self.toolbar_parent.EnableTool(self.ID_DELETE, False)
+            self.toolbar_parent.EnableTool(self.ID_EDIT, False)
+            
+            #self.update()
 
 
-    def print_dataset(self):
+    def print_dataset(self, event=None):
         print "print"
 
 
-    def search_dataset(self):
+    def search_dataset(self, event=None):
         print "search"
 
 
+    def show_preferences(self, event=None):
+        print "preferences"
+        
+        
     def show_help(self):
         if self.help_file <> None:
             self.HTMLhelp.show(self.help_file)
@@ -332,16 +333,10 @@ class Table:
         
         self.definition_lod = definition_lod
         self.attributes_lod = self.db_table.attributes
-            
+        
         result = WxTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
         if result <> None: 
             self.primary_key_column = result['column_name']
-
-        #self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
-        
-        # Just populate immideately if this is not a child-table of a form!
-        #if self.parent_form == None:
-            #self.populate()
 
 
     def populate(self, content_lod=None):        
@@ -372,8 +367,8 @@ class Table:
         for definition_dic in self.definition_lod:
             if definition_dic.has_key('populate_function'):
                 definition_dic['populate_function'](definition_dic)
-                    
-
+                
+                
     def update(self):
         self.button_new.set_sensitive(1)
         self.button_delete.set_sensitive(0)
@@ -382,38 +377,65 @@ class Table:
         self.populate()
 
 
-    def populate_toolbar(self, toolbar):
-        toolbar.SetToolBitmapSize(wx.Size(22, 22))
+    def populate_toolbar(self):
+        self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
-        toolbar.AddLabelTool(id=-1, label="Neu",        bitmap=IconSet16.getfilenew_16Bitmap())
-        toolbar.AddLabelTool(id=-1, label="Bearbeiten", bitmap=IconSet16.getedit_16Bitmap())
-        toolbar.AddLabelTool(id=-1, label=u"Löschen",   bitmap=IconSet16.getdelete_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.new_dataset, id=self.ID_NEW)
+
+        self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit_dataset, id=self.ID_EDIT)
+
+        self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",   IconSet16.getdelete_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete_dataset, id=self.ID_DELETE)
+
+        self.toolbar_parent.AddSeparator()
         
-        toolbar.AddSeparator()
-        toolbar.AddLabelTool(id=-1, label="Drucken",       bitmap=IconSet16.getprint_16Bitmap())
-        
+        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",       IconSet16.getprint_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.print_dataset, id=self.ID_PRINT)
+
         #if filter == True:
-        toolbar.AddSeparator()
+        self.toolbar_parent.AddSeparator()
         combobox_filter = wx.ComboBox(
-            parent=toolbar, id=-1, choices=["", "This", "is a", "wx.ComboBox"],
+            parent=self.toolbar_parent, id=-1, choices=["", "This", "is a", "wx.ComboBox"],
             size=(150,-1), style=wx.CB_DROPDOWN)
-        toolbar.AddControl(combobox_filter)
+        self.toolbar_parent.AddControl(combobox_filter)
         
         #if search == True:
-        toolbar.AddSeparator() 
-        entry_search = wx.SearchCtrl(parent=toolbar, id=-1)
-        toolbar.AddControl(entry_search) 
-            
+        self.toolbar_parent.AddSeparator() 
+        entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
+        self.toolbar_parent.AddControl(entry_search) 
+        
         #if preferences == True or help == True:
-        toolbar.AddSeparator()
+        self.toolbar_parent.AddSeparator()
         
         #if preferences == True:
-        toolbar.AddLabelTool(id=-1, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_preferences, id=self.ID_PREFERENCES)
         
-        #if help == True:
-        toolbar.AddLabelTool(id=-1, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
+        if self.help_file <> None:
+            self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_help, id=self.ID_HELP)
         
-        toolbar.Realize()
+        self.toolbar_parent.Realize()
+    
+    
+    def populate_portlet(self):
+        self.Table = DataViews.Tree(self.portlet_parent)
+        sizer = self.portlet_parent.GetSizer()
+        sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+
+        self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
+        self.Table.set_row_activate_function(self.on_row_activate)
+        self.Table.set_cursor_changed_function(self.on_cursor_changed)
+        
+        # Just populate immideately if this is not a child-table of a form!
+        if self.parent_form == None:
+            self.populate()
+            
+        self.Table.Show()
+        sizer.Layout()
+        return self.Table
         
         
     def add_filter(self, filter_name=None, filter_function=None):

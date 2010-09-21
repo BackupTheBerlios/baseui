@@ -11,6 +11,12 @@ import res.Dialogs
 from res import IconSet32
 
 
+class Help(wx.Frame):
+    def __init__(self, parent):
+        wx.Frame.__init__(self, parent)
+
+
+
 class Error(res.Dialogs.Error):
     def __init__(self, parent):
         res.Dialogs.Error.__init__(self, parent)
