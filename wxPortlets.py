@@ -15,6 +15,10 @@ from wxApi.res import IconSet16
 from dbApi import SQLdb, Tools as dbTools
 
 
+class WebserverPreferences:
+    pass
+    
+    
 class DatabaseLogin(wx.Panel):
     def __init__(self, parent, image_path='', ini_path='', autosave=True, debug=False):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
