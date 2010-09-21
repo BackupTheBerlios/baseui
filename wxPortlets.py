@@ -9,7 +9,9 @@ import sys
 import wx
 
 from pprint import pprint
+from wx import xrc
 from misc import FileSystem, HelpFile, FileTransfer
+
 from wxApi import Portlets, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
 from wxApi.res import IconSet16
@@ -207,7 +209,7 @@ class Table:
                        form_object=None, parent_form=None, \
                        
                        dataset=True, report=False, search=False, filter=True, \
-                       db_table=None, help_file=None, separate_toolbar=True):
+                       db_table=None, filename_help=None, separate_toolbar=True):
         
         self.db_object = db_object
         self.portlet_parent = portlet_parent
@@ -216,7 +218,7 @@ class Table:
         self.form_object = form_object
         self.parent_form = parent_form
         
-        self.help_file = help_file
+        self.filename_help = filename_help
         #self.filter_lod = []
         
         #self.toolbar = None #Toolbars.TableToolbar(parent)
@@ -470,16 +472,21 @@ class Table:
         
         
 class Form:
-    def __init__(self, parent_form=None, icon_file=None, title=None, glade_file=None, window_name=None, help_file=None):
+    def __init__(self, parent_form=None, 
+                       title=None, 
+                       frame_name=None,
+                       filename_icon=None, 
+                       filename_xrc=None,     
+                       filename_help=None):
         self.parent_form = parent_form
         self.primary_key_column = None
         self.primary_key = None
         
-        self.icon_file = icon_file
+        self.filename_icon = filename_icon
         self.title = title
-        self.glade_file = glade_file
-        self.window_name = window_name
-        self.help_file = help_file
+        self.filename_xrc = filename_xrc
+        self.frame_name = window_name
+        self.filename_help = filename_help
         
         
     def on_button_save_clicked(self, widget=None, data=None):
@@ -506,7 +513,7 @@ class Form:
                 dic = portlet_row
                 if dic.has_key('portlet'):
                     if dic.has_key('container'):
-                        self.wTree.get_widget(dic['container']).remove(dic['portlet'])
+                        self.xrc.get_widget(dic['container']).remove(dic['portlet'])
         self.update_func()
 
 
@@ -532,17 +539,17 @@ class Form:
         self.create_toolbar(help=help_button_visible)
 
         # Get wTree, initialize form
-        self.wTree = Glade.import_tree(self, self.glade_file, self.window_name)
-        self.Form = DataViews.Form(self.wTree)
+        self.xrc = xrc.XmlResource(self.xrc_filename)
+        self.Form = DataViews.Form(self.xrc)
         self.Form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.Form.definition_lod
 
         # Cut form_portlet out of wTree
-        glade_window = self.wTree.get_widget(self.window_name)
-        self.portlet = glade_window.get_child()
-        glade_window.remove(self.portlet)
-        glade_window.destroy()
+       # glade_window = self.wTree.get_widget(self.window_name)
+       # self.portlet = glade_window.get_child()
+       # glade_window.remove(self.portlet)
+       # glade_window.destroy()
 
         Window = Containers.Window(icon_file=self.icon_file, title=self.title)
         self.window = Window.create()

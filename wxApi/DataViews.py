@@ -322,16 +322,16 @@ class Form:
     ''' If data has to be inserted in a database, a input form is needed. This
         class defines a form from a JSON-Definition for easy access. '''
 
-    def __init__(self, wTree=None):
-        ''' A Form has no real widget, so the wTree from a glade import is needed. '''
+    def __init__(self, xrc=None):
+        ''' xrc = xrc.XmlResource('gui.xrc') '''
 
         self.content_edited = False
 
         self.definition_lod = None
         self.attributes_lod = None
         self.content_lod = None
-        self.wTree = wTree
-
+        self.xrc = xrc
+        
 
     def on_widget_changed(self, widget=None, widget_definition_dict=None):
         self.validate_widget(widget_definition_dict)
@@ -377,19 +377,8 @@ class Form:
                     if attributes_dic['column_name'] == column_name:
                         self.definition_lod[row].update(attributes_dic)
             
-            if dic.has_key('widget_name'):
-                widget_name = dic['widget_name']
-            else:
-                widget_name = None
-            
-            if dic.has_key('data_type'):
-                data_type = dic['data_type']
-            else:
-                data_type = None
-            
-            #widget_object = None
-            # *** MONKEYPATCH *** MONKEYPATCH *** MONKEYPATCH *** MONKEYPATCH ***
-            #setattr(self, self.definition_lod[row]['widget_name'], Entrys.Simple(self.wTree.get_widget(dic['widget_name'])))
+            widget_name = dic.get('widget_name')
+            data_type = dic.get('data_type')
 
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
