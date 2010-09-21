@@ -108,3 +108,15 @@ class Login(res.Portlets.Login):
         for content in content_lod:
             user_list.append(content.get('user'))
             
+            
+            
+class Webserver(res.Portlets.Webserver):
+    def __init__(self, parent):
+        res.Portlets.Webserver.__init__(self, parent)
+        
+        
+    def populate(self, content_lod):
+        pass
+        
+        
+    
