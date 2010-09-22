@@ -272,10 +272,10 @@ password = %(password)s
 class Table:
     def __init__(self, form_object=None, parent_form=None, \
                        dataset=True, report=False, search=False, filter=True, help=True, \
-                       db_table=None, help_file=None, separate_toolbar=True):
+                       db_table=None, help_path=None, separate_toolbar=True):
         self.parent_form = parent_form
         
-        self.help_file = help_file
+        self.help_path = help_path
         self.filter_lod = []
         
         self.Table = DataViews.Tree()
@@ -370,8 +370,8 @@ class Table:
 
 
     def show_help(self):
-        if self.help_file <> None:
-            self.HTMLhelp.show(self.help_file)
+        if self.help_path <> None:
+            self.HTMLhelp.show(self.help_path)
 
 
     def create_toolbar(self, dataset, report, search, filter, help):
@@ -551,16 +551,16 @@ class Table:
         
         
 class Form:
-    def __init__(self, parent_form=None, icon_file=None, title=None, glade_file=None, window_name=None, help_file=None):
+    def __init__(self, parent_form=None, icon_file=None, title=None, xrc_path=None, window_name=None, help_path=None):
         self.parent_form = parent_form
         self.primary_key_column = None
         self.primary_key = None
         
         self.icon_file = icon_file
         self.title = title
-        self.glade_file = glade_file
+        self.xrc_path = xrc_path
         self.window_name = window_name
-        self.help_file = help_file
+        self.help_path = help_path
         
         
     def on_button_save_clicked(self, widget=None, data=None):
@@ -577,8 +577,8 @@ class Form:
 
 
     def on_button_help_clicked(self, widget=None, data=None):
-        if self.help_file <> None:
-            self.HTMLhelp.show(self.help_file)
+        if self.help_path <> None:
+            self.HTMLhelp.show(self.help_path)
 
 
     def on_window_destroy(self, widget=None, data=None):
@@ -607,13 +607,13 @@ class Form:
         
         self.primary_key = primary_key
 
-        if self.help_file <> None:
+        if self.help_path <> None:
             help_button_visible = True
 
         self.create_toolbar(help=help_button_visible)
 
         # Get wTree, initialize form
-        self.wTree = Glade.import_tree(self, self.glade_file, self.window_name)
+        self.wTree = Glade.import_tree(self, self.xrc_path, self.window_name)
         self.Form = DataViews.Form(self.wTree)
         self.Form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)

@@ -47,7 +47,7 @@ werden. Wird eine Tabellenzeile angewählt, so sollte sich meist ein Formular
 
    Nicht dokumentiert.
    
-   .. function:: __init__(self, form_object=None, parent_form=None, dataset=True, report=False, search=False, filter=True, help=True, db_table=None, help_file=None, separate_toolbar=True)
+   .. function:: __init__(self, form_object=None, parent_form=None, dataset=True, report=False, search=False, filter=True, help=True, db_table=None, help_path=None, separate_toolbar=True)
 
       Nicht dokumentiert.
       
@@ -57,7 +57,7 @@ werden. Wird eine Tabellenzeile angewählt, so sollte sich meist ein Formular
 
    Nicht dokumentiert.
    
-   .. function:: __init__(self, parent_form=None, icon_file=None, title=None, glade_file=None, window_name=None, help_file=None)
+   .. function:: __init__(self, parent_form=None, icon_file=None, title=None, xrc_path=None, window_name=None, help_path=None)
 
       Nicht dokumentiert.
       

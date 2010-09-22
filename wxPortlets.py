@@ -213,7 +213,7 @@ class Table:
                        form_object=None, parent_form=None, \
                        
                        dataset=True, report=False, search=False, filter=True, \
-                       db_table=None, filename_help=None, separate_toolbar=True):
+                       db_table=None, help_path=None):
         
         self.db_object = db_object
         self.portlet_parent = portlet_parent
@@ -222,7 +222,7 @@ class Table:
         self.form_object = form_object
         self.parent_form = parent_form
         
-        self.filename_help = filename_help
+        self.help_path = help_path
         #self.filter_lod = []
         
         #self.toolbar = None #Toolbars.TableToolbar(parent)
@@ -302,8 +302,8 @@ class Table:
         
         
     def show_help(self):
-        if self.help_file <> None:
-            self.HTMLhelp.show(self.help_file)
+        if self.help_path <> None:
+            self.HTMLhelp.show(self.help_path)
     
 
     def initialize(self, db_table_object=None, definition_lod=None):
@@ -415,7 +415,7 @@ class Table:
         self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_preferences, id=self.ID_PREFERENCES)
         
-        if self.help_file <> None:
+        if self.help_path <> None:
             self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_help, id=self.ID_HELP)
         
@@ -479,18 +479,19 @@ class Form:
     def __init__(self, parent_form=None, 
                        title=None, 
                        frame_name=None,
-                       filename_icon=None, 
-                       filename_xrc=None,     
-                       filename_help=None):
+                       window_name=None,
+                       icon_path=None, 
+                       xrc_path=None,     
+                       help_path=None):
         self.parent_form = parent_form
         self.primary_key_column = None
         self.primary_key = None
         
-        self.filename_icon = filename_icon
+        self.icon_path = icon_path
         self.title = title
-        self.filename_xrc = filename_xrc
+        self.xrc_path = xrc_path
         self.frame_name = window_name
-        self.filename_help = filename_help
+        self.help_path = help_path
         
         
     def on_button_save_clicked(self, widget=None, data=None):
@@ -507,8 +508,8 @@ class Form:
 
 
     def on_button_help_clicked(self, widget=None, data=None):
-        if self.help_file <> None:
-            self.HTMLhelp.show(self.help_file)
+        if self.help_path <> None:
+            self.HTMLhelp.show(self.help_path)
 
 
     def on_window_destroy(self, widget=None, data=None):
@@ -537,13 +538,13 @@ class Form:
         
         self.primary_key = primary_key
 
-        if self.help_file <> None:
+        if self.help_path <> None:
             help_button_visible = True
 
         self.create_toolbar(help=help_button_visible)
 
         # Get wTree, initialize form
-        self.xrc = xrc.XmlResource(self.xrc_filename)
+        self.xrc = xrc.XmlResource(self.xrc_path)
         self.Form = DataViews.Form(self.xrc)
         self.Form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
