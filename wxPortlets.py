@@ -5,17 +5,16 @@
 # published under BSD license by Mark Muzenhardt.
 #===============================================================================
 
-import sys
-import wx
+#import sys
+import wx, wx.aui
 
-from pprint import pprint
-from wx import xrc
 from misc import FileSystem, HelpFile, FileTransfer
-
 from wxApi import Portlets, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
 from wxApi.res import IconSet16
 from dbApi import SQLdb, Tools as dbTools
+
+from pprint import pprint
 
 
 class WebserverPreferences:
@@ -269,13 +268,13 @@ class Table:
     # Actions -----------------------------------------------------------------
     def new_dataset(self, event=None):       
         # try:
-        self.form.show(primary_key=None)
+        self.form(self.db_object).show(primary_key=None)
         # except Exception, inst:
         # self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
     def edit_dataset(self, event=None):
-        self.form.show(self.primary_key)
+        self.form(self.db_object).show(self.primary_key)
 
 
     def delete_dataset(self, event=None):
@@ -486,10 +485,7 @@ class Form(wx.Frame):
         self.primary_key_column = None
         self.primary_key = None
         
-        wx.Frame.__init__(self, None, wx.ID_ANY, title)
-        self.Centre()
-        self.SetInitialSize()
-        
+        self.frame = None
         self.icon_path = icon_path
         self.title = title
         self.xrc_path = xrc_path
@@ -539,32 +535,38 @@ class Form(wx.Frame):
                              'delete_function': None}]
                                  => function triggered on delete'''
         
+        self.frame = wx.Frame(None, wx.ID_ANY, self.title)
+        self.aui_manager = wx.aui.AuiManager(self.frame)
+        
         self.primary_key = primary_key
 
         if self.help_path <> None:
             help_button_visible = True
 
-        self.create_toolbar(help=help_button_visible)
+        self.create_toolbar()
 
+        # Add panels ----------------------------------------------------------
+        self.panel_main = wx.Panel(self.frame, -1, size = (200, 150))
+
+        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
+                         Name("toolbar_standard").Caption("Standard").
+                         ToolbarPane().Top().Resizable().
+                         LeftDockable(False).RightDockable(False))
+        self.aui_manager.AddPane(self.panel_main, wx.aui.AuiPaneInfo().CaptionVisible(False).
+                                 Name("self.panel_main").TopDockable(False).
+                                 Center().Layer(1).CloseButton(False))
+        self.aui_manager.Update()
+        
+        self.pane_main_info = self.aui_manager.GetPane('self.panel_main')
+                
+        
         # Get wTree, initialize form
-        #self.xrc = xrc.XmlResource(self.xrc_path)
-        self.Form = DataViews.Form(self, self.xrc_path, self.panel_name)
+        self.Form = DataViews.Form(self.panel_main, self.xrc_path, self.panel_name)
         self.Form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.Form.definition_lod
 
-        # Cut form_portlet out of wTree
-       # glade_window = self.wTree.get_widget(self.window_name)
-       # self.portlet = glade_window.get_child()
-       # glade_window.remove(self.portlet)
-       # glade_window.destroy()
-
-      #  Window = Containers.Window(icon_file=self.icon_file, title=self.title)
-      #  self.window = Window.create()
       #  self.window.connect('destroy', self.on_window_destroy)
-
-      #  self.vbox = gtk.VBox()
-      #  self.window.add(self.vbox)
 
        # self.statusbar = gtk.Statusbar()
 
@@ -593,39 +595,20 @@ class Form(wx.Frame):
         #if self.primary_key == None:
         #    self.button_delete.set_sensitive(0)
        # self.populate()
-        self.Show()
+        self.frame.SetInitialSize()
+        self.frame.Centre()
+        self.frame.Show()
 
 
     def create_toolbar(self, dataset=True, report=True, help=True):
-        print 'creating toolbar...'
-        #self.toolbar = gtk.Toolbar()
-#
-#        if dataset == True:
-#            self.button_save = Buttons.Simple().create(stock_image=gtk.STOCK_SAVE, height=32)
-#            self.button_save.connect('clicked', self.on_button_save_clicked)
-#            self.toolbar.add(self.button_save)
-#            self.button_delete = Buttons.Simple().create(stock_image=gtk.STOCK_DELETE, height=32)
-#            self.button_delete.connect('clicked', self.on_button_delete_clicked)
-#            self.toolbar.add(self.button_delete)
-#            separator = gtk.VSeparator()
-#            separator.set_size_request(8, 32)
-#            self.toolbar.add(separator)
-
-        # Report widgets
-#        if report == True:
-#            self.button_print = Buttons.Simple().create(stock_image=gtk.STOCK_PRINT, height=32)
-#            self.button_print.connect('clicked', self.on_button_print_clicked)
-#            self.toolbar.add(self.button_print)
-#            separator = gtk.VSeparator()
-#            separator.set_size_request(8, 32)
-#            self.toolbar.add(separator)
-
-#        if help == True:
-#            self.button_help = Buttons.Simple().create(stock_image=gtk.STOCK_HELP, width=-1, height=32)
-#            self.button_help.connect('clicked', self.on_button_help_clicked)
-#            self.toolbar.add(self.button_help)
-
-#        self.toolbar.show_all()
+        self.toolbar_standard = wx.aui.AuiToolBar(self.frame, id=wx.ID_ANY) 
+ 
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Speichern",     IconSet16.getfilesave_16Bitmap())
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Löschen",       IconSet16.getdelete_16Bitmap())
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken",       IconSet16.getprint_16Bitmap())
+        self.toolbar_standard.AddSeparator()
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Hilfe",         IconSet16.gethelp_16Bitmap())
 
 
     def initialize(self, db_table_object=None, definition_lod=None, attributes_lod=None, portlets_lod=None):

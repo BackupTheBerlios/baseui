@@ -6,9 +6,8 @@
 #===============================================================================
 
 import os
-import wx
+import wx, wx.xrc
 
-from wx import xrc
 from wx.gizmos import TreeListCtrl
 
 from pprint import pprint
@@ -119,8 +118,8 @@ class Tree(TreeListCtrl):
 
         self.definition_lod = definition_lod
         
-        treeview_column_list = []
-        self.type_list = []
+        #treeview_column_list = []
+        #self.type_list = []
         
         # Merge definition_lod and attributes_lod together.
         self.definition_lod = merge_two_lods(self.definition_lod, attributes_lod, 'column_name')
@@ -321,19 +320,22 @@ class Tree(TreeListCtrl):
 
 
 
-class Form:
+class Form(wx.Panel):
     ''' If data has to be inserted in a database, a input form is needed. This
         class defines a form from a JSON-Definition for easy access. '''
 
     def __init__(self, parent, xrc_path, panel_name):
-        ''' xrc = xrc.XmlResource('gui.xrc') '''
+        # Preload a panel to subclass it from this class!
+        pre_panel = wx.PrePanel()
+        self.xrc_resource = wx.xrc.XmlResource(xrc_path)
+        self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
+        self.PostCreate(pre_panel)
 
         self.parent = parent
-        self.xrc_resource = xrc.XmlResource(xrc_path)
-        self.panel = self.xrc_resource.LoadPanel(parent, panel_name)#xrc.XRCCTRL(parent, panel_name)
+        self.parent.SetInitialSize()
+        self.Layout()
         
         self.content_edited = False
-
         self.definition_lod = None
         self.attributes_lod = None
         self.content_lod = None
@@ -389,7 +391,7 @@ class Form:
 
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
-                widget_object = xrc.XRCCTRL(self.panel, widget_name)
+                widget_object = wx.xrc.XRCCTRL(self, widget_name)
 
                 # if widget_name.startswith('entry_'):                    
                 #     if data_type == 'date':
