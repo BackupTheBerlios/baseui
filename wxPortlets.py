@@ -210,7 +210,7 @@ class Table:
     
     def __init__(self, db_object, toolbar_parent=None, portlet_parent=None, \
                  
-                       form_object=None, parent_form=None, \
+                       form=None, parent_form=None, \
                        
                        dataset=True, report=False, search=False, filter=True, \
                        db_table=None, help_path=None):
@@ -219,7 +219,7 @@ class Table:
         self.portlet_parent = portlet_parent
         self.toolbar_parent = toolbar_parent
         
-        self.form_object = form_object
+        self.form = form
         self.parent_form = parent_form
         
         self.help_path = help_path
@@ -268,10 +268,10 @@ class Table:
 
     # Actions -----------------------------------------------------------------
     def new_dataset(self, event=None):       
-        try:
-            self.form.show(primary_key=None)
-        except Exception, inst:
-            self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
+        # try:
+        self.form.show(primary_key=None)
+        # except Exception, inst:
+        # self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
     def edit_dataset(self, event=None):
@@ -475,11 +475,10 @@ class Table:
         
         
         
-class Form:
+class Form(wx.Frame):
     def __init__(self, parent_form=None, 
                        title=None, 
-                       frame_name=None,
-                       window_name=None,
+                       panel_name=None,
                        icon_path=None, 
                        xrc_path=None,     
                        help_path=None):
@@ -487,10 +486,14 @@ class Form:
         self.primary_key_column = None
         self.primary_key = None
         
+        wx.Frame.__init__(self, None, wx.ID_ANY, title)
+        self.Centre()
+        self.SetInitialSize()
+        
         self.icon_path = icon_path
         self.title = title
         self.xrc_path = xrc_path
-        self.frame_name = window_name
+        self.panel_name = panel_name
         self.help_path = help_path
         
         
@@ -544,8 +547,8 @@ class Form:
         self.create_toolbar(help=help_button_visible)
 
         # Get wTree, initialize form
-        self.xrc = xrc.XmlResource(self.xrc_path)
-        self.Form = DataViews.Form(self.xrc)
+        #self.xrc = xrc.XmlResource(self.xrc_path)
+        self.Form = DataViews.Form(self, self.xrc_path, self.panel_name)
         self.Form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.Form.definition_lod
@@ -556,18 +559,18 @@ class Form:
        # glade_window.remove(self.portlet)
        # glade_window.destroy()
 
-        Window = Containers.Window(icon_file=self.icon_file, title=self.title)
-        self.window = Window.create()
-        self.window.connect('destroy', self.on_window_destroy)
+      #  Window = Containers.Window(icon_file=self.icon_file, title=self.title)
+      #  self.window = Window.create()
+      #  self.window.connect('destroy', self.on_window_destroy)
 
-        self.vbox = gtk.VBox()
-        self.window.add(self.vbox)
+      #  self.vbox = gtk.VBox()
+      #  self.window.add(self.vbox)
 
-        self.statusbar = gtk.Statusbar()
+       # self.statusbar = gtk.Statusbar()
 
-        self.vbox.pack_start(self.toolbar, expand=False, fill=True, padding=0)
-        self.vbox.pack_start(self.portlet, expand=True, fill=True, padding=0)
-        self.vbox.pack_start(self.statusbar, expand=False, fill=True, padding=0)
+       # self.vbox.pack_start(self.toolbar, expand=False, fill=True, padding=0)
+       # self.vbox.pack_start(self.portlet, expand=True, fill=True, padding=0)
+       # self.vbox.pack_start(self.statusbar, expand=False, fill=True, padding=0)
         
         # Get the portlet_objects and pack them into their container.
         if self.portlets_lod <> None:
@@ -580,47 +583,49 @@ class Form:
                         if dic.has_key('populate_function'):# and self.primary_key <> None:
                             dic['populate_function']()
                         
-        self.window.set_position(gtk.WIN_POS_CENTER)
-        self.window.set_modal(True)
-        self.window.show_all()
+       # self.window.set_position(gtk.WIN_POS_CENTER)
+       # self.window.set_modal(True)
+       # self.window.show_all()
 
-        self.DialogBox = Dialogs.Simple(parent=self.window)
-        self.HTMLhelp = HelpFile.HTML()
+       # self.DialogBox = Dialogs.Simple(parent=self.window)
+       # self.HTMLhelp = HelpFile.HTML()
 
-        if self.primary_key == None:
-            self.button_delete.set_sensitive(0)
-        self.populate()
+        #if self.primary_key == None:
+        #    self.button_delete.set_sensitive(0)
+       # self.populate()
+        self.Show()
 
 
     def create_toolbar(self, dataset=True, report=True, help=True):
-        self.toolbar = gtk.Toolbar()
-
-        if dataset == True:
-            self.button_save = Buttons.Simple().create(stock_image=gtk.STOCK_SAVE, height=32)
-            self.button_save.connect('clicked', self.on_button_save_clicked)
-            self.toolbar.add(self.button_save)
-            self.button_delete = Buttons.Simple().create(stock_image=gtk.STOCK_DELETE, height=32)
-            self.button_delete.connect('clicked', self.on_button_delete_clicked)
-            self.toolbar.add(self.button_delete)
-            separator = gtk.VSeparator()
-            separator.set_size_request(8, 32)
-            self.toolbar.add(separator)
+        print 'creating toolbar...'
+        #self.toolbar = gtk.Toolbar()
+#
+#        if dataset == True:
+#            self.button_save = Buttons.Simple().create(stock_image=gtk.STOCK_SAVE, height=32)
+#            self.button_save.connect('clicked', self.on_button_save_clicked)
+#            self.toolbar.add(self.button_save)
+#            self.button_delete = Buttons.Simple().create(stock_image=gtk.STOCK_DELETE, height=32)
+#            self.button_delete.connect('clicked', self.on_button_delete_clicked)
+#            self.toolbar.add(self.button_delete)
+#            separator = gtk.VSeparator()
+#            separator.set_size_request(8, 32)
+#            self.toolbar.add(separator)
 
         # Report widgets
-        if report == True:
-            self.button_print = Buttons.Simple().create(stock_image=gtk.STOCK_PRINT, height=32)
-            self.button_print.connect('clicked', self.on_button_print_clicked)
-            self.toolbar.add(self.button_print)
-            separator = gtk.VSeparator()
-            separator.set_size_request(8, 32)
-            self.toolbar.add(separator)
+#        if report == True:
+#            self.button_print = Buttons.Simple().create(stock_image=gtk.STOCK_PRINT, height=32)
+#            self.button_print.connect('clicked', self.on_button_print_clicked)
+#            self.toolbar.add(self.button_print)
+#            separator = gtk.VSeparator()
+#            separator.set_size_request(8, 32)
+#            self.toolbar.add(separator)
 
-        if help == True:
-            self.button_help = Buttons.Simple().create(stock_image=gtk.STOCK_HELP, width=-1, height=32)
-            self.button_help.connect('clicked', self.on_button_help_clicked)
-            self.toolbar.add(self.button_help)
+#        if help == True:
+#            self.button_help = Buttons.Simple().create(stock_image=gtk.STOCK_HELP, width=-1, height=32)
+#            self.button_help.connect('clicked', self.on_button_help_clicked)
+#            self.toolbar.add(self.button_help)
 
-        self.toolbar.show_all()
+#        self.toolbar.show_all()
 
 
     def initialize(self, db_table_object=None, definition_lod=None, attributes_lod=None, portlets_lod=None):

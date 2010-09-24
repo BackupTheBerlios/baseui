@@ -8,6 +8,7 @@
 import os
 import wx
 
+from wx import xrc
 from wx.gizmos import TreeListCtrl
 
 from pprint import pprint
@@ -324,15 +325,18 @@ class Form:
     ''' If data has to be inserted in a database, a input form is needed. This
         class defines a form from a JSON-Definition for easy access. '''
 
-    def __init__(self, xrc=None):
+    def __init__(self, parent, xrc_path, panel_name):
         ''' xrc = xrc.XmlResource('gui.xrc') '''
 
+        self.parent = parent
+        self.xrc_resource = xrc.XmlResource(xrc_path)
+        self.panel = self.xrc_resource.LoadPanel(parent, panel_name)#xrc.XRCCTRL(parent, panel_name)
+        
         self.content_edited = False
 
         self.definition_lod = None
         self.attributes_lod = None
         self.content_lod = None
-        self.xrc = xrc
         
 
     def on_widget_changed(self, widget=None, widget_definition_dict=None):
@@ -367,6 +371,7 @@ class Form:
             return
 
         # Iterate over the definition_lod --------------------------------
+        
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
             dic = definition_row[1]
@@ -380,25 +385,28 @@ class Form:
                         self.definition_lod[row].update(attributes_dic)
             
             widget_name = dic.get('widget_name')
-            data_type = dic.get('data_type')
+            # data_type = dic.get('data_type')
 
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
-                if widget_name.startswith('entry_'):                    
-                    if data_type == 'date':
-                        widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
-                    else:
-                        widget_object = Entrys.Simple(self.wTree.get_widget(widget_name))
-                        widget_object.initialize(self.definition_lod[row])
-                if widget_name.startswith('comboboxentry_'):
-                    widget_object = Entrys.Combobox(self.wTree.get_widget(widget_name))
-                if widget_name.startswith('checkbutton_'):
-                    widget_object = self.wTree.get_widget(widget_name)
-                if widget_name.startswith('textview_'):
-                    widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
+                widget_object = xrc.XRCCTRL(self.panel, widget_name)
+
+                # if widget_name.startswith('entry_'):                    
+                #     if data_type == 'date':
+                #         widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
+                #     else:
+                #         widget_object = Entrys.Simple(self.wTree.get_widget(widget_name))
+                #         widget_object.initialize(self.definition_lod[row])
+                # if widget_name.startswith('comboboxentry_'):
+                #     widget_object = Entrys.Combobox(self.wTree.get_widget(widget_name))
+                # if widget_name.startswith('checkbutton_'):
+                #     widget_object = self.wTree.get_widget(widget_name)
+                # if widget_name.startswith('textview_'):
+                #     widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
                 
                 self.definition_lod[row]['widget_object'] = widget_object
-
+            pprint (self.definition_lod)
+            
 
     def populate(self, content_dict=None):
         ''' content_dict = {#column_name: #content}
