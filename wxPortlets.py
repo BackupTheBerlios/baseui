@@ -208,10 +208,7 @@ class Table:
     
     
     def __init__(self, db_object, toolbar_parent=None, portlet_parent=None, \
-                 
                        form=None, parent_form=None, \
-                       
-                       dataset=True, report=False, search=False, filter=True, \
                        db_table=None, help_path=None):
         
         self.db_object = db_object
@@ -268,7 +265,7 @@ class Table:
     # Actions -----------------------------------------------------------------
     def new_dataset(self, event=None):       
         # try:
-        self.form(self.db_object).show(primary_key=None)
+        self.form(self.portlet_parent, self.db_object).show(primary_key=None)
         # except Exception, inst:
         # self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
@@ -284,7 +281,6 @@ class Table:
         if response == True:
             self.toolbar_parent.EnableTool(self.ID_DELETE, False)
             self.toolbar_parent.EnableTool(self.ID_EDIT, False)
-            
             #self.update()
 
 
@@ -387,12 +383,12 @@ class Table:
         self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit_dataset, id=self.ID_EDIT)
 
-        self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",   IconSet16.getdelete_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete_dataset, id=self.ID_DELETE)
 
         self.toolbar_parent.AddSeparator()
         
-        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",       IconSet16.getprint_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",     IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.print_dataset, id=self.ID_PRINT)
 
         #if filter == True:
@@ -475,12 +471,14 @@ class Table:
         
         
 class Form(wx.Frame):
-    def __init__(self, parent_form=None, 
+    def __init__(self, parent=None,
+                       parent_form=None, 
                        title=None, 
                        panel_name=None,
                        icon_path=None, 
                        xrc_path=None,     
                        help_path=None):
+        self.parent = parent
         self.parent_form = parent_form
         self.primary_key_column = None
         self.primary_key = None
@@ -535,7 +533,7 @@ class Form(wx.Frame):
                              'delete_function': None}]
                                  => function triggered on delete'''
         
-        self.frame = wx.Frame(None, wx.ID_ANY, self.title)
+        self.frame = wx.Frame(self.parent, wx.ID_ANY, self.title)
         self.aui_manager = wx.aui.AuiManager(self.frame)
         
         self.primary_key = primary_key
@@ -566,14 +564,6 @@ class Form(wx.Frame):
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.Form.definition_lod
 
-      #  self.window.connect('destroy', self.on_window_destroy)
-
-       # self.statusbar = gtk.Statusbar()
-
-       # self.vbox.pack_start(self.toolbar, expand=False, fill=True, padding=0)
-       # self.vbox.pack_start(self.portlet, expand=True, fill=True, padding=0)
-       # self.vbox.pack_start(self.statusbar, expand=False, fill=True, padding=0)
-        
         # Get the portlet_objects and pack them into their container.
         if self.portlets_lod <> None:
             for portlet_row in self.portlets_lod:
@@ -584,21 +574,10 @@ class Form(wx.Frame):
                         container.add(dic['portlet'])
                         if dic.has_key('populate_function'):# and self.primary_key <> None:
                             dic['populate_function']()
-                        
-       # self.window.set_position(gtk.WIN_POS_CENTER)
-       # self.window.set_modal(True)
-       # self.window.show_all()
-
-       # self.DialogBox = Dialogs.Simple(parent=self.window)
-       # self.HTMLhelp = HelpFile.HTML()
-
-        #if self.primary_key == None:
-        #    self.button_delete.set_sensitive(0)
-       # self.populate()
+        
         self.frame.SetInitialSize()
-        self.frame.Centre()
         self.frame.Show()
-
+        
 
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self.frame, id=wx.ID_ANY) 

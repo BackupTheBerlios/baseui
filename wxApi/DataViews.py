@@ -407,7 +407,7 @@ class Form(wx.Panel):
                 #     widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
                 
                 self.definition_lod[row]['widget_object'] = widget_object
-            pprint (self.definition_lod)
+            #pprint (self.definition_lod)
             
 
     def populate(self, content_dict=None):
