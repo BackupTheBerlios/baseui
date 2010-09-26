@@ -38,11 +38,7 @@ class DatabaseLogin:
         db_engines_list = SQLdb.get_engines()
         self.config_dic = self.get_settings_from_ini()
         
-        if sys.platform.startswith('win'):
-            odbc_drivers_list = dbTools.get_odbc_from_winreg()
-        else:
-            odbc_drivers_list = []
-            
+        odbc_drivers_list = dbTools.get_odbc_drivers()
         self.database_dialog.populate(db_engines_list, odbc_drivers_list, self.config_dic)
 
         self.database_dialog.connect_order = self.connect
