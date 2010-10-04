@@ -21,7 +21,7 @@ class DatabaseLogin(wx.Panel):
         self.autosave = autosave
         self.debug = debug
         
-        self.database = None        
+        self.database = None
         self.sizer = wx.FlexGridSizer( 2, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
         self.sizer.AddGrowableRow( 0, 1 )
@@ -85,3 +85,15 @@ class DatabaseLogin(wx.Panel):
         
         
         
+class PreferencesDialog(wx.Frame):
+    ''' Gesucht wird ein Dialog, der über ein einfaches LOD weitgehend definierbar
+        ist. Optionen sind immer über ein TabNotebook erreichbar, jedes davon ist 
+        eine section in der .ini-Datei. Jedes Notebook-Tab enthält ein Formular, 
+        welches alle Optionen der jeweiligen section enthält. '''
+        
+    def __init__(self, ini_filepath)
+        ''' definition_lod = [{'section_name': 'printer',  'label': 'Drucker', 'portlet_object': form(), 'icon_path': '/res/icon.ico'},
+                              {'section_name': 'template', 'label': 'Vorlage', 'portlet_object': form(), 'icon_path': '/usr/chil.ico'}] '''
+                              
+        pass
+    
