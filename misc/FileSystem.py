@@ -22,6 +22,73 @@ class Base:
         self.filepath = self.path + self.filename
         
         
+    
+class ini:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.configuration = []
+        
+        import ConfigParser
+        self.parser = ConfigParser.ConfigParser()
+        
+        
+    def initialize(self, config_lod):
+        ''' definition_lod = \
+            [
+                {'Section Print':
+                    [
+                        {'printer': 'standard value'},
+                        {'style': 'italic'},
+                    ]
+                },
+                {'Section config':
+                    [
+                        {'color': 'red'}
+                    ]
+                }
+            ] '''
+            
+        self.configuration = config_lod
+        
+    
+    def load(self):
+        try:
+            self.parser.read(self.filepath)
+            sections_list = self.parser.sections()
+            
+            for section in sections_list:
+                print section
+                value_lot = self.parser.items(section)
+                value_lod = []
+                for value in value_lot:
+                     value_lod.append({value[0]: value[1]})
+                     
+                self.configuration.append({section: value_lod})
+        except:
+            raise
+        
+        
+    def save(self):
+        output_str = ''
+        for section_dict in self.configuration:
+            for section in section_dict:
+                output_str += '[%s]\n' % section
+                value_lod = section_dict[section]
+                for value_dict in value_lod:
+                    for variable in value_dict:
+                        output_str += '%s = %s\n' % (str(variable), str(value_dict[variable]))
+            output_str += '\n'
+        print output_str
+        
+        
+    def get(self, section, value):
+        pass
+        
+        
+    def change(self, section, value):
+        pass
+        
+        
         
 class iniFile(Base):
     def __init__(self, path='', filename=''):
@@ -39,9 +106,9 @@ class iniFile(Base):
         except:
             raise
         
-        value_dic = {}
+        value_dict = {}
         for value in value_lol:
-             value_dic[value[0]] = value[1]
+             value_dict[value[0]] = value[1]
         return value_dic
         
         
