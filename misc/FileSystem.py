@@ -109,7 +109,7 @@ class iniFile(Base):
         value_dict = {}
         for value in value_lol:
              value_dict[value[0]] = value[1]
-        return value_dic
+        return value_dict
         
         
     def save(self, ini_text):
