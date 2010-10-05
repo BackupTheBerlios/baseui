@@ -32,7 +32,7 @@ class ini:
         self.parser = ConfigParser.ConfigParser()
         
         
-    def initialize(self, config_lod):
+    def initialize(self, definition):
         ''' definition_lod = \
             [
                 {'Section Print':
@@ -61,7 +61,7 @@ class ini:
                 value_lot = self.parser.items(section)
                 value_lod = []
                 for value in value_lot:
-                     value_lod.append({value[0]: value[1]})
+                    value_lod.append({value[0]: value[1]})
                      
                 self.configuration.append({section: value_lod})
         except:
