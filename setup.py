@@ -59,7 +59,7 @@ setup(name         = 'BaseUI',
                                     '_sources/misc/*.*',
                                     '_sources/misc/module/*.*',]},
                       
-      version      = '0.3',
+      version      = '1.1',
       description  = 'Advanced Database and user interface API',
       license      = 'BSD',
       url          = 'http://baseui.berlios.de',
