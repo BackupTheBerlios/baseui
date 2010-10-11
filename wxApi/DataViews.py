@@ -541,7 +541,16 @@ class Form(wx.Panel):
         return self.content_dict
 
 
+        
         # Just for testing purpuoses!
         #print self.entry_log.__class__, 'is the same as', wx._controls.TextCtrl
         #if self.entry_log.__class__ ==  wx._controls.TextCtrl:
         #    print 'is really the same...\n\n\n'
+
+        
+        
+if __name__ == "__main__":
+    x = raw_input('press <RETURN> to exit...')
+    
+    
+    
