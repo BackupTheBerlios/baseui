@@ -8,6 +8,7 @@
 #===============================================================================
 
 import sys, os, imp, shutil
+from pprint import pprint
 
 
 def get_winGTKdir():
@@ -178,20 +179,33 @@ Section "un.Uninstaller Section"
 SectionEnd
 ;------------------------------------------------------------------------------"""
     return nsi_text % kwargs
-    
-
+      
+        
 def get_revision():
-    # This is alpha PySVN support -------------------------------------------------
+    # The easiest way to get the revision control system is to look up the directorys!
+    # os.getcwd()
+    dir_list = os.listdir('.')
     try:
-        import pysvn
+        if '.hg' in dir_list:
+            out = os.popen('hg log')
+            log = out.read()
+            log_list = (log.split('\n'))
+            change_list = []
+            for line in log_list:
+                if line.startswith('changeset'):
+                    changeset = line.split(':')
+                    change_list.append(int(changeset[1]))
+            app_revision = str(max(change_list))
+        elif '.svn' in dir_list:
+        
+            import pysvn
 
-        client = pysvn.Client()
-        entry = client.info('.')
-        app_revision = str(entry.revision.number)
-        print
-        print "Compiled revision number:", app_revision
+            client = pysvn.Client()
+            entry = client.info('.')
+            app_revision = str(entry.revision.number)
     except Exception, inst:
         print str(inst)
+        raw_input('>')
         app_revision = ''
     return app_revision
     
