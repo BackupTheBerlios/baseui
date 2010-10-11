@@ -12,6 +12,7 @@ import sys, os, imp, shutil
 
 def get_winGTKdir():
     # Fetches gtk2 path from registry.
+	
     import _winreg
     import msvcrt
 
@@ -30,7 +31,77 @@ def get_winGTKdir():
         return gtkdir[0] + '\\'
         
 
+def get_rpm(**kwargs):
+	# This stuff is simply a try to capture rpm-support, but not ready yet!
+	
+	rpm_text = """\
+# This is a sample spec file for wget
+
+%define _topdir	 	/home/strike/mywget
+%define name			wget 
+%define release		1
+%define version 	1.12
+%define buildroot %{_topdir}/%{name}-%{version}-root
+
+BuildRoot:	%{buildroot}
+Summary: 		GNU wget
+License: 		GPL
+Name: 			%{name}
+Version: 		%{version}
+Release: 		%{release}
+Source: 		%{name}-%{version}.tar.gz
+Prefix: 		/usr
+Group: 			Development/Tools
+
+%description
+The GNU wget program downloads files from the Internet using the command-line.
+
+%prep
+%setup -q
+
+%build
+./configure
+make
+
+%install
+make install prefix=$RPM_BUILD_ROOT/usr
+
+%files
+%defattr(-,root,root)
+/usr/local/bin/wget
+
+%doc %attr(0444,root,root) /usr/local/share/man/man1/wget.1"""
+	return rpm_text
+	
+	
+def get_deb(**kwargs):
+	# This stuff is simply a try to capture deb-support, but not yet ready!
+	
+	deb_text = """\
+Package: acme
+Version: 1.0
+Section: web 
+Priority: optional
+Architecture: all
+Essential: no
+Depends: libwww-perl, acme-base (>= 1.2)
+Pre-Depends: perl 
+Recommends: mozilla | netscape  
+Suggests: docbook 
+Installed-Size: 1024
+Maintainer: Joe Brockmeier [jzb@dissociatedpress.net]
+Conflicts: wile-e-coyote
+Replaces: sam-sheepdog
+Provides: acme
+Description: The description can contain free-form text
+             describing the function of the program, what
+             kind of features it has, and so on..."""
+	return deb_text
+	
+	
 def get_nsi(**kwargs):
+	# This works fine to make an installer for windows with NSIS.
+	
     python_version = sys.version[:3]
     
     nsi_text = """\
