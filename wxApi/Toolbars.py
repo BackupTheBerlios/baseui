@@ -11,29 +11,29 @@ from res import IconSet16
 from Buttons import BitmapTextToggleButton
 
 
-class WebserverToolbar(wx.ToolBar):
-    ID_START = 1
-    ID_STOP = 2
-    ID_PREFERENCES = 3
-    ID_HELP = 4
-    
-    def __init__(self, parent, preferences=True, help=True):
-        wx.ToolBar.__init__(self, parent, id=-1, pos=wx.DefaultPosition, 
-                            size=wx.DefaultSize, 
-                            style=wx.TB_FLAT | wx.TB_NODIVIDER)
-        self.SetToolBitmapSize(wx.Size(22, 22))
-        
-        self.AddLabelTool(id=self.ID_START, label="Start", bitmap=IconSet16.getstart_16Bitmap())
-        self.AddLabelTool(id=self.ID_STOP, label="Stop",  bitmap=IconSet16.getstop_16Bitmap())
-        
-        self.AddSeparator()
-        if preferences == True:
-            self.AddLabelTool(id=self.ID_PREFERENCES, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
-        
-        if help == True:
-            self.AddLabelTool(id=self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
-
-        self.Realize()
+#class WebserverToolbar(wx.ToolBar):
+#    ID_START = 1
+#    ID_STOP = 2
+#    ID_PREFERENCES = 3
+#    ID_HELP = 4
+#    
+#    def __init__(self, parent, preferences=True, help=True):
+#        wx.ToolBar.__init__(self, parent, id=-1, pos=wx.DefaultPosition, 
+#                            size=wx.DefaultSize, 
+#                            style=wx.TB_FLAT | wx.TB_NODIVIDER)
+#        self.SetToolBitmapSize(wx.Size(22, 22))
+#        
+#        self.AddLabelTool(id=self.ID_START, label="Start", bitmap=IconSet16.getstart_16Bitmap())
+#        self.AddLabelTool(id=self.ID_STOP, label="Stop",  bitmap=IconSet16.getstop_16Bitmap())
+#        
+#        self.AddSeparator()
+#        if preferences == True:
+#            self.AddLabelTool(id=self.ID_PREFERENCES, label="Einstellungen", bitmap=IconSet16.getpreferences_16Bitmap())
+#        
+#        if help == True:
+#            self.AddLabelTool(id=self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
+#
+#        self.Realize()
         
         
                             

@@ -6,7 +6,7 @@
 #===============================================================================
 
 import os
-import wx
+import wx, wx.xrc
 
 from wx.gizmos import TreeListCtrl
 
@@ -118,8 +118,8 @@ class Tree(TreeListCtrl):
 
         self.definition_lod = definition_lod
         
-        treeview_column_list = []
-        self.type_list = []
+        #treeview_column_list = []
+        #self.type_list = []
         
         # Merge definition_lod and attributes_lod together.
         self.definition_lod = merge_two_lods(self.definition_lod, attributes_lod, 'column_name')
@@ -320,19 +320,25 @@ class Tree(TreeListCtrl):
 
 
 
-class Form:
+class Form(wx.Panel):
     ''' If data has to be inserted in a database, a input form is needed. This
         class defines a form from a JSON-Definition for easy access. '''
 
-    def __init__(self, xrc=None):
-        ''' xrc = xrc.XmlResource('gui.xrc') '''
+    def __init__(self, parent, xrc_path, panel_name):
+        # Preload a panel to subclass it from this class!
+        pre_panel = wx.PrePanel()
+        self.xrc_resource = wx.xrc.XmlResource(xrc_path)
+        self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
+        self.PostCreate(pre_panel)
 
+        self.parent = parent
+        self.parent.SetInitialSize()
+        self.Layout()
+        
         self.content_edited = False
-
         self.definition_lod = None
         self.attributes_lod = None
         self.content_lod = None
-        self.xrc = xrc
         
 
     def on_widget_changed(self, widget=None, widget_definition_dict=None):
@@ -367,6 +373,7 @@ class Form:
             return
 
         # Iterate over the definition_lod --------------------------------
+        
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
             dic = definition_row[1]
@@ -380,25 +387,28 @@ class Form:
                         self.definition_lod[row].update(attributes_dic)
             
             widget_name = dic.get('widget_name')
-            data_type = dic.get('data_type')
+            # data_type = dic.get('data_type')
 
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
-                if widget_name.startswith('entry_'):                    
-                    if data_type == 'date':
-                        widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
-                    else:
-                        widget_object = Entrys.Simple(self.wTree.get_widget(widget_name))
-                        widget_object.initialize(self.definition_lod[row])
-                if widget_name.startswith('comboboxentry_'):
-                    widget_object = Entrys.Combobox(self.wTree.get_widget(widget_name))
-                if widget_name.startswith('checkbutton_'):
-                    widget_object = self.wTree.get_widget(widget_name)
-                if widget_name.startswith('textview_'):
-                    widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
+                widget_object = wx.xrc.XRCCTRL(self, widget_name)
+
+                # if widget_name.startswith('entry_'):                    
+                #     if data_type == 'date':
+                #         widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
+                #     else:
+                #         widget_object = Entrys.Simple(self.wTree.get_widget(widget_name))
+                #         widget_object.initialize(self.definition_lod[row])
+                # if widget_name.startswith('comboboxentry_'):
+                #     widget_object = Entrys.Combobox(self.wTree.get_widget(widget_name))
+                # if widget_name.startswith('checkbutton_'):
+                #     widget_object = self.wTree.get_widget(widget_name)
+                # if widget_name.startswith('textview_'):
+                #     widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
                 
                 self.definition_lod[row]['widget_object'] = widget_object
-
+            #pprint (self.definition_lod)
+            
 
     def populate(self, content_dict=None):
         ''' content_dict = {#column_name: #content}
@@ -531,4 +541,7 @@ class Form:
         return self.content_dict
 
 
-
+        # Just for testing purpuoses!
+        #print self.entry_log.__class__, 'is the same as', wx._controls.TextCtrl
+        #if self.entry_log.__class__ ==  wx._controls.TextCtrl:
+        #    print 'is really the same...\n\n\n'
