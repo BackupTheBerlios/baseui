@@ -12,6 +12,19 @@ from misc import FileSystem
 from dbApi import SQLdb, Tools as dbTools
 
 
+class Database(Portlets.Database):
+    def __init__(self, parent, ini_filename='', autosave=False):
+        Portlets.Database.__init__(self, parent)
+        
+        # Populate comboboxes -------------------------------------------------
+        odbc_drivers = dbTools.get_odbc_drivers()
+        self.combobox_odbc.AppendItems(odbc_drivers)
+        
+        db_engines_list = SQLdb.get_engines()
+        self.combobox_engine.AppendItems(db_engines_list)
+        
+        
+        
 class DatabaseLogin(wx.Panel):
     def __init__(self, parent, image_path='', ini_filename='', autosave=False, debug=False):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
@@ -48,6 +61,7 @@ class DatabaseLogin(wx.Panel):
         
         db_engines_list = SQLdb.get_engines()
         self.portlet_database.combobox_engine.AppendItems(db_engines_list)
+        # KICK THIS SECTION OUT WHEN DATABASE PORTLET IS SUBCLASSED!
         
         # Add bottom panel with buttons ---------------------------------------
         bottom_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -91,7 +105,7 @@ class PreferencesDialog(wx.Frame):
         eine section in der .ini-Datei. Jedes Notebook-Tab enthält ein Formular, 
         welches alle Optionen der jeweiligen section enthält. '''
         
-    def __init__(self, ini_filepath)
+    def __init__(self, ini_filepath):
         ''' definition_lod = [{'section_name': 'printer',  'label': 'Drucker', 'portlet_object': form(), 'icon_path': '/res/icon.ico'},
                               {'section_name': 'template', 'label': 'Vorlage', 'portlet_object': form(), 'icon_path': '/usr/chil.ico'}] '''
                               
