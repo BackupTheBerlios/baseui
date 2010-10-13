@@ -7,7 +7,7 @@
 
 import wx
 
-from wxApi import Portlets
+from wxApi import Portlets, Dialogs
 from misc import FileSystem
 from dbApi import SQLdb, Tools as dbTools
 
@@ -24,17 +24,20 @@ class Database(Portlets.Database):
         self.combobox_engine.AppendItems(db_engines_list)
         
         
-        
+       
 class DatabaseLogin(wx.Panel):
-    def __init__(self, parent, image_path='', ini_filename='', autosave=False, debug=False):
+    def __init__(self, parent, image_path='', ini_path='', autosave=True, debug=False):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
+        self.ErrorDialog = Dialogs.Error(parent=self)
         
         self.image_path = image_path
-        self.ini_filename = ini_filename
+        self.ini_path = ini_path
         self.autosave = autosave
         self.debug = debug
         
-        self.database = None
+        self.on_connect = None
+        self.on_disconnect = None
+        
         self.sizer = wx.FlexGridSizer( 2, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
         self.sizer.AddGrowableRow( 0, 1 )
@@ -42,26 +45,18 @@ class DatabaseLogin(wx.Panel):
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        self.portlet_database = Portlets.Database(parent=self)
+        self.portlet_database = Portlets.Database(parent=self, autosave=self.autosave)
         self.portlet_database.Hide()
         self.portlet_login = Portlets.Login(parent=self)
         
         png = wx.Image(self.image_path, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         self.logo = wx.StaticBitmap(self, -1, png, (10, 5), (png.GetWidth(), png.GetHeight()))
-
+        
         self.sizer.Add(self.logo, 0, wx.ALL|wx.EXPAND)
         self.sizer.Add(self.portlet_login, 0, wx.ALL|wx.EXPAND)
         
         self.SetSizer(self.sizer)
         self.Layout()
-        
-        # Populate comboboxes -------------------------------------------------
-        odbc_drivers = dbTools.get_odbc_drivers()
-        self.portlet_database.combobox_odbc.AppendItems(odbc_drivers)
-        
-        db_engines_list = SQLdb.get_engines()
-        self.portlet_database.combobox_engine.AppendItems(db_engines_list)
-        # KICK THIS SECTION OUT WHEN DATABASE PORTLET IS SUBCLASSED!
         
         # Add bottom panel with buttons ---------------------------------------
         bottom_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -83,6 +78,15 @@ class DatabaseLogin(wx.Panel):
 
         bottom_panel.SetSizer(bottom_sizer)
         
+        # Get the database settings -------------------------------------------
+        self.database = None  
+        self.ini_file = FileSystem.iniFile(self.ini_path)
+        self.config_dic = self.get_settings_from_ini()
+        self.populate()
+        
+        self.portlet_database.on_connect = self.connect
+        self.portlet_database.on_disconnect = self.disconnect
+                
         
     def on_togglebutton_preferences_toggled(self, event):
         selection = event.GetSelection()
@@ -96,6 +100,103 @@ class DatabaseLogin(wx.Panel):
             self.logo.Show()
             self.portlet_database.Hide()
         self.Layout()
+        
+        
+    # Actions -----------------------------------------------------------------
+    def populate(self):
+        # First, populate database_portlet        
+        self.portlet_database.populate({'engines_list':  SQLdb.get_engines(),
+                                        'drivers_list':  dbTools.get_odbc_drivers(),
+                                        'engine':   self.config_dic.get('engine'),
+                                        'driver':   self.config_dic.get('driver'),
+                                        'database': self.config_dic.get('database'),
+                                        'host':     self.config_dic.get('host'),
+                                        'user':     self.config_dic.get('user'),
+                                        'password': self.config_dic.get('password')})
+        
+        # TODO: Populate the login portlet
+        pass
+        
+    
+    def get_settings_from_db(self, database):
+        self.database = database
+        if self.database <> None:
+            self.config_dic = database.config
+        else:
+            self.portlet_database.set_disconnected()
+            return
+
+        if self.database.connection <> None:
+            self.portlet_database.set_connected()
+        else:
+            self.portlet_database.set_disconnected()
+        return self.config_dic
+    
+    
+    def get_settings_from_ini(self):
+        try:
+            self.config_dic = self.ini_file.dictresult('db')
+            return self.config_dic
+        except Exception, inst:
+            dialog = wx.MessageDialog(self, caption='Fehler', 
+                                            message='''\
+Die Datenbank Konfigurationsdatei ist fehlerhaft
+oder nicht vorhanden.
+
+Soll die Konfigurationsdatei neu erstellt werden?''', 
+                                            style=(wx.YES_NO | wx.ICON_EXCLAMATION))
+            result = dialog.ShowModal()
+            
+            if result == wx.ID_YES:
+                self.config_dic = self.save_settings_to_ini()
+                return self.config_dic
+        
+        
+    def save_settings_to_ini(self):
+        self.config_dic = self.portlet_database.get_content()
+        ini_text = """\
+[db]
+engine = %(engine)s
+driver = %(driver)s
+database = %(database)s
+host = %(host)s
+user = %(user)s
+password = %(password)s
+
+""" % self.config_dic
+
+        self.ini_file.save(ini_text)
+        return self.config_dic
+
+
+    def connect(self):
+        try:
+            self.config_dic = self.portlet_database.get_content()
+            self.database = SQLdb.database(self.config_dic.get('engine'), debug=self.debug)
+            self.database.connect(database=self.config_dic.get('database'),
+                                  driver=self.config_dic.get('driver'),
+                                  host=self.config_dic.get('host'),
+                                  user=self.config_dic.get('user'),
+                                  password=self.config_dic.get('password'))
+            self.portlet_database.set_connected()
+            
+            # Save .ini-file automatically on connection
+            if self.autosave == True:
+                self.save_settings_to_ini()
+            if self.on_connect <> None:
+                self.on_connect()
+        except Exception, inst:
+            self.portlet_database.set_disconnected()
+            self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
+        return self.database
+
+
+    def disconnect(self):        
+        if self.database.connection <> None:
+            self.database.close()
+        self.portlet_database.set_disconnected()
+        if self.on_disconnect <> None:
+            self.on_disconnect()
         
         
         
