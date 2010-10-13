@@ -267,6 +267,13 @@ def makeSphinx(pathname, build_dir):
     os.system('xcopy "' + pathname + '\\doc\\build\\htmlhelp" "' + pathname + build_dir + 'doc\\htmlhelp\\" /E /Y')
     os.system('xcopy "' + pathname + '\\doc\\build\\latex\*.pdf" "' + pathname + build_dir + 'doc\\" /E /Y')
 
+
+def makeAutorun():
+    text = """\
+[Autorun]
+ShellExecute=startup\start.exe
+UseAutoplay=1"""
+    
     
 def makeNSI(pathname, build_dir, app_name, app_version, app_icon=''):
     # Make installer with NSIS ------------------------------------------------

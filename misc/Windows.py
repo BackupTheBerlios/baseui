@@ -6,3 +6,20 @@
 #===============================================================================
 
 # For now, empty... but at least the drive serial getter comes here!
+
+import os
+
+
+def get_volume_serial(drive_letter):
+    out = os.popen('vol %s' % drive_letter)
+    out_str = out.read()
+    out_list = out_str.split(':')
+    
+    if len(out_list) > 1:
+        drive_serial = out_list[2].replace('\n', '').lstrip()
+    else:
+        drive_serial = ''
+    return drive_serial
+    
+    
+def 
