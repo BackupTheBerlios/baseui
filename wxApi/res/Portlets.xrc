@@ -2,7 +2,7 @@
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
 	<object class="wxPanel" name="Database">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>200,-1</size>
+		<size>340,108</size>
 		<object class="wxStaticBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<label>Datenbank</label>
@@ -39,25 +39,8 @@
 						<option>0</option>
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
-						<object class="wxStaticText" name="label_database">
-							<label>Datenbank</label>
-							<wrap>-1</wrap>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="entry_database">
-							<value></value>
-							<maxlength>0</maxlength>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
-						<border>5</border>
 						<object class="wxStaticText" name="label_odbc">
+							<hidden>1</hidden>
 							<label>ODBC-Treiber</label>
 							<wrap>-1</wrap>
 						</object>
@@ -67,6 +50,7 @@
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
 						<object class="wxComboBox" name="combobox_odbc">
+							<hidden>1</hidden>
 							<value></value>
 							<content />
 						</object>
@@ -75,7 +59,28 @@
 						<option>0</option>
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
+						<object class="wxStaticText" name="label_database">
+							<hidden>1</hidden>
+							<label>Datenbank</label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="entry_database">
+							<hidden>1</hidden>
+							<value></value>
+							<maxlength>0</maxlength>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+						<border>5</border>
 						<object class="wxStaticText" name="label_host">
+							<hidden>1</hidden>
 							<label>Host</label>
 							<wrap>-1</wrap>
 						</object>
@@ -85,6 +90,7 @@
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
 						<object class="wxTextCtrl" name="entry_host">
+							<hidden>1</hidden>
 							<value></value>
 							<maxlength>0</maxlength>
 						</object>
@@ -94,6 +100,7 @@
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="label_user">
+							<hidden>1</hidden>
 							<label>Benutzer</label>
 							<wrap>-1</wrap>
 						</object>
@@ -103,6 +110,7 @@
 						<flag>wxALL|wxEXPAND</flag>
 						<border>5</border>
 						<object class="wxTextCtrl" name="entry_user">
+							<hidden>1</hidden>
 							<value></value>
 							<maxlength>0</maxlength>
 						</object>
@@ -112,6 +120,7 @@
 						<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>
 						<object class="wxStaticText" name="label_password">
+							<hidden>1</hidden>
 							<label>Passwort</label>
 							<wrap>-1</wrap>
 						</object>
@@ -122,8 +131,31 @@
 						<border>5</border>
 						<object class="wxTextCtrl" name="entry_password">
 							<style>wxTE_PASSWORD</style>
+							<hidden>1</hidden>
 							<value></value>
 							<maxlength>0</maxlength>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="label_path">
+							<hidden>1</hidden>
+							<label>Dateipfad</label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxFilePickerCtrl" name="filepicker_path">
+							<value></value>
+							<message>Select a file</message>
+							<wildcard>*.*</wildcard>
+							<style>wxFLP_SAVE|wxFLP_USE_TEXTCTRL</style>
+							<hidden>1</hidden>
 						</object>
 					</object>
 					<object class="spacer">

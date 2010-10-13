@@ -104,7 +104,8 @@ class database:
                 driver   = Only if database=ODBC, a driver string is needed...
                 host     = Hostname of database server (or local path to database if SQLite (f.e. localhost:5432).
                 user     = Database user.
-                password = Password of given user account. '''
+                password = Password of given user account. 
+                filepath = Filepath if the database exists as file.'''
         
         self.name = kwargs['database']
         self.config = kwargs
@@ -129,7 +130,21 @@ class database:
                 self.connection = self.connector.connect(kwargs['database'])
                 self.table_schema = None
             if self.engine.startswith('odbc'):
-                connection_string = 'DRIVER={%(driver)s};SERVER=%(host)s;DATABASE=%(database)s;UID=%(user)s;PWD=%(password)s' % kwargs
+                # This creates the odbc-connection string, which can have different parameters.
+                connection_string = 'DRIVER={%(driver)s}'
+                if kwargs.get('host') not in [None, '']:
+                    connection_string += ';SERVER=%(host)s'
+                if kwargs.get('database') not in [None, '']:
+                    connection_string += ';DATABASE=%(database)s'
+                if kwargs.get('user') not in [None, '']:
+                    connection_string += ';UID=%(user)s'
+                if kwargs.get('password') not in [None, '']:
+                    connection_string += ';PWD=%(password)s'
+                if kwargs.get('filepath') not in [None, '']:
+                    connection_string += ';DBQ=%(filepath)s;'
+                    
+                # connection_string = 'DRIVER={%(driver)s};SERVER=%(host)s;DATABASE=%(database)s;UID=%(user)s;PWD=%(password)s' % kwargs
+                connection_string = connection_string % kwargs
                 self.table_schema = None
                 self.connection = self.connector.connect(connection_string, autocommit=True)
                 
