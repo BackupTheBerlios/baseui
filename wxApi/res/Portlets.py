@@ -97,7 +97,7 @@ class Database ( wx.Panel ):
 		
 		sizer_content.Add( self.label_path, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 		
-		self.filepicker_path = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_SAVE|wx.FLP_USE_TEXTCTRL )
+		self.filepicker_path = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
 		self.filepicker_path.Hide()
 		
 		sizer_content.Add( self.filepicker_path, 0, wx.ALL|wx.EXPAND, 5 )

@@ -154,7 +154,7 @@
 							<value></value>
 							<message>Select a file</message>
 							<wildcard>*.*</wildcard>
-							<style>wxFLP_SAVE|wxFLP_USE_TEXTCTRL</style>
+							<style>wxFLP_DEFAULT_STYLE</style>
 							<hidden>1</hidden>
 						</object>
 					</object>
