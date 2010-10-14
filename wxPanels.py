@@ -13,8 +13,16 @@ from dbApi import SQLdb, Tools as dbTools
 
 
 class Database(Portlets.Database):
-    def __init__(self, parent, ini_filename='', autosave=False):
+    def __init__(self, parent, ini_filepath='', autosave=False):
         Portlets.Database.__init__(self, parent)
+        
+        self.ini_filepath = ini_filepath
+        self.autosave = autosave
+        
+        # Get the database settings -------------------------------------------
+        self.database = None  
+        self.ini_file = FileSystem.iniFile(self.ini_filepath)
+        self.config_dic = self.get_settings_from_ini()
         
         # Populate comboboxes -------------------------------------------------
         odbc_drivers = dbTools.get_odbc_drivers()
@@ -23,6 +31,97 @@ class Database(Portlets.Database):
         db_engines_list = SQLdb.get_engines()
         self.combobox_engine.AppendItems(db_engines_list)
         
+        self.populate({'engines_list':  SQLdb.get_engines(),
+                       'drivers_list':  dbTools.get_odbc_drivers(),
+                       'engine':   self.config_dic.get('engine'),
+                       'driver':   self.config_dic.get('driver'),
+                       'database': self.config_dic.get('database'),
+                       'host':     self.config_dic.get('host'),
+                       'user':     self.config_dic.get('user'),
+                       'password': self.config_dic.get('password'),
+                       'filepath': self.config_dic.get('filepath')})
+                       
+                       
+    def connect(self):
+        try:
+            self.config_dic = self.portlet_database.get_content()
+            self.database = SQLdb.database(self.config_dic.get('engine'), debug=self.debug)
+            self.database.connect(database=self.config_dic.get('database'),
+                                  driver=self.config_dic.get('driver'),
+                                  host=self.config_dic.get('host'),
+                                  user=self.config_dic.get('user'),
+                                  password=self.config_dic.get('password'))
+            self.portlet_database.set_connected()
+            
+            # Save .ini-file automatically on connection
+            if self.autosave == True:
+                self.save_settings_to_ini()
+            if self.on_connect <> None:
+                self.on_connect()
+        except Exception, inst:
+            self.portlet_database.set_disconnected()
+            self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
+        return self.database
+        
+        
+    def disconnect(self):        
+        if self.database.connection <> None:
+            self.database.close()
+        self.portlet_database.set_disconnected()
+        if self.on_disconnect <> None:
+            self.on_disconnect()
+        
+        
+    def get_settings_from_db(self, database):
+        self.database = database
+        if self.database <> None:
+            self.config_dic = database.config
+        else:
+            self.portlet_database.set_disconnected()
+            return
+
+        if self.database.connection <> None:
+            self.portlet_database.set_connected()
+        else:
+            self.portlet_database.set_disconnected()
+        return self.config_dic
+    
+    
+    def get_settings_from_ini(self):
+        try:
+            self.config_dic = self.ini_file.dictresult('db')
+            return self.config_dic
+        except Exception, inst:
+            dialog = wx.MessageDialog(self, caption='Fehler', 
+                                            message='''\
+Die Datenbank Konfigurationsdatei ist fehlerhaft
+oder nicht vorhanden.
+
+Soll die Konfigurationsdatei neu erstellt werden?''', 
+                                            style=(wx.YES_NO | wx.ICON_EXCLAMATION))
+            result = dialog.ShowModal()
+            
+            if result == wx.ID_YES:
+                self.config_dic = self.save_settings_to_ini()
+                return self.config_dic
+        
+        
+    def save_settings_to_ini(self):
+        self.config_dic = self.get_content()
+        ini_text = """\
+[db]
+engine = %(engine)s
+driver = %(driver)s
+database = %(database)s
+host = %(host)s
+user = %(user)s
+password = %(password)s
+
+""" % self.config_dic
+
+        self.ini_file.save(ini_text)
+        return self.config_dic
+
         
        
 class DatabaseLogin(wx.Panel):
@@ -45,7 +144,7 @@ class DatabaseLogin(wx.Panel):
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        self.portlet_database = Portlets.Database(parent=self, autosave=self.autosave)
+        self.portlet_database = Database(parent=self, autosave=self.autosave)
         self.portlet_database.Hide()
         self.portlet_login = Portlets.Login(parent=self)
         
@@ -105,14 +204,7 @@ class DatabaseLogin(wx.Panel):
     # Actions -----------------------------------------------------------------
     def populate(self):
         # First, populate database_portlet        
-        self.portlet_database.populate({'engines_list':  SQLdb.get_engines(),
-                                        'drivers_list':  dbTools.get_odbc_drivers(),
-                                        'engine':   self.config_dic.get('engine'),
-                                        'driver':   self.config_dic.get('driver'),
-                                        'database': self.config_dic.get('database'),
-                                        'host':     self.config_dic.get('host'),
-                                        'user':     self.config_dic.get('user'),
-                                        'password': self.config_dic.get('password')})
+        
         
         # TODO: Populate the login portlet
         pass
@@ -170,25 +262,7 @@ password = %(password)s
 
 
     def connect(self):
-        try:
-            self.config_dic = self.portlet_database.get_content()
-            self.database = SQLdb.database(self.config_dic.get('engine'), debug=self.debug)
-            self.database.connect(database=self.config_dic.get('database'),
-                                  driver=self.config_dic.get('driver'),
-                                  host=self.config_dic.get('host'),
-                                  user=self.config_dic.get('user'),
-                                  password=self.config_dic.get('password'))
-            self.portlet_database.set_connected()
-            
-            # Save .ini-file automatically on connection
-            if self.autosave == True:
-                self.save_settings_to_ini()
-            if self.on_connect <> None:
-                self.on_connect()
-        except Exception, inst:
-            self.portlet_database.set_disconnected()
-            self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
-        return self.database
+        self.portlet_database.connect()
 
 
     def disconnect(self):        

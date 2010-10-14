@@ -106,7 +106,10 @@ class Database(res.Portlets.Database):
         self.entry_host.SetValue(content_dict.get('host'))
         self.entry_user.SetValue(content_dict.get('user'))
         self.entry_password.SetValue(content_dict.get('password'))
-        self.filepicker_path.SetPath(content_dict.get('filepath'))
+        
+        filepath = content_dict.get('filepath')
+        if filepath == None: filepath = ''
+        self.filepicker_path.SetPath(filepath)
         
         
     def get_content(self):
