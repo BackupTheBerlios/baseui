@@ -5,10 +5,10 @@
 # published under BSD license by Mark Muzenhardt.
 #===============================================================================
 
-import wx, ConfigParser
+import wx
 
 from wxApi import Portlets, Dialogs
-# from misc import FileSystem
+from misc.FileSystem import iniFile
 from dbApi import SQLdb, Tools as dbTools
 
 
@@ -17,7 +17,7 @@ class Database(Portlets.Database):
         Portlets.Database.__init__(self, parent)
         self.ErrorDialog = Dialogs.Error(self)
         
-        self.ini_filepath = ini_filepath
+        self.ini_file = iniFile(ini_filepath)
         self.ini_section = ini_section
         self.autosave = autosave
         
@@ -32,33 +32,22 @@ class Database(Portlets.Database):
         # Populate comboboxes -------------------------------------------------
         odbc_drivers = dbTools.get_odbc_drivers()
         self.combobox_odbc.AppendItems(odbc_drivers)
-        #self.on_combobox_odbc_changed(event=None)
         
         db_engines_list = SQLdb.get_engines()
         self.combobox_engine.AppendItems(db_engines_list)
-        #self.on_combobox_engine_changed(event=None)
         
         # Populate the rest ---------------------------------------------------
-        self.config = ConfigParser.RawConfigParser()
-        self.config.read(self.ini_filepath)
+        options ={'engine': '', 
+                  'driver': '', 
+                  'database': '', 
+                  'host': '', 
+                  'user': '', 
+                  'password': '', 
+                  'filepath': ''}
         
-        self.section_dict = {'engines_list':  db_engines_list,
-                             'drivers_list':  odbc_drivers}
-        
-        # This safely reads the ini-section. If something does not exist, create it.
-        for option in ['engine', 'driver', 'database', 'host', 'user', 'password', 'filepath']:
-            try:
-                value = self.config.get(self.ini_section, option)
-                self.section_dict[option] = value
-            except ConfigParser.NoSectionError:
-                self.config.add_section(self.ini_section)
-                self.config.set(self.ini_section, option, '')
-                self.section_dict[option] = ''                
-            except ConfigParser.NoOptionError:
-                self.config.set(self.ini_section, option, '')
-                self.section_dict[option] = ''
-                
-        self.config.write(open(self.ini_filepath, 'w'))        
+        self.section_dict = self.ini_file.get_section(section=self.ini_section, option_dict=options)
+        self.section_dict['engines_list'] = db_engines_list
+        self.section_dict['drivers_list'] = odbc_drivers
         self.populate(self.section_dict)
         
         self.on_connect = self.connect
@@ -79,13 +68,7 @@ class Database(Portlets.Database):
             
             # Save .ini-file automatically on connection
             if self.autosave == True:
-                print self.section_dict
-                for key in self.section_dict:
-                    self.config.set(self.ini_section, key, self.section_dict[key])
-                self.config.write(open(self.ini_filepath, 'w'))
-                # self.save_settings_to_ini()
-            #if self.on_connect <> None:
-            #    self.on_connect()
+                self.ini_file.save_section(self.ini_section, self.section_dict)
         except Exception, inst:
             self.set_disconnected()
             self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
@@ -96,59 +79,6 @@ class Database(Portlets.Database):
         if self.database.connection <> None:
             self.database.close()
         self.set_disconnected()
-        #if self.on_disconnect <> None:
-        #    self.on_disconnect()
-        
-        
-    def get_settings_from_db(self, database):
-        self.database = database
-        if self.database <> None:
-            self.config_dic = database.config
-        else:
-            self.portlet_database.set_disconnected()
-            return
-
-        if self.database.connection <> None:
-            self.portlet_database.set_connected()
-        else:
-            self.portlet_database.set_disconnected()
-        return self.config_dic
-    
-    
-    def get_settings_from_ini(self):
-        try:
-            self.config_dic = self.ini_file.dictresult('db')
-            return self.config_dic
-        except Exception, inst:
-            dialog = wx.MessageDialog(self, caption='Fehler', 
-                                            message='''\
-Die Datenbank Konfigurationsdatei ist fehlerhaft
-oder nicht vorhanden.
-
-Soll die Konfigurationsdatei neu erstellt werden?''', 
-                                            style=(wx.YES_NO | wx.ICON_EXCLAMATION))
-            result = dialog.ShowModal()
-            
-            if result == wx.ID_YES:
-                self.config_dic = self.save_settings_to_ini()
-                return self.config_dic
-        
-        
-    def save_settings_to_ini(self):
-        self.config_dic = self.get_content()
-        ini_text = """\
-[db]
-engine = %(engine)s
-driver = %(driver)s
-database = %(database)s
-host = %(host)s
-user = %(user)s
-password = %(password)s
-
-""" % self.config_dic
-
-        self.ini_file.save(ini_text)
-        return self.config_dic
 
         
        

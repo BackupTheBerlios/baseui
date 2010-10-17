@@ -5,7 +5,7 @@
 # by Mark Muzenhardt, published under BSD-License.
 #===============================================================================
 
-import os
+import os, ConfigParser
 
 
 class Base:
@@ -23,112 +23,55 @@ class Base:
         
         
     
-class ini:
+class iniFile(ConfigParser.RawConfigParser):
     def __init__(self, filepath):
-        self.filepath = filepath
-        self.configuration = []
+        ConfigParser.RawConfigParser.__init__(self)
         
-        import ConfigParser
-        self.parser = ConfigParser.ConfigParser()
-        
-        
-    def initialize(self, configuration):
-        ''' configuration = \
-            [
-                {'Section Print':
-                    [
-                        {'printer': 'standard value'},
-                        {'style':   'italic'},
-                    ]
-                },
-                {'Section config':
-                    [
-                        {'color': 'red'}
-                    ]
-                }
-            ] '''
-            
-        self.definition = configuration
-        
+        self._filepath = filepath
+
     
-    def load(self):
-        try:
-            self.parser.read(self.filepath)
-            sections_list = self.parser.sections()
+    def get_section(self, section, option_dict):
+        ''' section is simply the section as string,
+            option_dict is a dict of defaults, f.e.:
+            {'engine': 'SQLite',
+             'filepath': 'c:\\dummy.db'} '''
+             
+        self.read(self._filepath)
+        section_dict = {}
+        error_occured = False
+        
+        for option in option_dict: #['engine', 'driver', 'database', 'host', 'user', 'password', 'filepath']:
+            section_error = False
+            option_error = False
             
-            for section in sections_list:
-                print section
-                value_lot = self.parser.items(section)
-                value_lod = []
-                for value in value_lot:
-                    value_lod.append({value[0]: value[1]})
-                     
-                self.configuration.append({section: value_lod})
+            try:
+                value = self.get(section, option)
+                section_dict[option] = value
+            except ConfigParser.NoSectionError:
+                section_error = True
+            except ConfigParser.NoOptionError:
+                option_error = True
+            finally:
+                if section_error == True:
+                    self.add_section(section)
+                if section_error == True or option_error == True:
+                    self.set(section, option, option_dict[option])
+                    section_dict[option] = option_dict[option]
+                    error_occured = True
+        
+        if error_occured:
+            self.write(open(self._filepath, 'w'))
+        return section_dict
+    
+    
+    def save_section(self, section, options_dict):
+        for key in options_dict:
+            self.set(section, key, options_dict[key])
+                    
+        try:
+            self.write(open(self._filepath, 'w'))
         except:
             raise
-        
-        
-    def save(self):
-        output_str = ''
-        for section_dict in self.configuration:
-            for section in section_dict:
-                output_str += '[%s]\n' % section
-                value_lod = section_dict[section]
-                for value_dict in value_lod:
-                    for variable in value_dict:
-                        output_str += '%s = %s\n' % (str(variable), str(value_dict[variable]))
-            output_str += '\n'
-        print output_str
-        
-        
-    def get_value(self, section, value):
-        pass
-    
-    
-    def set_value(self, section, value):
-        pass
-    
-    
-    def remove_value(self, section, value):
-        pass
-    
-        
-    def get_section(self, section):
-        pass
-    
-    
-    def remove_section(self, section):
-        pass
-        
-        
-        
-class iniFile(Base):
-    def __init__(self, path='', filename=''):
-        Base.__init__(self, path, filename)
-            
-        import ConfigParser
-        self.parser = ConfigParser.ConfigParser()
-        return
-        
-        
-    def dictresult(self, section):
-        try:
-            self.parser.read(self.filepath)
-            value_lol = self.parser.items(section)
-        except:
-            raise
-        
-        value_dict = {}
-        for value in value_lol:
-             value_dict[value[0]] = value[1]
-        return value_dict
-        
-        
-    def save(self, ini_text):
-        ini_file = open(self.filepath, "w")
-        ini_file.write(ini_text)
-        ini_file.close()
-        return
 
 
 

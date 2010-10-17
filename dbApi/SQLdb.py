@@ -127,7 +127,7 @@ class database:
                 self.connection = self.connector.connect()
                 self.table_schema = None
             if self.engine.startswith('sqlite'):
-                self.connection = self.connector.connect(kwargs['database'])
+                self.connection = self.connector.connect(kwargs['filepath'])
                 self.table_schema = None
             if self.engine.startswith('odbc'):
                 # This creates the odbc-connection string, which can have different parameters.

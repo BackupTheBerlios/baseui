@@ -13,7 +13,7 @@ class Database(res.Portlets.Database):
         res.Portlets.Database.__init__(self, parent)
         
         self.engines_list = []
-        self.drivers_list = []
+        self.drivers_list = [] 
         
         self.on_connect = None
         self.on_disconnect = None
@@ -69,6 +69,29 @@ class Database(res.Portlets.Database):
                     raise
     
     
+    def set_enabled(self, enabled=False):
+        self.combobox_odbc.Enable(enabled)
+        self.label_odbc.Enable(enabled)
+        
+        self.combobox_engine.Enable(enabled)
+        self.label_engine.Enable(enabled)
+        
+        self.entry_database.Enable(enabled)
+        self.label_database.Enable(enabled)
+        
+        self.entry_host.Enable(enabled)
+        self.label_host.Enable(enabled)
+        
+        self.entry_user.Enable(enabled)
+        self.label_user.Enable(enabled)
+        
+        self.entry_password.Enable(enabled)
+        self.label_password.Enable(enabled)
+        
+        self.label_path.Enable(enabled)
+        self.filepicker_path.Enable(enabled)
+        
+        
     def set_visibility(self, odbc=False, database=False, host=False, user=False, password=False, filepath=False):
         self.combobox_odbc.Show(odbc)
         self.label_odbc.Show(odbc)
@@ -136,7 +159,7 @@ class Database(res.Portlets.Database):
                         'host': self.entry_host.GetValue(),
                         'user': self.entry_user.GetValue(),
                         'password': self.entry_password.GetValue(),
-                        'filepath': self.filepicker_path.GetPath()}
+                        'filepath': self.filepicker_path.GetTextCtrlValue()}
         return content_dict
     
     
@@ -145,6 +168,7 @@ class Database(res.Portlets.Database):
         self.togglebutton_connect.SetBitmapSelected(bitmap)
         
         self.togglebutton_connect.SetToggle(True)
+        self.set_enabled(False)
         
         
     def set_disconnected(self):
@@ -155,6 +179,7 @@ class Database(res.Portlets.Database):
         self.togglebutton_connect.SetBitmapSelected(bitmap)
         
         self.togglebutton_connect.SetToggle(False)
+        self.set_enabled(True)
         
         
         
