@@ -30,8 +30,8 @@ class Database(Portlets.Database):
         
     def on_show(self, event):
         # Populate comboboxes -------------------------------------------------
-        odbc_drivers = dbTools.get_odbc_drivers()
-        self.combobox_odbc.AppendItems(odbc_drivers)
+        odbc_drivers_list = dbTools.get_odbc_drivers()
+        self.combobox_odbc.AppendItems(odbc_drivers_list)
         
         db_engines_list = SQLdb.get_engines()
         self.combobox_engine.AppendItems(db_engines_list)
@@ -46,9 +46,11 @@ class Database(Portlets.Database):
                   'filepath': ''}
         
         self.section_dict = self.ini_file.get_section(section=self.ini_section, option_dict=options)
-        self.section_dict['engines_list'] = db_engines_list
-        self.section_dict['drivers_list'] = odbc_drivers
-        self.populate(self.section_dict)
+        
+        self.form_dict = {'engines_list': db_engines_list,
+                          'drivers_list': odbc_drivers_list}
+        self.form_dict.update(self.section_dict)
+        self.populate(self.form_dict)
         
         self.on_connect = self.connect
         self.on_disconnect = self.disconnect
@@ -68,7 +70,7 @@ class Database(Portlets.Database):
             
             # Save .ini-file automatically on connection
             if self.autosave == True:
-                self.ini_file.save_section(self.ini_section, self.section_dict)
+                self.save_settings()
         except Exception, inst:
             self.set_disconnected()
             self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
@@ -79,6 +81,10 @@ class Database(Portlets.Database):
         if self.database.connection <> None:
             self.database.close()
         self.set_disconnected()
+        
+        
+    def save_settings(self):
+        self.ini_file.save_section(self.ini_section, self.section_dict)
 
         
        

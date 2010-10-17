@@ -38,9 +38,8 @@ class iniFile(ConfigParser.RawConfigParser):
              
         self.read(self._filepath)
         section_dict = {}
-        error_occured = False
         
-        for option in option_dict: #['engine', 'driver', 'database', 'host', 'user', 'password', 'filepath']:
+        for option in option_dict:
             section_error = False
             option_error = False
             
@@ -57,10 +56,6 @@ class iniFile(ConfigParser.RawConfigParser):
                 if section_error == True or option_error == True:
                     self.set(section, option, option_dict[option])
                     section_dict[option] = option_dict[option]
-                    error_occured = True
-        
-        if error_occured:
-            self.write(open(self._filepath, 'w'))
         return section_dict
     
     

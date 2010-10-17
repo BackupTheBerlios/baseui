@@ -136,11 +136,11 @@ class Database(res.Portlets.Database):
         self.combobox_engine.AppendItems(self.engines_list)
         
         # Populate the rest ---------------------------------------------------
-        self.combobox_odbc.SetValue(content_dict.get('driver'))
-        self.on_combobox_odbc_changed(event=None)
-        
         self.combobox_engine.SetValue(content_dict.get('engine'))
         self.on_combobox_engine_changed(event=None)
+        
+        self.combobox_odbc.SetValue(content_dict.get('driver'))
+        self.on_combobox_odbc_changed(event=None)
         
         self.entry_database.SetValue(content_dict.get('database'))
         self.entry_host.SetValue(content_dict.get('host'))

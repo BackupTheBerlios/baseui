@@ -28,6 +28,7 @@ class Error(res.Dialogs.Error):
         
         
     def show(self, title='Fehler', instance=None, message='Error'):
+        self.m_toggleBtn_detail.SetValue(False)
         if instance <> None:
             detail = traceback.format_exc()
             self.m_textCtrl_traceback.SetValue(detail)
