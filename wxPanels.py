@@ -5,61 +5,89 @@
 # published under BSD license by Mark Muzenhardt.
 #===============================================================================
 
-import wx
+import wx, ConfigParser
 
 from wxApi import Portlets, Dialogs
-from misc import FileSystem
+# from misc import FileSystem
 from dbApi import SQLdb, Tools as dbTools
 
 
 class Database(Portlets.Database):
-    def __init__(self, parent, ini_filepath='', autosave=False):
+    def __init__(self, parent, ini_filepath, ini_section, autosave=False):
         Portlets.Database.__init__(self, parent)
+        self.ErrorDialog = Dialogs.Error(self)
         
         self.ini_filepath = ini_filepath
+        self.ini_section = ini_section
         self.autosave = autosave
         
         # Get the database settings -------------------------------------------
-        self.database = None  
-        self.ini_file = FileSystem.iniFile(self.ini_filepath)
-        self.config_dic = self.get_settings_from_ini()
+        self.database = None
         
+        toplevel = self.GetTopLevelParent()
+        toplevel.Bind(wx.EVT_SHOW, self.on_show)
+        
+        
+    def on_show(self, event):
         # Populate comboboxes -------------------------------------------------
         odbc_drivers = dbTools.get_odbc_drivers()
         self.combobox_odbc.AppendItems(odbc_drivers)
+        #self.on_combobox_odbc_changed(event=None)
         
         db_engines_list = SQLdb.get_engines()
         self.combobox_engine.AppendItems(db_engines_list)
+        #self.on_combobox_engine_changed(event=None)
         
-        self.populate({'engines_list':  SQLdb.get_engines(),
-                       'drivers_list':  dbTools.get_odbc_drivers(),
-                       'engine':   self.config_dic.get('engine'),
-                       'driver':   self.config_dic.get('driver'),
-                       'database': self.config_dic.get('database'),
-                       'host':     self.config_dic.get('host'),
-                       'user':     self.config_dic.get('user'),
-                       'password': self.config_dic.get('password'),
-                       'filepath': self.config_dic.get('filepath')})
-                       
+        # Populate the rest ---------------------------------------------------
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read(self.ini_filepath)
+        
+        self.section_dict = {'engines_list':  db_engines_list,
+                             'drivers_list':  odbc_drivers}
+        
+        # This safely reads the ini-section. If something does not exist, create it.
+        for option in ['engine', 'driver', 'database', 'host', 'user', 'password', 'filepath']:
+            try:
+                value = self.config.get(self.ini_section, option)
+                self.section_dict[option] = value
+            except ConfigParser.NoSectionError:
+                self.config.add_section(self.ini_section)
+                self.config.set(self.ini_section, option, '')
+                self.section_dict[option] = ''                
+            except ConfigParser.NoOptionError:
+                self.config.set(self.ini_section, option, '')
+                self.section_dict[option] = ''
+                
+        self.config.write(open(self.ini_filepath, 'w'))        
+        self.populate(self.section_dict)
+        
+        self.on_connect = self.connect
+        self.on_disconnect = self.disconnect
+                
                        
     def connect(self):
         try:
-            self.config_dic = self.portlet_database.get_content()
-            self.database = SQLdb.database(self.config_dic.get('engine'), debug=self.debug)
-            self.database.connect(database=self.config_dic.get('database'),
-                                  driver=self.config_dic.get('driver'),
-                                  host=self.config_dic.get('host'),
-                                  user=self.config_dic.get('user'),
-                                  password=self.config_dic.get('password'))
-            self.portlet_database.set_connected()
+            self.section_dict = self.get_content()
+            self.database = SQLdb.database(self.section_dict.get('engine'))
+            self.database.connect(database=self.section_dict.get('database'),
+                                  driver=self.section_dict.get('driver'),
+                                  host=self.section_dict.get('host'),
+                                  user=self.section_dict.get('user'),
+                                  password=self.section_dict.get('password'),
+                                  filepath=self.section_dict.get('filepath'))
+            self.set_connected()
             
             # Save .ini-file automatically on connection
             if self.autosave == True:
-                self.save_settings_to_ini()
-            if self.on_connect <> None:
-                self.on_connect()
+                print self.section_dict
+                for key in self.section_dict:
+                    self.config.set(self.ini_section, key, self.section_dict[key])
+                self.config.write(open(self.ini_filepath, 'w'))
+                # self.save_settings_to_ini()
+            #if self.on_connect <> None:
+            #    self.on_connect()
         except Exception, inst:
-            self.portlet_database.set_disconnected()
+            self.set_disconnected()
             self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
         return self.database
         
@@ -67,9 +95,9 @@ class Database(Portlets.Database):
     def disconnect(self):        
         if self.database.connection <> None:
             self.database.close()
-        self.portlet_database.set_disconnected()
-        if self.on_disconnect <> None:
-            self.on_disconnect()
+        self.set_disconnected()
+        #if self.on_disconnect <> None:
+        #    self.on_disconnect()
         
         
     def get_settings_from_db(self, database):

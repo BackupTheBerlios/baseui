@@ -6,17 +6,20 @@ from Buttons import BitmapToggleButton
 
 
 class Database(res.Portlets.Database):
-    def __init__(self, parent, autosave=False):
+    def __init__(self, parent):
         """ If autosave = False, there is a save-button appearing! """
         
         # TODO: Save button for autosave has to be implemented! 
         res.Portlets.Database.__init__(self, parent)
         
+        self.engines_list = []
+        self.drivers_list = []
+        
         self.on_connect = None
         self.on_disconnect = None
         
-        self.combobox_engine.Bind(wx.EVT_COMBOBOX, self.on_combobox_engine_changed)
-        self.combobox_odbc.Bind(wx.EVT_COMBOBOX, self.on_combobox_odbc_changed)
+        self.combobox_engine.Bind(wx.EVT_TEXT, self.on_combobox_engine_changed)
+        self.combobox_odbc.Bind(wx.EVT_TEXT, self.on_combobox_odbc_changed)
         
         self.togglebutton_connect = BitmapToggleButton(self, \
             label_bitmap=IconSet16.getconnect_no_16Bitmap(), \
@@ -33,16 +36,20 @@ class Database(res.Portlets.Database):
             self.set_visibility(odbc=True)
         elif engine.lower() == 'sqlite':
             self.set_visibility(filepath=True)
-        else:
+        elif engine in self.engines_list:
             self.set_visibility(database=True, host=True, user=True, password=True)            
+        else:
+            self.set_visibility(odbc=False)
         
     
     def on_combobox_odbc_changed(self, event):
         driver = self.combobox_odbc.GetValue()
         if '*.' in driver.lower():
             self.set_visibility(odbc=True, filepath=True)
-        else:
+        elif driver in self.drivers_list:
             self.set_visibility(odbc=True, database=True, host=True, user=True, password=True)
+        else:
+            self.set_visibility()
         
         
     def on_togglebutton_connect_toggled(self, event):
@@ -97,11 +104,21 @@ class Database(res.Portlets.Database):
              'filepath': 'c:\access\test.mdb'}"""
         
         # Populate comboboxes -------------------------------------------------
-        self.combobox_odbc.AppendItems(content_dict.get('drivers_list'))
-        self.combobox_engine.AppendItems(content_dict.get('engines_list'))
+        self.combobox_odbc.Clear()
+        self.drivers_list = content_dict.get('drivers_list')
+        self.combobox_odbc.AppendItems(self.drivers_list)
         
+        self.combobox_engine.Clear()
+        self.engines_list = content_dict.get('engines_list')
+        self.combobox_engine.AppendItems(self.engines_list)
+        
+        # Populate the rest ---------------------------------------------------
         self.combobox_odbc.SetValue(content_dict.get('driver'))
+        self.on_combobox_odbc_changed(event=None)
+        
         self.combobox_engine.SetValue(content_dict.get('engine'))
+        self.on_combobox_engine_changed(event=None)
+        
         self.entry_database.SetValue(content_dict.get('database'))
         self.entry_host.SetValue(content_dict.get('host'))
         self.entry_user.SetValue(content_dict.get('user'))

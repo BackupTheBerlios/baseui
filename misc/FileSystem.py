@@ -32,13 +32,13 @@ class ini:
         self.parser = ConfigParser.ConfigParser()
         
         
-    def initialize(self, definition):
-        ''' definition_lod = \
+    def initialize(self, configuration):
+        ''' configuration = \
             [
                 {'Section Print':
                     [
                         {'printer': 'standard value'},
-                        {'style': 'italic'},
+                        {'style':   'italic'},
                     ]
                 },
                 {'Section config':
@@ -48,7 +48,7 @@ class ini:
                 }
             ] '''
             
-        self.configuration = config_lod
+        self.definition = configuration
         
     
     def load(self):
@@ -81,11 +81,23 @@ class ini:
         print output_str
         
         
-    def get(self, section, value):
+    def get_value(self, section, value):
         pass
+    
+    
+    def set_value(self, section, value):
+        pass
+    
+    
+    def remove_value(self, section, value):
+        pass
+    
         
-        
-    def change(self, section, value):
+    def get_section(self, section):
+        pass
+    
+    
+    def remove_section(self, section):
         pass
         
         
