@@ -26,6 +26,7 @@ class Database(Portlets.Database):
         
         toplevel = self.GetTopLevelParent()
         toplevel.Bind(wx.EVT_SHOW, self.on_show)
+        self.on_show(None)
         
         
     def on_show(self, event):
@@ -52,8 +53,8 @@ class Database(Portlets.Database):
         self.form_dict.update(self.section_dict)
         self.populate(self.form_dict)
         
-        self.on_connect = self.connect
-        self.on_disconnect = self.disconnect
+        #self.on_connect = self.connect
+        #self.on_disconnect = self.disconnect
                 
                        
     def connect(self):
@@ -81,6 +82,7 @@ class Database(Portlets.Database):
         if self.database.connection <> None:
             self.database.close()
         self.set_disconnected()
+        return self.database
         
         
     def save_settings(self):
@@ -141,7 +143,7 @@ class DatabaseLogin(wx.Panel):
         
         self.button_ok = wx.Button(bottom_panel, label='Ok')
         bottom_sizer.Add(self.button_ok, 1, wx.ALL|wx.ALIGN_RIGHT, 5)
-
+        
         bottom_panel.SetSizer(bottom_sizer)
         
         # Get the database settings -------------------------------------------
@@ -171,11 +173,11 @@ class DatabaseLogin(wx.Panel):
         
     # Actions -----------------------------------------------------------------
     def connect(self):
-        self.database = self.portlet_database.database
+        self.database = self.portlet_database.connect()
 
 
     def disconnect(self):        
-        self.database = self.portlet_database.database
+        self.database = self.portlet_database.disconnect()
         
         
         
