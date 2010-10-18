@@ -26,33 +26,19 @@ class Database(res.Portlets.Database):
             selected_bitmap = IconSet16.getconnect_creating_16Bitmap()
         )
 
-        self.togglebutton_connect.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled) #, self.togglebutton_connect)
-        self.sizer_button.Add( self.togglebutton_connect, 1, wx.ALIGN_RIGHT|wx.ALL, 5 )
-        
+        self.togglebutton_connect.Bind(wx.EVT_BUTTON, self.on_togglebutton_connect_toggled)
+        self.sizer_button.Add(self.togglebutton_connect, 1, wx.ALIGN_RIGHT|wx.ALL, 5)
+
     
-    def on_combobox_engine_changed(self, event):
-        engine = self.combobox_engine.GetValue()
-        if engine.lower() == 'odbc':
-            self.set_visibility(odbc=True)
-        elif engine.lower() == 'sqlite':
-            self.set_visibility(filepath=True)
-        elif engine in self.engines_list:
-            self.set_visibility(database=True, host=True, user=True, password=True)            
-        else:
-            self.set_visibility(odbc=False)
-        
+    def on_combobox_engine_changed(self, event=None):
+        self.set_visibility()
+         
     
-    def on_combobox_odbc_changed(self, event):
-        driver = self.combobox_odbc.GetValue()
-        if '*.' in driver.lower():
-            self.set_visibility(odbc=True, filepath=True)
-        elif driver in self.drivers_list:
-            self.set_visibility(odbc=True, database=True, host=True, user=True, password=True)
-        else:
-            self.set_visibility()
+    def on_combobox_odbc_changed(self, event=None):
+        self.set_visibility()
         
         
-    def on_togglebutton_connect_toggled(self, event):
+    def on_togglebutton_connect_toggled(self, event=None):
         is_down = event.GetIsDown() 
         
         if is_down:
@@ -92,7 +78,34 @@ class Database(res.Portlets.Database):
         self.filepicker_path.Enable(enabled)
         
         
-    def set_visibility(self, odbc=False, database=False, host=False, user=False, password=False, filepath=False):
+    def set_visibility(self):
+        driver = self.combobox_odbc.GetValue()
+        engine = self.combobox_engine.GetValue()
+        
+        odbc=False
+        database=False
+        host=False
+        user=False
+        password=False
+        filepath=False
+        
+        if engine.lower() == 'odbc':
+            odbc=True
+            if '*.' in driver.lower():
+                filepath=True
+            elif driver in self.drivers_list:
+                database=True
+                host=True
+                user=True
+                password=True
+        elif engine.lower() == 'sqlite':
+            filepath=True
+        elif engine in self.engines_list:
+            database=True
+            host=True
+            user=True
+            password=True
+
         self.combobox_odbc.Show(odbc)
         self.label_odbc.Show(odbc)
         
@@ -137,10 +150,10 @@ class Database(res.Portlets.Database):
         
         # Populate the rest ---------------------------------------------------
         self.combobox_engine.SetValue(content_dict.get('engine'))
-        self.on_combobox_engine_changed(event=None)
+        self.on_combobox_engine_changed()
         
         self.combobox_odbc.SetValue(content_dict.get('driver'))
-        self.on_combobox_odbc_changed(event=None)
+        self.on_combobox_odbc_changed()
         
         self.entry_database.SetValue(content_dict.get('database'))
         self.entry_host.SetValue(content_dict.get('host'))
