@@ -13,11 +13,11 @@ from dbApi import SQLdb, Tools as dbTools
 
 
 class Database(Portlets.Database):
-    def __init__(self, parent, ini_filepath, ini_section, autosave=False):
+    def __init__(self, parent, ini_path, ini_section, autosave=False):
         Portlets.Database.__init__(self, parent)
         self.ErrorDialog = Dialogs.Error(self)
         
-        self.ini_file = iniFile(ini_filepath)
+        self.ini_file = iniFile(ini_path)
         self.ini_section = ini_section
         self.autosave = autosave
         
@@ -89,14 +89,14 @@ class Database(Portlets.Database):
         
        
 class DatabaseLogin(wx.Panel):
-    def __init__(self, parent, image_path='', ini_path='', autosave=True, debug=False):
+    def __init__(self, parent, image_path, ini_path, ini_section, autosave=True):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
         self.image_path = image_path
         self.ini_path = ini_path
+        self.ini_section = ini_section
         self.autosave = autosave
-        self.debug = debug
         
         self.on_connect = None
         self.on_disconnect = None
@@ -108,7 +108,10 @@ class DatabaseLogin(wx.Panel):
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        self.portlet_database = Database(parent=self, autosave=self.autosave)
+        self.portlet_database = Database(parent=self, 
+                                         ini_path=self.ini_path, 
+                                         ini_section=self.ini_section,
+                                         autosave=self.autosave)
         self.portlet_database.Hide()
         self.portlet_login = Portlets.Login(parent=self)
         
@@ -142,17 +145,18 @@ class DatabaseLogin(wx.Panel):
         bottom_panel.SetSizer(bottom_sizer)
         
         # Get the database settings -------------------------------------------
-        self.database = None  
-        self.ini_file = FileSystem.iniFile(self.ini_path)
-        self.config_dic = self.get_settings_from_ini()
-        self.populate()
         
-        self.portlet_database.on_connect = self.connect
-        self.portlet_database.on_disconnect = self.disconnect
+        #self.ini_file = FileSystem.iniFile(self.ini_path)
+        #self.config_dic = self.get_settings_from_ini()
+        #self.populate()
+        
+        #self.portlet_database.on_connect = self.connect
+        #self.portlet_database.on_disconnect = self.disconnect
                 
         
     def on_togglebutton_preferences_toggled(self, event):
         selection = event.GetSelection()
+        print self.database
         
         if selection == 1:
             self.sizer.Replace(self.logo, self.portlet_database)
@@ -166,75 +170,12 @@ class DatabaseLogin(wx.Panel):
         
         
     # Actions -----------------------------------------------------------------
-    def populate(self):
-        # First, populate database_portlet        
-        
-        
-        # TODO: Populate the login portlet
-        pass
-        
-    
-    def get_settings_from_db(self, database):
-        self.database = database
-        if self.database <> None:
-            self.config_dic = database.config
-        else:
-            self.portlet_database.set_disconnected()
-            return
-
-        if self.database.connection <> None:
-            self.portlet_database.set_connected()
-        else:
-            self.portlet_database.set_disconnected()
-        return self.config_dic
-    
-    
-    def get_settings_from_ini(self):
-        try:
-            self.config_dic = self.ini_file.dictresult('db')
-            return self.config_dic
-        except Exception, inst:
-            dialog = wx.MessageDialog(self, caption='Fehler', 
-                                            message='''\
-Die Datenbank Konfigurationsdatei ist fehlerhaft
-oder nicht vorhanden.
-
-Soll die Konfigurationsdatei neu erstellt werden?''', 
-                                            style=(wx.YES_NO | wx.ICON_EXCLAMATION))
-            result = dialog.ShowModal()
-            
-            if result == wx.ID_YES:
-                self.config_dic = self.save_settings_to_ini()
-                return self.config_dic
-        
-        
-    def save_settings_to_ini(self):
-        self.config_dic = self.portlet_database.get_content()
-        ini_text = """\
-[db]
-engine = %(engine)s
-driver = %(driver)s
-database = %(database)s
-host = %(host)s
-user = %(user)s
-password = %(password)s
-
-""" % self.config_dic
-
-        self.ini_file.save(ini_text)
-        return self.config_dic
-
-
     def connect(self):
-        self.portlet_database.connect()
+        self.database = self.portlet_database.database
 
 
     def disconnect(self):        
-        if self.database.connection <> None:
-            self.database.close()
-        self.portlet_database.set_disconnected()
-        if self.on_disconnect <> None:
-            self.on_disconnect()
+        self.database = self.portlet_database.database
         
         
         
