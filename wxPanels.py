@@ -24,13 +24,15 @@ class Database(Portlets.Database):
         # Get the database settings -------------------------------------------
         self.database = None
         
-        toplevel = self.GetTopLevelParent()
-        toplevel.Bind(wx.EVT_SHOW, self.on_show)
-        self.on_show(None)
+        #toplevel = self.GetTopLevelParent()
+        #toplevel.Bind(wx.EVT_SHOW, self.on_show)
+        self.Bind(wx.EVT_SHOW, self.on_show)
+        #self.on_show(None)
         
         
     def on_show(self, event):
         # Populate comboboxes -------------------------------------------------
+        print 'on show DATABAE'
         odbc_drivers_list = dbTools.get_odbc_drivers()
         self.combobox_odbc.AppendItems(odbc_drivers_list)
         
@@ -154,7 +156,7 @@ class DatabaseLogin(wx.Panel):
         
         #self.portlet_database.on_connect = self.connect
         #self.portlet_database.on_disconnect = self.disconnect
-                
+        
         
     def on_togglebutton_preferences_toggled(self, event):
         selection = event.GetSelection()
