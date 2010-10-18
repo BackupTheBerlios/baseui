@@ -165,6 +165,7 @@ class DatabaseLogin(wx.Panel):
             self.sizer.Replace(self.logo, self.portlet_database)
             self.logo.Hide()
             self.portlet_database.Show()
+            self.portlet_database.on_show(None)
         else:
             self.sizer.Replace(self.portlet_database, self.logo)
             self.logo.Show()
