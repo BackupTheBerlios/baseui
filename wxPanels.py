@@ -26,13 +26,12 @@ class Database(Portlets.Database):
         
         #toplevel = self.GetTopLevelParent()
         #toplevel.Bind(wx.EVT_SHOW, self.on_show)
-        self.Bind(wx.EVT_SHOW, self.on_show)
+        #self.Bind(wx.EVT_SHOW, self.on_show)
         #self.on_show(None)
         
         
     def on_show(self, event):
         # Populate comboboxes -------------------------------------------------
-        print 'on show DATABAE'
         odbc_drivers_list = dbTools.get_odbc_drivers()
         self.combobox_odbc.AppendItems(odbc_drivers_list)
         
@@ -55,8 +54,8 @@ class Database(Portlets.Database):
         self.form_dict.update(self.section_dict)
         self.populate(self.form_dict)
         
-        #self.on_connect = self.connect
-        #self.on_disconnect = self.disconnect
+        self.on_connect = self.connect
+        self.on_disconnect = self.disconnect
                 
                        
     def connect(self):
