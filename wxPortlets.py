@@ -41,6 +41,8 @@ class Table:
         self.toolbar_parent = toolbar_parent
         
         self.form = form
+        print self.form
+        
         self.parent_form = parent_form
         
         self.help_path = help_path
@@ -89,10 +91,10 @@ class Table:
 
     # Actions -----------------------------------------------------------------
     def new_dataset(self, event=None):       
-        # try:
-        self.form(self.portlet_parent, self.db_object).show(primary_key=None)
-        # except Exception, inst:
-        # self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
+        try:
+            self.form(self.portlet_parent, self.db_object).show(primary_key=None)
+        except Exception, inst:
+            self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
     def edit_dataset(self, event=None):
@@ -314,6 +316,9 @@ class Form(wx.Frame):
         self.xrc_path = xrc_path
         self.panel_name = panel_name
         self.help_path = help_path
+        print 'init Form instance'
+        
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
         
         
     def on_button_save_clicked(self, widget=None, data=None):
@@ -358,8 +363,8 @@ class Form(wx.Frame):
                              'delete_function': None}]
                                  => function triggered on delete'''
         
-        self.frame = wx.Frame(self.parent, wx.ID_ANY, self.title)
-        self.aui_manager = wx.aui.AuiManager(self.frame)
+        #self.frame = wx.Frame(self.parent, wx.ID_ANY, self.title)
+        self.aui_manager = wx.aui.AuiManager(self)
         
         self.primary_key = primary_key
 
@@ -369,18 +374,18 @@ class Form(wx.Frame):
         self.create_toolbar()
 
         # Add panels ----------------------------------------------------------
-        self.panel_main = wx.Panel(self.frame, -1, size = (200, 150))
+        self.panel_main = wx.Panel(self, -1, size = (200, 150))
 
         self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
                          Name("toolbar_standard").Caption("Standard").
                          ToolbarPane().Top().Resizable().
                          LeftDockable(False).RightDockable(False))
         self.aui_manager.AddPane(self.panel_main, wx.aui.AuiPaneInfo().CaptionVisible(False).
-                                 Name("self.panel_main").TopDockable(False).
+                                 Name("panel_main").TopDockable(False).
                                  Center().Layer(1).CloseButton(False))
         self.aui_manager.Update()
         
-        self.pane_main_info = self.aui_manager.GetPane('self.panel_main')
+        #self.pane_main_info = self.aui_manager.GetPane('self.panel_main')
                 
         
         # Get wTree, initialize form
@@ -400,12 +405,12 @@ class Form(wx.Frame):
                         if dic.has_key('populate_function'):# and self.primary_key <> None:
                             dic['populate_function']()
         
-        self.frame.SetInitialSize()
-        self.frame.Show()
+        self.SetInitialSize()
+        self.Show()
         
 
     def create_toolbar(self, dataset=True, report=True, help=True):
-        self.toolbar_standard = wx.aui.AuiToolBar(self.frame, id=wx.ID_ANY) 
+        self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
  
         self.toolbar_standard.AddTool(wx.ID_ANY, "Speichern",     IconSet16.getfilesave_16Bitmap())
         self.toolbar_standard.AddTool(wx.ID_ANY, "Löschen",       IconSet16.getdelete_16Bitmap())
