@@ -41,7 +41,6 @@ class Table:
         self.toolbar_parent = toolbar_parent
         
         self.form = form
-        print self.form
         
         self.parent_form = parent_form
         
@@ -92,13 +91,13 @@ class Table:
     # Actions -----------------------------------------------------------------
     def new_dataset(self, event=None):       
         try:
-            self.form(self.portlet_parent, self.db_object).show(primary_key=None)
+            self.form(self.portlet_parent, self.db_object)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
     def edit_dataset(self, event=None):
-        self.form(self.db_object).show(self.primary_key)
+        self.form(self.db_object).show(self.portlet_parent, self.primary_key)
 
 
     def delete_dataset(self, event=None):
@@ -296,8 +295,69 @@ class Table:
             content_dic[column_name] = mask % substitute_lod[0]
         
         
-        
+
 class Form(wx.Frame):
+    def __init__(self, parent=None,
+                       title=None, 
+                       panel_name=None,
+                       icon_path=None, 
+                       xrc_path=None,     
+                       help_path=None):
+                       
+        self.parent = parent
+        self.icon_path = icon_path
+        self.title = title
+        self.xrc_path = xrc_path
+        self.panel_name = panel_name
+        self.help_path = help_path
+        
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+        
+        self.aui_manager = wx.aui.AuiManager(self)
+                
+        self.panel_main = wx.Panel(self, -1, size = (320, 240))
+        self.create_toolbar()
+        
+        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
+                         Name("toolbar_standard").Caption("Standard").
+                         ToolbarPane().Top().Resizable().
+                         LeftDockable(False).RightDockable(False))
+        self.aui_manager.AddPane(self.panel_main, wx.aui.AuiPaneInfo().CaptionVisible(False).
+                                 Name("panel_main").TopDockable(False).
+                                 Center().Layer(1).CloseButton(False))
+        self.aui_manager.Update()
+        self.Show()
+        
+        
+    def on_close(self, event):
+        del(self.toolbar_standard)
+        self.Destroy()
+        
+        
+    def initialize(self, db_table_object=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
+        self.definition_lod = definition_lod
+        self.attributes_lod = attributes_lod
+        
+        self.Form = DataViews.Form(self.panel_main, self.xrc_path, self.panel_name)
+        self.Form.initialize(definition_lod=self.definition_lod, 
+                             attributes_lod=self.attributes_lod)
+        self.definition_lod = self.Form.definition_lod
+        self.SetInitialSize()
+        
+        
+    def create_toolbar(self, dataset=True, report=True, help=True):
+        self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
+ 
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Speichern",     IconSet16.getfilesave_16Bitmap())
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Löschen",       IconSet16.getdelete_16Bitmap())
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken",       IconSet16.getprint_16Bitmap())
+        self.toolbar_standard.AddSeparator()
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Hilfe",         IconSet16.gethelp_16Bitmap())
+
+                       
+class OldForm(wx.Frame):
     def __init__(self, parent=None,
                        parent_form=None, 
                        title=None, 
@@ -320,33 +380,52 @@ class Form(wx.Frame):
         
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
         
+        self.Show()
         
-    def on_button_save_clicked(self, widget=None, data=None):
-        self.save_dataset()
-        self.window.destroy()
+        self.aui_manager = wx.aui.AuiManager(self)
+        
+        self.create_toolbar()
+
+        # Add panels ----------------------------------------------------------
+        self.panel_main = wx.Panel(self, -1, size = (200, 150))
+
+        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
+                         Name("toolbar_standard").Caption("Standard").
+                         ToolbarPane().Top().Resizable().
+                         LeftDockable(False).RightDockable(False))
+        self.aui_manager.AddPane(self.panel_main, wx.aui.AuiPaneInfo().CaptionVisible(True).
+                                 Name("panel_main").TopDockable(False).
+                                 Center().Layer(1).CloseButton(False))
+        self.aui_manager.Update()
+        self.SetInitialSize()
+        
+        
+    #def on_button_save_clicked(self, widget=None, data=None):
+    #    self.save_dataset()
+    #    self.window.destroy()
 
 
-    def on_button_delete_clicked(self, widget=None, data=None):
-        self.delete_dataset()
+    #def on_button_delete_clicked(self, widget=None, data=None):
+    #    self.delete_dataset()
+
+    
+    #def on_button_print_clicked(self, widget=None, data=None):
+    #    pass
 
 
-    def on_button_print_clicked(self, widget=None, data=None):
-        pass
+    #def on_button_help_clicked(self, widget=None, data=None):
+    #    if self.help_path <> None:
+    #        self.HTMLhelp.show(self.help_path)
 
 
-    def on_button_help_clicked(self, widget=None, data=None):
-        if self.help_path <> None:
-            self.HTMLhelp.show(self.help_path)
-
-
-    def on_window_destroy(self, widget=None, data=None):
-        if self.portlets_lod <> None:
-            for portlet_row in self.portlets_lod:
-                dic = portlet_row
-                if dic.has_key('portlet'):
-                    if dic.has_key('container'):
-                        self.xrc.get_widget(dic['container']).remove(dic['portlet'])
-        self.update_func()
+    #def on_window_destroy(self, widget=None, data=None):
+    #    if self.portlets_lod <> None:
+    #        for portlet_row in self.portlets_lod:
+    #            dic = portlet_row
+    #            if dic.has_key('portlet'):
+    #                if dic.has_key('container'):
+    #                    self.xrc.get_widget(dic['container']).remove(dic['portlet'])
+    #    self.update_func()
 
 
     # Actions -----------------------------------------------------------------
@@ -364,26 +443,14 @@ class Form(wx.Frame):
                                  => function triggered on delete'''
         
         #self.frame = wx.Frame(self.parent, wx.ID_ANY, self.title)
-        self.aui_manager = wx.aui.AuiManager(self)
+        
         
         self.primary_key = primary_key
 
         if self.help_path <> None:
             help_button_visible = True
 
-        self.create_toolbar()
-
-        # Add panels ----------------------------------------------------------
-        self.panel_main = wx.Panel(self, -1, size = (200, 150))
-
-        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
-                         Name("toolbar_standard").Caption("Standard").
-                         ToolbarPane().Top().Resizable().
-                         LeftDockable(False).RightDockable(False))
-        self.aui_manager.AddPane(self.panel_main, wx.aui.AuiPaneInfo().CaptionVisible(False).
-                                 Name("panel_main").TopDockable(False).
-                                 Center().Layer(1).CloseButton(False))
-        self.aui_manager.Update()
+        
         
         #self.pane_main_info = self.aui_manager.GetPane('self.panel_main')
                 
@@ -395,18 +462,17 @@ class Form(wx.Frame):
         self.definition_lod = self.Form.definition_lod
 
         # Get the portlet_objects and pack them into their container.
-        if self.portlets_lod <> None:
-            for portlet_row in self.portlets_lod:
-                dic = portlet_row
-                if dic.has_key('portlet'):
-                    if dic.has_key('container'):
-                        container = self.wTree.get_widget(dic['container'])
-                        container.add(dic['portlet'])
-                        if dic.has_key('populate_function'):# and self.primary_key <> None:
-                            dic['populate_function']()
+        #if self.portlets_lod <> None:
+        #    for portlet_row in self.portlets_lod:
+        #        dic = portlet_row
+        #        if dic.has_key('portlet'):
+        #            if dic.has_key('container'):
+        #                container = self.wTree.get_widget(dic['container'])
+        #                container.add(dic['portlet'])
+        #                if dic.has_key('populate_function'):# and self.primary_key <> None:
+        #                    dic['populate_function']()
         
-        self.SetInitialSize()
-        self.Show()
+        
         
 
     def create_toolbar(self, dataset=True, report=True, help=True):
