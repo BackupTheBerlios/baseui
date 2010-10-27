@@ -640,7 +640,13 @@ CREATE TABLE """ + self.name + """
         ''' Returns a list of columns contained by this table. '''
         
         if self.db_object.engine <> 'sqlite':
-            column_list = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
+            if self.db_object.engine == 'odbc':
+                column_attributes = self.db_object.cursor.columns(table=self.name)
+                column_list = []
+                for column in column_attributes:
+                    column_list.append(column[3])
+            else:
+                column_list = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         else:
             attributes_lod = self.db_object.dictresult("PRAGMA TABLE_INFO(%s)" % self.name)
             column_list = []
