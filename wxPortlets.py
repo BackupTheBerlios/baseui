@@ -85,7 +85,7 @@ class Table:
         self.toolbar_parent.EnableTool(self.ID_DELETE, True)
         
         self.primary_key = content_dic[self.primary_key_column]
-        print self.primary_key
+        # print self.primary_key
         
 
     # Actions -----------------------------------------------------------------
@@ -97,7 +97,7 @@ class Table:
 
 
     def edit_dataset(self, event=None):
-        self.form(self.db_object).show(self.portlet_parent, self.primary_key)
+        self.form(self.portlet_parent, self.db_object).show(self.portlet_parent, self.primary_key)
 
 
     def delete_dataset(self, event=None):
