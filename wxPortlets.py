@@ -33,43 +33,25 @@ class Table:
     
     
     def __init__(self, db_object, toolbar_parent=None, portlet_parent=None, \
-                       form=None, parent_form=None, \
-                       db_table=None, help_path=None):
+                       form=None, db_table=None, help_path=None):
         
+        ''' db_object is the current opened database object.
+            toolbar_parent is an aui toolbar, which has to be populated from here.
+            portlet_parent is the underlying parent which contains this widget.
+            
+            form is a form class, that creates an object here to edit datasets.
+            # parent_form is ???
+            db_table is a string which is simply the database table name.
+            help_path is the path to the helpfile opened if help pressed. '''
+            
         self.db_object = db_object
-        self.portlet_parent = portlet_parent
         self.toolbar_parent = toolbar_parent
+        self.portlet_parent = portlet_parent
         
         self.form = form
-        
-        self.parent_form = parent_form
-        
+        # self.parent_form = parent_form
         self.help_path = help_path
-        #self.filter_lod = []
-        
-        #self.toolbar = None #Toolbars.TableToolbar(parent)
-        #print '........', portlet_parent
-        
-        #self.Table.create()
-
-
-        #self.create_toolbar(dataset, report, search, filter, help)
-        #self.form = form_object
-        #self.form.set_update_function(self.update)
-        
-        #self.scrolledwindow = gtk.ScrolledWindow()
-        #self.scrolledwindow.set_policy(hscrollbar_policy=gtk.POLICY_AUTOMATIC, 
-        #                               vscrollbar_policy=gtk.POLICY_AUTOMATIC)
-        #self.scrolledwindow.add(self.Table.widget)
-        #self.portlet = self.scrolledwindow
-
-        #if separate_toolbar == False:
-        #    vbox = gtk.VBox()
-        #    vbox.pack_start(child=self.toolbar,        expand=False, fill=True, padding=0)
-        #    vbox.pack_start(child=self.scrolledwindow, expand=True,  fill=True, padding=0)
-        #    self.portlet = vbox
-        #self.portlet.show()
-        
+                
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
@@ -89,40 +71,41 @@ class Table:
         
 
     # Actions -----------------------------------------------------------------
-    def new_dataset(self, event=None):       
+    def on_new(self, event=None):       
         try:
             self.form(self.portlet_parent, self.db_object)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
-    def edit_dataset(self, event=None):
+    def on_edit(self, event=None):
         self.form(self.portlet_parent, self.db_object).show(self.portlet_parent, self.primary_key)
 
 
-    def delete_dataset(self, event=None):
+    def on_delete(self, event=None):
         self.form.primary_key = self.primary_key
-        response = self.form.delete_dataset()
+        print 'primary_key for form:', self.form.primary_key
+        #response = self.form.delete_dataset()
 
-        if response == True:
-            self.toolbar_parent.EnableTool(self.ID_DELETE, False)
-            self.toolbar_parent.EnableTool(self.ID_EDIT, False)
+        #if response == True:
+        #    self.toolbar_parent.EnableTool(self.ID_DELETE, False)
+        #    self.toolbar_parent.EnableTool(self.ID_EDIT, False)
             #self.update()
 
 
-    def print_dataset(self, event=None):
+    def on_print(self, event=None):
         print "print"
 
 
-    def search_dataset(self, event=None):
+    def on_search(self, event=None):
         print "search"
 
 
-    def show_preferences(self, event=None):
+    def on_preferences(self, event=None):
         print "preferences"
         
         
-    def show_help(self):
+    def on_help(self, event=None):
         if self.help_path <> None:
             self.HTMLhelp.show(self.help_path)
     
@@ -204,18 +187,18 @@ class Table:
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
         self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.new_dataset, id=self.ID_NEW)
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_new, id=self.ID_NEW)
 
         self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit_dataset, id=self.ID_EDIT)
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_edit, id=self.ID_EDIT)
 
         self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete_dataset, id=self.ID_DELETE)
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
 
         self.toolbar_parent.AddSeparator()
         
         self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",     IconSet16.getprint_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.print_dataset, id=self.ID_PRINT)
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
 
         #if filter == True:
         self.toolbar_parent.AddSeparator()
@@ -234,11 +217,11 @@ class Table:
         
         #if preferences == True:
         self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_preferences, id=self.ID_PREFERENCES)
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
         
         if self.help_path <> None:
             self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.show_help, id=self.ID_HELP)
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         self.toolbar_parent.Realize()
     
@@ -297,6 +280,13 @@ class Table:
         
 
 class Form(wx.Frame):
+    ID_SAVE = 101
+    ID_DELETE = 102
+    ID_PRINT = 103
+    
+    ID_PREFERENCES = 201
+    ID_HELP = 202
+    
     def __init__(self, parent=None,
                        title=None, 
                        panel_name=None,
@@ -312,10 +302,11 @@ class Form(wx.Frame):
         self.help_path = help_path
         
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
+        self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ANY))
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
         self.aui_manager = wx.aui.AuiManager(self)
-                
+        
         self.panel_main = wx.Panel(self, -1, size = (320, 240))
         self.create_toolbar()
         
@@ -330,9 +321,29 @@ class Form(wx.Frame):
         self.Show()
         
         
-    def on_close(self, event):
+    def on_close(self, event=None):
         del(self.toolbar_standard)
         self.Destroy()
+        
+        
+    def on_save(self, event=None):
+        print 'save formular'
+        
+        
+    def on_delete(self, event=None):
+        print 'delete formular'
+        
+        
+    def on_print(self, event=None):
+        print 'print formular'
+        
+        
+    def on_preferences(self, event=None):
+        print 'preferences'
+        
+        
+    def on_help(self, event=None):
+        print 'help'
         
         
     def initialize(self, db_table_object=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
@@ -348,13 +359,22 @@ class Form(wx.Frame):
         
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
- 
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Speichern",     IconSet16.getfilesave_16Bitmap())
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Löschen",       IconSet16.getdelete_16Bitmap())
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken",       IconSet16.getprint_16Bitmap())
+        
+        self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap())
+        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
+        
+        self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap())
+        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
+        
+        self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap())
+        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        
         self.toolbar_standard.AddSeparator()
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Hilfe",         IconSet16.gethelp_16Bitmap())
+        self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+        
+        self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
+        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
 
                        
 class OldForm(wx.Frame):
