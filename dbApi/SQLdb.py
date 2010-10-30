@@ -876,7 +876,11 @@ class column:
     def get_content(self):
         ''' Fetches all rows and gives them back as list. '''
 
-        content = []
+        sql_command = 'SELECT %s FROM %s' % (self.name, self.table_object.name)
+        try:
+            content = self.db_object.listresult(sql_command)
+        except:
+            raise
         return content
 
 
