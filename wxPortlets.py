@@ -49,7 +49,7 @@ class Table:
         self.portlet_parent = portlet_parent
         
         self.form = form
-        # self.parent_form = parent_form
+        self.parent_form = None
         self.help_path = help_path
                 
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
@@ -329,6 +329,8 @@ class Form(wx.Frame):
     def on_save(self, event=None):
         print 'save formular'
         
+        print 'content:', self.form.get_content()
+        
         
     def on_delete(self, event=None):
         print 'delete formular'
@@ -350,10 +352,10 @@ class Form(wx.Frame):
         self.definition_lod = definition_lod
         self.attributes_lod = attributes_lod
         
-        self.Form = DataViews.Form(self.panel_main, self.xrc_path, self.panel_name)
-        self.Form.initialize(definition_lod=self.definition_lod, 
+        self.form = DataViews.Form(self.panel_main, self.xrc_path, self.panel_name)
+        self.form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
-        self.definition_lod = self.Form.definition_lod
+        self.definition_lod = self.form.definition_lod
         self.SetInitialSize()
         
         

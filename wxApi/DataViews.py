@@ -28,11 +28,6 @@ class Tree(TreeListCtrl):
         self.Hide()
         self.row_activate_function = None
         self.cursor_changed_function = None
-        
-
-    # Events ------------------------------------------------------------------
-#    def on_column_toggled(self, renderer=None, row=None, widget=None, col=None):
-#        pass
 
 
     def on_row_activated(self, event=None):
@@ -60,7 +55,7 @@ class Tree(TreeListCtrl):
         ''' Returns the content as list_of_dictionarys, just like the content_lod
             uses at populate. '''
             
-        content_lod = None    
+        content_lod = None
         return content_lod
 
 
@@ -117,7 +112,6 @@ class Tree(TreeListCtrl):
                               'is_nullable' = True}]'''
 
         self.definition_lod = definition_lod
-        
         #treeview_column_list = []
         #self.type_list = []
         
@@ -392,7 +386,7 @@ class Form(wx.Panel):
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
                 widget_object = wx.xrc.XRCCTRL(self, widget_name)
-
+                print 'widget_name:', widget_name, 'is object:', widget_object
                 # if widget_name.startswith('entry_'):                    
                 #     if data_type == 'date':
                 #         widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
@@ -479,60 +473,49 @@ class Form(wx.Panel):
             row = definition_row[0]
             dic = definition_row[1]
 
-            if dic.has_key('widget_object') and \
-               dic.has_key('widget_name'):
-                widget_object = self.definition_lod[row]['widget_object']
-                widget_name = self.definition_lod[row]['widget_name']
-                column_name = self.definition_lod[row]['column_name']
-                if self.definition_lod[row].has_key('data_type'):
-                    data_type = self.definition_lod[row]['data_type']
-                else:
-                    data_type = None
-            else:
-                continue
+            widget_object = self.definition_lod[row].get('widget_object')
+            widget_name = self.definition_lod[row].get('widget_name')
+            column_name = self.definition_lod[row].get('column_name')
+            data_type = self.definition_lod[row].get('data_type')
 
-            if widget_object == None:
+            if widget_object == None or \
+               column_name == None:
                 continue
-
-            if widget_name.startswith('entry_'):
-                widget_content = widget_object.get_text()
+            
+            if widget_object.__class__ ==  wx._controls.TextCtrl:
+                widget_content = widget_object.GetValue()
                 if widget_content <> '':
                     self.content_dict[column_name] = widget_content
                 else:
                     self.content_dict[column_name] = None
-            if widget_name.startswith('comboboxentry_'):
-                # Get the selected row (dict)
-                selection = widget_object.get_selection()
+            if widget_object.__class__ == wx._controls.ComboBox:
+                # TODO: If there is a db-column sub-referenced, there has to be some code for that!
                 
-                if dic.has_key('referenced_column_name'):
-                    if selection <> None:
-                        referenced_column_name = dic['referenced_column_name']
-                        widget_content = selection[referenced_column_name]
-                    else:
-                        widget_content = None
-                else:
-                    widget_content = widget_object.get_text()
-                
+                #if dic.has_key('referenced_column_name'):
+                #    if selection <> None:
+                #        referenced_column_name = dic['referenced_column_name']
+                #        widget_content = selection[referenced_column_name]
+                #    else:
+                #        widget_content = None
+                #else:
+                widget_content = widget_object.GetValue()
                 if widget_content <> '':
                     self.content_dict[column_name] = widget_content
                 else:
                     self.content_dict[column_name] = None
-            if widget_name.startswith('checkbutton_'):
-                widget_content = widget_object.get_active()
+            if widget_object.__class__ == wx._controls.CheckBox:
+                widget_content = widget_object.GetValue()
                 self.content_dict[column_name] = widget_content
-            if widget_name.startswith('textview_'):
-                widget_content = widget_object.get_text()
-                self.content_dict[column_name] = widget_content
-                #print 'textview_content:', widget_content, widget_object
-
+            
             # Make usdate from german date
+            # TODO: Whats' this shit here?
             if data_type == 'date':
                 if widget_content <> '':
                     try:
                         day, month, year = widget_content.split('.')
                     except:
                         raise
-
+                    
                     day = int(day)
                     month = int(month)
                     year = int(year)
@@ -540,17 +523,10 @@ class Form(wx.Panel):
                     self.content_dict[column_name] = widget_content
         return self.content_dict
 
-
-        
-        # Just for testing purpuoses!
-        #print self.entry_log.__class__, 'is the same as', wx._controls.TextCtrl
-        #if self.entry_log.__class__ ==  wx._controls.TextCtrl:
-        #    print 'is really the same...\n\n\n'
-
         
         
 if __name__ == "__main__":
-    x = raw_input('press <RETURN> to exit...')
+    dummy = raw_input('press <RETURN> to exit...')
     
     
     
