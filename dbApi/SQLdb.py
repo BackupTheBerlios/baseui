@@ -109,6 +109,7 @@ class database:
         
         self.name = kwargs['database']
         self.config = kwargs
+        self.driver = kwargs.get('driver')
         
         try:
             if self.debug:
@@ -445,6 +446,26 @@ CREATE TABLE """ + self.name + """
                 new_attributes_lod.append(new_attributes_dic)
             return new_attributes_lod
             
+        if self.db_object.engine == 'odbc':
+            attributes_lod = []
+            for row in self.db_object.cursor.columns(table=self.name):
+                is_nullable = row[17]
+                if is_nullable == 'YES':
+                    is_nullable = True
+                else:
+                    is_nullable = False
+                    
+                attributes_lod.append(\
+                {
+                    'column_name':              row[3],
+                    'data_type':                row[5],
+                    'character_maximum_length': row[6],
+                    'numeric_precision':        None,
+                    'numeric_scale':            None,
+                    'is_nullable':              is_nullable,
+                })
+            return attributes_lod
+        
         column_name_list              = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         data_type_list                = self.db_object.listresult("SELECT data_type FROM information_schema.columns WHERE table_name = '" + self.name + "';")
         character_maximum_length_list = self.db_object.listresult("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = '" + self.name + "'")
@@ -540,8 +561,9 @@ CREATE TABLE """ + self.name + """
 
     def get_content(self):
         ''' Fetches all rows and gives them back as list of dictionarys. '''
-
-        content_lod = self.db_object.dictresult("SELECT * FROM %s" % self.name)
+        
+        # The [%s] is a workaround for excel over odbc.
+        content_lod = self.db_object.dictresult("SELECT * FROM [%s]" % self.name)
         return content_lod
 
 

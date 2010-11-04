@@ -74,9 +74,9 @@ class xlsFile(Base):
     ''' Helps to get data out of xlsFiles. Needs pyExcelerator, hope someday
         a kind of pyWord will appear! '''
 
-    def __init__(self, path='', filename='', encoding='cp1251'):
-        Base.__init__(self, path, filename)
+    def __init__(self, filepath='', encoding='cp1251'):
         self.encoding = encoding
+        self.filepath = filepath
         
         try:
             import pyExcelerator
