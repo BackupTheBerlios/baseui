@@ -57,3 +57,5 @@ class Error(res.Dialogs.Error):
         
         
         
+class About:
+    pass
