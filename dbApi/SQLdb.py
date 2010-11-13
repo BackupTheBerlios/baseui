@@ -8,6 +8,7 @@
 import Transformations 
    
 from copy import copy
+from pprint import pprint
 
 
 def get_engines():
@@ -349,6 +350,43 @@ class database:
         return lof_users
     
     
+    def dump(self, path='./tmp/', format='csv'):
+        if format == 'csv':
+            import csv
+            
+            table_list = self.get_tables()
+            print 'dumping as %s, into %s' % (path, format)
+            
+            for table_name in table_list:
+                try:
+                    table_object = table(self, table_name)
+                except:
+                    print 'Error with table %s' % table_name
+                    # x = raw_input('<RETURN>')
+                    continue
+                
+                try:
+                    content_lod = table_object.get_content()
+                    column_list = table_object.get_columns()
+                except Exception, inst:
+                    print '%s with table %s' % (table_name, str(inst))
+                    # x = raw_input('<RETURN>')
+                    continue
+                
+                csv_writer = csv.DictWriter(open(path + table_name + '.csv', 'wb'), fieldnames=column_list)
+                
+                column_dict = {}
+                for column_name in column_list:
+                    column_dict[column_name] = column_name
+                    
+                csv_writer.writerow(column_dict)
+                for content_dict in content_lod:
+                    csv_writer.writerow(content_dict)
+                    
+                # Just a bunch of death-knocking-time-wasting memory cleanup!
+                del(content_lod)
+                del(column_list)
+                
     
 class table:
     ''' This handles all table-related SQL orders. '''
