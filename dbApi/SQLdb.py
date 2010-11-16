@@ -145,7 +145,6 @@ class database:
                 if kwargs.get('filepath') not in [None, '']:
                     connection_string += ';DBQ=%(filepath)s;'
                     
-                # connection_string = 'DRIVER={%(driver)s};SERVER=%(host)s;DATABASE=%(database)s;UID=%(user)s;PWD=%(password)s' % kwargs
                 connection_string = connection_string % kwargs
                 self.table_schema = None
                 self.connection = self.connector.connect(connection_string, autocommit=True)
@@ -164,7 +163,7 @@ class database:
         
         self.cursor = self.connection.cursor()
         
-        if self.engine.startswith('postgresql'):# or self.engine.startswith('mysql'):
+        if self.engine.startswith('postgresql'):
             self.commit()
         return self.connection
 
@@ -769,12 +768,12 @@ CREATE TABLE """ + self.name + """
     
     
     # Data manipulation -------------------------------------------------------
-    def insert(self, primary_key_column='', content=None):
+    def insert(self, key_column='', content=None):
         ''' Inserts content in this table.
                 content            = Content to insert in form of a list_of_dictionarys or
                                      as a single dictionary, where the dict-keys are the
                                      column-names of the table.
-                primary_key_column = Name of the primary_key_column for auto-incrementation. 
+                key_column = Name of the key_column for auto-incrementation. 
                                      If it is not given, there has to be no pk-field in the
                                      target table! '''
 
@@ -786,9 +785,9 @@ CREATE TABLE """ + self.name + """
             
         # Iterate the rows and insert it in the table.
         for content_dict in content_lod:
-            if primary_key_column <> '':
-                actual_pk = self.get_last_primary_key(primary_key_column = primary_key_column) + 1
-                content_dict[primary_key_column] = actual_pk
+            if key_column <> '':
+                actual_pk = self.get_last_primary_key(primary_key_column=key_column) + 1
+                content_dict[key_column] = actual_pk
                 
             sql_command = 'INSERT INTO %s (\n' % self.name
             column_list = content_dict.keys()
@@ -814,9 +813,9 @@ CREATE TABLE """ + self.name + """
         return
 
 
-    def update(self, primary_key_column='', column_list=None, content_dict=None):
+    def update(self, key_column='', column_list=None, content_dict=None):
         ''' Updates content in this table.
-                primary_key_column = string for primary key column.
+                key_column         = the name of the key column.
                 column_list        = list of column_names which have to be updated. If None,
                                      all values in content_dict are updated!
                 content_dict       = Content to insert in form of a list_of_dictionarys or
@@ -833,7 +832,7 @@ CREATE TABLE """ + self.name + """
                     column_content = Transformations.write_transform(content_dict[column_name], self.db_object.engine)
                     sql_command += '    %s = %s,\n' % (column_name, column_content)
             sql_command = sql_command[0:len(sql_command)-2] + '\n'
-        sql_command += 'WHERE %s = %s' % (primary_key_column, content_dict[primary_key_column])
+        sql_command += 'WHERE %s = %s' % (key_column, content_dict[key_column])
         
         try:
             self.db_object.execute(sql_command)
