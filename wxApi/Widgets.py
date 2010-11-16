@@ -34,7 +34,7 @@ class TrayIcon(wx.TaskBarIcon):
         self.frame = frame
         self.icon = icon
         
-        self.frame.Bind(wx.EVT_SIZE, self.on_size)
+        # self.frame.Bind(wx.EVT_SIZE, self.on_size)
         self.frame.Bind(wx.EVT_ICONIZE, self.on_minimize)
         self.frame.Bind(wx.EVT_CLOSE, self.on_close)
         
@@ -73,10 +73,10 @@ class TrayIcon(wx.TaskBarIcon):
         self.frame.Show(False)
  
  
-    def on_size(self, event):   
-        size = self.GetClientSize()
-        self.text.SetSize(size)
-        self.panel.SetSize(size)
-        event.Skip()
+    # def on_size(self, event):   
+    #     size = self.frame.GetClientSize()
+    #     self.frame.text.SetSize(size)
+    #     self.frame.panel.SetSize(size)
+    #     event.Skip()
         
         
