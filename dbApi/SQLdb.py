@@ -288,6 +288,7 @@ class database:
             if self.engine == 'mysql':
                 self.commit()
         except:
+            print sql_command
             raise
         return
 
@@ -312,10 +313,14 @@ class database:
         if self.engine == 'mssql':
             lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
         if self.engine == 'odbc':
-            lof_table_names = []
-            for row in self.cursor.tables():
-                lof_table_names.append(row.table_name)
-            return lof_table_names
+            print self.driver
+            try:
+                lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
+            except Exception, inst:
+                print str(inst)
+                lof_table_names = []
+                for row in self.cursor.tables():
+                    lof_table_names.append(row.table_name)
         if self.engine == 'sqlite':
             sqlite_master = self.dictresult("SELECT * FROM sqlite_master")
             lof_table_names = []
