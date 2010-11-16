@@ -232,7 +232,7 @@ def makeResources(pathname, build_dir):
         os.system('cp -R ' + pathname + '/bin/*' + pathname + build_dir + 'bin/')
         
         
-def makeAbout(tpl_path, svg_path, author, version, revision, license):
+def makeAbout(tpl_path, svg_path, author, version, revision, license, make_png=False):
     # Build about.svg -------------------------------------------------------------
     try:
         image_file = open(tpl_path, 'r')
@@ -250,13 +250,24 @@ def makeAbout(tpl_path, svg_path, author, version, revision, license):
                         
     for key in replacement_dict:
         file_content = file_content.replace(key, replacement_dict[key])
-
     
     output_file = open(svg_path, 'w')
     output_file.write(file_content)
     output_file.close()
     
-
+    if make_png == True:
+        opts_dict = {'programfiles': os.environ['PROGRAMFILES'],
+                     'thisdir': os.getcwd(),
+                     'svgpath': svg_path,
+                     'pngpath': 'res\\about.png'}
+        
+        holygrail = '%(programfiles)s\\Inkscape\\inkscape.exe -f "%(thisdir)s\\%(svgpath)s" -e "%(thisdir)s\\%(pngpath)s"' % opts_dict
+        print holygrail
+        x=raw_input('<RETURN>')
+        
+        os.popen(holygrail)
+        
+    
 def makeSphinx(pathname, build_dir):
     # Make and copy documentation ---------------------------------------------
     os.chdir(pathname + '\\doc\\')
