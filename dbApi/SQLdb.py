@@ -286,8 +286,9 @@ class database:
 
             if self.engine == 'mysql':
                 self.commit()
-        except:
+        except Exception, inst:
             print sql_command
+            print str(inst)
             raise
         return
 
