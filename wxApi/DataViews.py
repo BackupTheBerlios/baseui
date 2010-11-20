@@ -132,8 +132,6 @@ class Tree(TreeListCtrl):
             column_label = column_dict.get('column_label')
             if column_label == None:
                 column_label = column_dict.get('column_name')
-            else:
-                column_label = unicode(column_label, 'cp1252')
                 
             visible = column_dict.get('visible')
             if visible <> False:
@@ -320,6 +318,7 @@ class Form(wx.Panel):
 
     def __init__(self, parent, xrc_path, panel_name):
         # Preload a panel to subclass it from this class!
+        print xrc_path
         pre_panel = wx.PrePanel()
         self.xrc_resource = wx.xrc.XmlResource(xrc_path)
         self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
