@@ -52,8 +52,12 @@ class Database(Portlets.Database):
         
         self.on_connect = self.connect
         self.on_disconnect = self.disconnect
-                
-                       
+        
+    
+    def get_database(self):
+        return self.database
+        
+        
     def connect(self):
         try:
             self.section_dict = self.get_content()
@@ -159,6 +163,11 @@ class DatabaseLogin(wx.Panel):
         
         
     # Actions -----------------------------------------------------------------
+    def get_database(self):
+        self.database = self.portlet_database.get_database()
+        return self.database
+        
+        
     def connect(self):
         self.database = self.portlet_database.connect()
 
