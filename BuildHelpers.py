@@ -262,9 +262,6 @@ def makeAbout(tpl_path, svg_path, author, version, revision, license, make_png=F
                      'pngpath': 'res\\about.png'}
         
         holygrail = '%(programfiles)s\\Inkscape\\inkscape.exe -f "%(thisdir)s\\%(svgpath)s" -e "%(thisdir)s\\%(pngpath)s"' % opts_dict
-        print holygrail
-        x=raw_input('<RETURN>')
-        
         os.popen(holygrail)
         
     
