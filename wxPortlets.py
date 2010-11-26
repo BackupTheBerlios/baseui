@@ -312,7 +312,7 @@ class FormFrame(wx.Frame):
         self.help_path = help_path
         
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
-        self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ANY))
+        self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
         self.aui_manager = wx.aui.AuiManager(self)
