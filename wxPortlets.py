@@ -287,14 +287,24 @@ class FormFrame(wx.Frame):
     ID_PREFERENCES = 201
     ID_HELP = 202
     
-    def __init__(self, parent=None,
-                       title=None, 
+    def __init__(self, db_table=None,
+                       remote_parent=None,
+                       parent=None,
+                       title=None,
                        panel_name=None,
-                       icon_path=None, 
-                       xrc_path=None,     
+                       icon_path=None,
+                       xrc_path=None,
                        help_path=None):
-                       
-        self.parent = parent
+        
+        ''' db_table is the the table in which this Form writes the data. The remote_parent
+            is triggered on save and close, so that the parent widget can be updated. parent
+            is simply the wxWidgets-Parent, usually a Frame. title is the Frame-title, 
+            panel_name is the name of the panel which is loaded from the file behind xrc_path.
+            The help-path enables online help, if given. '''
+            
+        self.db_table = db_table
+        self.parent = parent 
+       
         self.icon_path = icon_path
         self.title = title
         self.xrc_path = xrc_path
@@ -330,6 +340,7 @@ class FormFrame(wx.Frame):
         print 'save formular'
         
         print 'content:', self.form.get_content()
+        self.db_table.insert(self.form.get_content())
         
         
     def on_delete(self, event=None):

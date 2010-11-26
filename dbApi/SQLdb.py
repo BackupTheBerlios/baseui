@@ -115,6 +115,7 @@ class database:
         try:
             if self.debug:
                 print 'Connecting database', self.name, '...',
+                
             # The table_schema points to the location where all informations about the tables of the given database are.
             if self.engine.startswith('postgresql'):
                 self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
@@ -819,7 +820,7 @@ CREATE TABLE """ + self.name + """
         return
 
 
-    def update(self, key_column='', column_list=None, content_dict=None):
+    def update(self, content_dict=None, column_list=None, where=''):
         ''' Updates content in this table.
                 key_column         = the name of the key column.
                 column_list        = list of column_names which have to be updated. If None,
@@ -838,7 +839,7 @@ CREATE TABLE """ + self.name + """
                     column_content = Transformations.write_transform(content_dict[column_name], self.db_object.engine)
                     sql_command += '    %s = %s,\n' % (column_name, column_content)
             sql_command = sql_command[0:len(sql_command)-2] + '\n'
-        sql_command += 'WHERE %s = %s' % (key_column, content_dict[key_column])
+        sql_command += 'WHERE %s' % where #% (key_column, content_dict[key_column])
         
         try:
             self.db_object.execute(sql_command)
@@ -847,8 +848,8 @@ CREATE TABLE """ + self.name + """
         return
 
 
-    def delete(self, column_name='', value=None):
-        sql_command = 'DELETE FROM %s WHERE %s = %s' % (self.name, column_name, value)
+    def delete(self, where=None):
+        sql_command = 'DELETE FROM %s WHERE %s' % (self.name, where)
         try:
             self.db_object.execute(sql_command)
         except:
