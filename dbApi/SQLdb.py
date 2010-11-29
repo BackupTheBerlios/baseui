@@ -17,10 +17,17 @@ def get_engines():
     engine_list = []
     try:
         import pgdb
-        engine_list.append('PostgreSQL')
+        engine_list.append('PostgreSQL via PyGreSQL')
     except:
         pass
     
+    engine_list = []
+    try:
+        import psycopg2
+        engine_list.append('PostgreSQL via Psycopg2')
+    except:
+        pass
+        
     try:
         import MySQLdb
         engine_list.append('MySQL')
@@ -31,7 +38,7 @@ def get_engines():
         import pymssql
         engine_list.append('msSQL')
     except:
-        pass
+        raise
     
     try:
         import cx_Oracle
@@ -73,9 +80,12 @@ class database:
         try:
             connector = None
             
-            if self.engine == "postgresql":
+            if 'pygresql' in self.engine:
                 import pgdb
                 connector = pgdb
+            if 'psycopg2' in self.engine:
+                import psycopg2
+                connector = psycopg2
             if self.engine == "mysql":
                 import MySQLdb
                 connector = MySQLdb
