@@ -8,7 +8,6 @@
 #===============================================================================
 
 import sys, os, imp, shutil
-import subprocess
 
 from pprint import pprint
 
