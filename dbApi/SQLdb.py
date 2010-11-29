@@ -516,6 +516,7 @@ class table(object):
 class generic_table(object):
     def __init__(self, db_object, table_name):
         self.db_object = db_object
+        self.db_cursor = db_object.cursor
         self.name = table_name
         
         self.primary_key_list = []
