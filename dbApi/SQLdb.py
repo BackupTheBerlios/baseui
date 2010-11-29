@@ -61,7 +61,7 @@ def get_engines():
 
 
 
-class database:
+class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
     def __init__(self, engine='', encoding="latin-1", debug=False):
@@ -81,28 +81,25 @@ class database:
             connector = None
             
             if 'pygresql' in self.engine:
-                import pgdb
-                connector = pgdb
+                __database = pygresql_database()
             if 'psycopg2' in self.engine:
-                import psycopg2
-                connector = psycopg2
+                __database = psycopg2_database()
             if self.engine == "mysql":
-                import MySQLdb
-                connector = MySQLdb
+                __database = mysql_database()
             if self.engine == "mssql":
-                import pymssql
-                connector = pymssql
+                __database == mssql_database()
             if self.engine == "oracle":
-                import cx_Oracle
-                connector = cx_Oracle
+                __database == oracle_database()
             if self.engine == "sqlite":
-                import sqlite3
-                connector = sqlite3
+                __database == sqlite_database()
             if self.engine == "odbc":
-                import pyodbc
-                connector = pyodbc
+                __database == odbc_generic_database()
                 
-            self.connector = connector
+            # This monkeypatch is to get foreign arguments into this class!
+            arguments = dir(__database)
+            for argument in arguments:
+                if not argument.startswith('__'):
+                     self.__setattr__(argument, __database.__getattribute__(argument))
         except:
             raise
         return
@@ -321,10 +318,11 @@ class database:
 
         if self.engine in ['mysql', 'postgresql']:
             lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + self.table_schema + "'")
+        if 'postgres' in self.engine:
+            lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + self.table_schema + "'")
         if self.engine == 'mssql':
             lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
         if self.engine == 'odbc':
-            print self.driver
             try:
                 lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
             except Exception, inst:
@@ -403,6 +401,75 @@ class database:
                 del(content_lod)
                 del(column_list)
                 
+    
+    
+class generic_database(object):
+    pass
+    
+    
+
+class sqlite_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import sqlite3
+        self.connector = sqlite3
+        
+        
+        
+class pygresql_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import pgdb
+        self.connector = pgdb
+    
+    
+    
+class psycopg2_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import psycopg2
+        self.connector = psycopg2
+                    
+        
+        
+class mssql_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import pymssql
+        self.connector = pymssql
+    
+    
+    
+class mysql_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import MySQLdb
+        self.connector = MySQLdb
+        
+    
+    
+class oracle_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import cx_Oracle
+        self.connector = cx_Oracle
+            
+    
+    
+class odbc_generic_database(generic_database):
+    def __init__(self):
+        generic_database.__init__(self)
+        
+        import pyodbc
+        self.connector = pyodbc
+    
+    
     
 class table:
     ''' This handles all table-related SQL orders. '''
@@ -617,7 +684,11 @@ CREATE TABLE """ + self.name + """
         ''' Fetches all rows and gives them back as list of dictionarys. '''
         
         # The [%s] is a workaround for excel over odbc.
-        content_lod = self.db_object.dictresult("SELECT * FROM [%s]" % self.name)
+        if self.db_object.engine == 'odbc':
+            sql_command = "SELECT * FROM [%s]"
+        else:   
+            sql_command = "SELECT * FROM %s"
+        content_lod = self.db_object.dictresult(sql_command % self.name)
         return content_lod
 
 
