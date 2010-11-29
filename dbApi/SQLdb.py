@@ -8,7 +8,6 @@
 import Transformations 
    
 from copy import copy
-from pprint import pprint
 
 
 def get_engines():
@@ -64,7 +63,7 @@ def get_engines():
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
-    def __init__(self, engine='', encoding="latin-1", debug=False):
+    def __init__(self, engine='', encoding='utf-8', debug=False):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
 
@@ -80,10 +79,9 @@ class database(object):
         try:
             connector = None
             
-            if 'pygresql' in self.engine:
-                __database = pygresql_database()
-            if 'psycopg2' in self.engine:
-                __database = psycopg2_database()
+            if 'pygresql' in self.engine or \
+               'psycopg2' in self.engine:
+                __database = postgresql_database(self.engine)
             if self.engine == "mysql":
                 __database = mysql_database()
             if self.engine == "mssql":
@@ -106,74 +104,74 @@ class database(object):
     
     
     # Connection handling -----------------------------------------------------
-    def connect(self, **kwargs):
-        ''' Connects the database and gives back the connector which is used to give SQL commands to the database.
-                database = Database name on server (or filesystem if SQLite).
-                driver   = Only if database=ODBC, a driver string is needed...
-                host     = Hostname of database server (or local path to database if SQLite (f.e. localhost:5432).
-                user     = Database user.
-                password = Password of given user account. 
-                filepath = Filepath if the database exists as file.'''
+    #def connect(self, **kwargs):
+    #    ''' Connects the database and gives back the connector which is used to give SQL commands to the database.
+    #            database = Database name on server (or filesystem if SQLite).
+    #            driver   = Only if database=ODBC, a driver string is needed...
+    #            host     = Hostname of database server (or local path to database if SQLite (f.e. localhost:5432).
+     #           user     = Database user.
+   #             password = Password of given user account. 
+   #             filepath = Filepath if the database exists as file.'''
         
-        self.name = kwargs['database']
-        self.config = kwargs
-        self.driver = kwargs.get('driver')
+    #    self.name = kwargs['database']
+    #    self.config = kwargs
+    #    self.driver = kwargs.get('driver')
         
-        try:
-            if self.debug:
-                print 'Connecting database', self.name, '...',
+        #try:
+        #    if self.debug:
+        #        print 'Connecting database', self.name, '...',
                 
             # The table_schema points to the location where all informations about the tables of the given database are.
-            if self.engine.startswith('postgresql'):
-                self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
-                self.table_schema = 'public'
-            if self.engine.startswith('mysql'):
-                self.connection = self.connector.connect(db=kwargs['database'], host=kwargs['host'], user=kwargs['user'], passwd=kwargs['password'])
-                self.table_schema = kwargs['database']
-            if self.engine.startswith('mssql'):
-                self.connection = self.connector.connect(host=kwargs['host'], user=kwargs['user'], password=kwargs['password'], database=kwargs['database'])
-                self.table_schema = None
-            if self.engine.startswith('oracle'):
-                self.connection = self.connector.connect()
-                self.table_schema = None
-            if self.engine.startswith('sqlite'):
-                self.connection = self.connector.connect(kwargs['filepath'])
-                self.table_schema = None
-            if self.engine.startswith('odbc'):
+            # if self.engine.startswith('postgresql'):
+            #    self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
+            #    self.table_schema = 'public'
+            #if self.engine.startswith('mysql'):
+            #    self.connection = self.connector.connect(db=kwargs['database'], host=kwargs['host'], user=kwargs['user'], passwd=kwargs['password'])
+            #    self.table_schema = kwargs['database']
+            #if self.engine.startswith('mssql'):
+            #    self.connection = self.connector.connect(host=kwargs['host'], user=kwargs['user'], password=kwargs['password'], database=kwargs['database'])
+            #    self.table_schema = None
+            #if self.engine.startswith('oracle'):
+            #    self.connection = self.connector.connect()
+            #    self.table_schema = None
+            #if self.engine.startswith('sqlite'):
+            #    self.connection = self.connector.connect(kwargs['filepath'])
+            #    self.table_schema = None
+         #   if self.engine.startswith('odbc'):
                 # This creates the odbc-connection string, which can have different parameters.
-                connection_string = 'DRIVER={%(driver)s}'
-                if kwargs.get('host') not in [None, '']:
-                    connection_string += ';SERVER=%(host)s'
-                if kwargs.get('database') not in [None, '']:
-                    connection_string += ';DATABASE=%(database)s'
-                if kwargs.get('user') not in [None, '']:
-                    connection_string += ';UID=%(user)s'
-                if kwargs.get('password') not in [None, '']:
-                    connection_string += ';PWD=%(password)s'
-                if kwargs.get('filepath') not in [None, '']:
-                    connection_string += ';DBQ=%(filepath)s;'
+         #       connection_string = 'DRIVER={%(driver)s}'
+           #     if kwargs.get('host') not in [None, '']:
+             #       connection_string += ';SERVER=%(host)s'
+            #    if kwargs.get('database') not in [None, '']:
+             #       connection_string += ';DATABASE=%(database)s'
+              #  if kwargs.get('user') not in [None, '']:
+              #      connection_string += ';UID=%(user)s'
+             #   if kwargs.get('password') not in [None, '']:
+             #       connection_string += ';PWD=%(password)s'
+             #   if kwargs.get('filepath') not in [None, '']:
+             #       connection_string += ';DBQ=%(filepath)s;'
                     
-                connection_string = connection_string % kwargs
-                self.table_schema = None
-                self.connection = self.connector.connect(connection_string, autocommit=True)
+             #   connection_string = connection_string % kwargs
+             #   self.table_schema = None
+             #   self.connection = self.connector.connect(connection_string, autocommit=True)
                 
-            if self.debug:
-                print 'Ok.'
-        except:
-            if self.debug:
-                print 'Failed!'
+            #if self.debug:
+            #    print 'Ok.'
+        #except:
+        #    if self.debug:
+        #        print 'Failed!'
                 
-            self.connection = None
-            raise
+        #    self.connection = None
+        #    raise
         
-        if self.connection == None:
-            raise Exception, 'Fehler beim verbinden der Datenbank'
+        #if self.connection == None:
+        #    raise Exception, 'Fehler beim verbinden der Datenbank'
         
-        self.cursor = self.connection.cursor()
+        #self.cursor = self.connection.cursor()
         
-        if self.engine.startswith('postgresql'):
-            self.commit()
-        return self.connection
+        #if self.engine.startswith('postgresql'):
+        #    self.commit()
+        #return self.connection
 
 
     def close(self):
@@ -221,6 +219,129 @@ class database(object):
         return sql_command
 
 
+
+
+
+    # Database information ----------------------------------------------------
+    def get_databases(self):
+        ''' Returns a list containing all databases available by connected user. '''
+
+        lof_databases = []
+        if self.engine.startswith('postgresql'):
+            sql_command = "SELECT datname FROM pg_database"
+
+        lof_databases = self.listresult(sql_command)
+        return lof_databases
+
+
+    #def get_tables(self):
+    #    ''' Returns a list of table names held by given database. '''
+
+     #   if self.engine in ['mysql', 'postgresql']:
+     #       lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + self.table_schema + "'")
+     #   if 'postgres' in self.engine:
+     #       lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + self.table_schema + "'")
+     #   if self.engine == 'mssql':
+     #       lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
+     #   if self.engine == 'odbc':
+     #       try:
+     #           lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
+     #       except Exception, inst:
+     #           print str(inst)
+     #           lof_table_names = []
+     #           for row in self.cursor.tables():
+     #               lof_table_names.append(row.table_name)
+     #   if self.engine == 'sqlite':
+     #       sqlite_master = self.dictresult("SELECT * FROM sqlite_master")
+     #       lof_table_names = []#
+
+     #       for dict in sqlite_master:
+     #           if dict['tbl_name'] not in lof_table_names:
+     #               lof_table_names.append(dict['tbl_name'])
+     #   return lof_table_names
+
+
+    def get_users(self):
+        ''' Returns a list containing the database users. '''
+
+        # PostgreSQL works like this:
+        if self.engine.startswith('postgres'):
+            lod_users = self.dictresult("SELECT * FROM pg_user")
+
+            # Translate list of lists to simple list
+            lof_users = []
+            for user in lod_users:
+                lof_users.append(user['usename'])
+
+        # MySQL works like that:
+        if self.engine.startswith('mysql'):
+            lod_users = self.dictresult("SELECT * FROM mysql.user")
+
+            # Translate list of lists to simple list
+            lof_users = []
+            for user in lod_users:
+                if not (user['User'] in lof_users):
+                    lof_users.append(user['User'])
+        return lof_users
+    
+    
+    def dump(self, path='./tmp/', format='csv'):
+        if format == 'csv':
+            import csv
+            
+            table_list = self.get_tables()
+            print 'dumping as %s, into %s' % (path, format)
+            
+            for table_name in table_list:
+                try:
+                    table_object = table(self, table_name)
+                except:
+                    print 'Error with table %s' % table_name
+                    # x = raw_input('<RETURN>')
+                    continue
+                
+                try:
+                    content_lod = table_object.get_content()
+                    column_list = table_object.get_columns()
+                except Exception, inst:
+                    print '%s with table %s' % (table_name, str(inst))
+                    # x = raw_input('<RETURN>')
+                    continue
+                
+                csv_writer = csv.DictWriter(open(path + table_name + '.csv', 'wb'), fieldnames=column_list)
+                
+                column_dict = {}
+                for column_name in column_list:
+                    column_dict[column_name] = column_name
+                    
+                csv_writer.writerow(column_dict)
+                for content_dict in content_lod:
+                    csv_writer.writerow(content_dict)
+                    
+                # Just a bunch of death-knocking-time-wasting memory cleanup!
+                del(content_lod)
+                del(column_list)
+                
+    
+    
+class generic_database(object):
+    def __init__(self, engine='', debug=False):
+        self.engine = engine.lower()
+        self.debug = debug
+        
+        
+    def connect(self, **kwargs):
+        self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
+        self.cursor = self.connection.cursor()
+        self.set_connection_arguments(**kwargs)
+        return self.connection
+        
+        
+    def set_connection_arguments(self, **kwargs):
+        self.name = kwargs.get('database')
+        self.driver = kwargs.get('driver')
+        
+        
     def drop(self, database):
         ''' Drops the given database and returns the SQLcommand.
             NOTICE: You never can drop the database which is connected! '''
@@ -299,177 +420,149 @@ class database(object):
             print str(inst)
             raise
         return
-
-
-    # Database information ----------------------------------------------------
-    def get_databases(self):
-        ''' Returns a list containing all databases available by connected user. '''
-
-        lof_databases = []
-        if self.engine.startswith('postgresql'):
-            sql_command = "SELECT datname FROM pg_database"
-
-        lof_databases = self.listresult(sql_command)
-        return lof_databases
-
-
-    def get_tables(self):
-        ''' Returns a list of table names held by given database. '''
-
-        if self.engine in ['mysql', 'postgresql']:
-            lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + self.table_schema + "'")
-        if 'postgres' in self.engine:
-            lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '" + self.table_schema + "'")
-        if self.engine == 'mssql':
-            lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
-        if self.engine == 'odbc':
-            try:
-                lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
-            except Exception, inst:
-                print str(inst)
-                lof_table_names = []
-                for row in self.cursor.tables():
-                    lof_table_names.append(row.table_name)
-        if self.engine == 'sqlite':
-            sqlite_master = self.dictresult("SELECT * FROM sqlite_master")
-            lof_table_names = []
-
-            for dict in sqlite_master:
-                if dict['tbl_name'] not in lof_table_names:
-                    lof_table_names.append(dict['tbl_name'])
-        return lof_table_names
-
-
-    def get_users(self):
-        ''' Returns a list containing the database users. '''
-
-        # PostgreSQL works like this:
-        if self.engine.startswith('postgres'):
-            lod_users = self.dictresult("SELECT * FROM pg_user")
-
-            # Translate list of lists to simple list
-            lof_users = []
-            for user in lod_users:
-                lof_users.append(user['usename'])
-
-        # MySQL works like that:
-        if self.engine.startswith('mysql'):
-            lod_users = self.dictresult("SELECT * FROM mysql.user")
-
-            # Translate list of lists to simple list
-            lof_users = []
-            for user in lod_users:
-                if not (user['User'] in lof_users):
-                    lof_users.append(user['User'])
-        return lof_users
-    
-    
-    def dump(self, path='./tmp/', format='csv'):
-        if format == 'csv':
-            import csv
-            
-            table_list = self.get_tables()
-            print 'dumping as %s, into %s' % (path, format)
-            
-            for table_name in table_list:
-                try:
-                    table_object = table(self, table_name)
-                except:
-                    print 'Error with table %s' % table_name
-                    # x = raw_input('<RETURN>')
-                    continue
-                
-                try:
-                    content_lod = table_object.get_content()
-                    column_list = table_object.get_columns()
-                except Exception, inst:
-                    print '%s with table %s' % (table_name, str(inst))
-                    # x = raw_input('<RETURN>')
-                    continue
-                
-                csv_writer = csv.DictWriter(open(path + table_name + '.csv', 'wb'), fieldnames=column_list)
-                
-                column_dict = {}
-                for column_name in column_list:
-                    column_dict[column_name] = column_name
-                    
-                csv_writer.writerow(column_dict)
-                for content_dict in content_lod:
-                    csv_writer.writerow(content_dict)
-                    
-                # Just a bunch of death-knocking-time-wasting memory cleanup!
-                del(content_lod)
-                del(column_list)
-                
-    
-    
-class generic_database(object):
-    pass
-    
+        
+        
+# ------------------------------------------------------------------------------
+        
     
 
 class sqlite_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
+    def __init__(self, engine='sqlite'):
+        generic_database.__init__(self, engine=engine)
         
         import sqlite3
         self.connector = sqlite3
         
         
+    def connect(self, **kwargs):
+        self.connection = self.connector.connect(kwargs['filepath'])
+        self.cursor = self.connection.cursor
+        return self.connection
         
-class pygresql_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
         
-        import pgdb
-        self.connector = pgdb
+    def get_tables(self):
+        ''' Returns a list of table names held by given database. '''
+
+        sqlite_master = self.dictresult("SELECT * FROM sqlite_master")
+        lof_table_names = []
+
+        for dict in sqlite_master:
+            if dict['tbl_name'] not in lof_table_names:
+                lof_table_names.append(dict['tbl_name'])
+        return lof_table_names
+        
+        
+        
+class postgresql_database(generic_database):
+    def __init__(self, engine='psycopg2'):
+        generic_database.__init__(self, engine=engine)
+        
+        if 'psycopg2' in self.engine:
+            import psycopg2
+            self.connector = psycopg2
+        if 'pygresql' in self.engine:
+            import pgdb
+            self.connector = pgdb
     
     
-    
-class psycopg2_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
+    def get_tables(self):
+        ''' Returns a list of table names held by given database. '''
+
+        lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        return lof_table_names       
         
-        import psycopg2
-        self.connector = psycopg2
-                    
         
         
 class mssql_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
+    def __init__(self, engine='mssql'):
+        generic_database.__init__(self, engine=engine)
         
         import pymssql
         self.connector = pymssql
     
     
-    
+    def get_tables(self):
+        ''' Returns a list of table names held by given database. '''
+
+        lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
+        return lof_table_names
+        
+        
+                    
 class mysql_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
+    def __init__(self, engine='mysql'):
+        generic_database.__init__(self, engine=engine)
         
         import MySQLdb
         self.connector = MySQLdb
         
+        
+    def connect(self, **kwargs):
+        self.connection = self.connector.connect(db=kwargs['database'], host=kwargs['host'], user=kwargs['user'], passwd=kwargs['password'])
+        self.cursor = self.connection.cursor()
+        self.set_connection_arguments(kwargs)
+        return self.connection
+        
+        
+    def get_tables(self):
+        ''' Returns a list of table names held by given database. '''
+
+        lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'" % self.name)
+        return lof_table_names
+        
     
     
 class oracle_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
+    def __init__(self, engine='oracle'):
+        generic_database.__init__(self, engine=engine)
         
         import cx_Oracle
         self.connector = cx_Oracle
-            
+        
     
     
 class odbc_generic_database(generic_database):
-    def __init__(self):
-        generic_database.__init__(self)
+    def __init__(self, engine='odbc'):
+        generic_database.__init__(self, engine=engine)
         
         import pyodbc
         self.connector = pyodbc
     
     
+    def connect(self, **kwargs):
+        # This creates the odbc-connection string, which can have different parameters.
+        connection_string = 'DRIVER={%(driver)s}'
+        if kwargs.get('host') not in [None, '']:
+            connection_string += ';SERVER=%(host)s'
+        if kwargs.get('database') not in [None, '']:
+            connection_string += ';DATABASE=%(database)s'
+        if kwargs.get('user') not in [None, '']:
+            connection_string += ';UID=%(user)s'
+        if kwargs.get('password') not in [None, '']:
+            connection_string += ';PWD=%(password)s'
+        if kwargs.get('filepath') not in [None, '']:
+            connection_string += ';DBQ=%(filepath)s;'
+            
+        connection_string = connection_string % kwargs
+        self.connection = self.connector.connect(connection_string, autocommit=True)
+        self.cursor = self.connection.cursor()
+        self.set_connection_arguments(kwargs)
+        return self.connection
+        
+        
+    def get_tables(self):
+        ''' Returns a list of table names held by given database. '''
+
+        try:
+            lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables")
+        except Exception, inst:
+            print str(inst)
+            lof_table_names = []
+            for row in self.cursor.tables():
+                lof_table_names.append(row.table_name)
+        return lof_table_names
+        
+        
     
 class table:
     ''' This handles all table-related SQL orders. '''
