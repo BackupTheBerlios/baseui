@@ -37,7 +37,7 @@ def get_engines():
         import pymssql
         engine_list.append('msSQL')
     except:
-        raise
+        pass
     
     try:
         import cx_Oracle
@@ -85,13 +85,13 @@ class database(object):
             if self.engine == "mysql":
                 __database = mysql_database(self)
             if self.engine == "mssql":
-                __database == mssql_database(self)
+                __database = mssql_database(self)
             if self.engine == "oracle":
-                __database == oracle_database(self)
+                __database = oracle_database(self)
             if self.engine == "sqlite":
-                __database == sqlite_database(self)
+				__database = sqlite_database(self)
             if self.engine == "odbc":
-                __database == odbc_generic_database(self)
+                __database = odbc_generic_database(self)
                 
             self.connect = __database.connect
         except:
@@ -194,7 +194,7 @@ class generic_database(object):
             self.cursor.execute(sql_command)
         except:
             raise
-            
+        
         lol_result = self.cursor.fetchall()
 
         lod_result = []
@@ -209,7 +209,7 @@ class generic_database(object):
     def execute(self, sql_command):
         ''' Executes sql_command without returning values (for db-manipulation). '''
         
-        if self.debug: print sql_command
+        if self.debug: print sql_command 
         
         try:
             self.cursor.execute(sql_command)
@@ -272,8 +272,9 @@ class sqlite_database(generic_database):
         
     def connect(self, **kwargs):
         self.connection = self.connector.connect(kwargs['filepath'])
-        self.cursor = self.connection.cursor
-        self.set_arguments(kwargs)
+        self.cursor = self.connection.cursor()
+		
+        self.set_arguments(**kwargs)
         return self.connection
         
         
@@ -485,13 +486,13 @@ class table(object):
             if engine == "mysql":
                 __table = mysql_table(db_object, table_name)
             if engine == "mssql":
-                __table == mssql_table(db_object, table_name)
+                __table = mssql_table(db_object, table_name)
             if engine == "oracle":
-                __table == oracle_table(db_object, table_name)
+                __table = oracle_table(db_object, table_name)
             if engine == "sqlite":
-                __table == sqlite_table(db_object, table_name)
+                __table = sqlite_table(db_object, table_name)
             if engine == "odbc":
-                __table == odbc_generic_table(db_object, table_name)
+                __table = odbc_generic_table(db_object, table_name)
                 
             # This monkeypatch is to get foreign arguments into this class!
             arguments = dir(__table)
