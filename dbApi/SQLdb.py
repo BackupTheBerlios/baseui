@@ -74,8 +74,7 @@ class database(object):
     def __init__(self, engine='', encoding='utf-8', debug=False):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
-
-        
+          
         self.engine = engine.lower()
         self.encoding = encoding
         self.debug = debug
@@ -95,7 +94,7 @@ class database(object):
             __database = odbc_generic_database(self)
             
         inherit_class(self, __database)
-
+        
 
             
 class generic_database(object):

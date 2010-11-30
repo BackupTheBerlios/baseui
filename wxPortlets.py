@@ -32,8 +32,9 @@ class FormTable:
     ID_HELP = 402
     
     
-    def __init__(self, db_object, toolbar_parent=None, portlet_parent=None, \
-                       form=None, db_table=None, help_path=None):
+    def __init__(self, db_table, form=None, \
+                 toolbar_parent=None, portlet_parent=None, \
+                 help_path=None):
         
         ''' db_object is the current opened database object.
             toolbar_parent is an aui toolbar, which has to be populated from here.
@@ -41,17 +42,18 @@ class FormTable:
             
             form is a form class, that creates an object here to edit datasets.
             # parent_form is ???
-            db_table is a string which is simply the database table name.
+            db_table is an instance of a sql_table.
             help_path is the path to the helpfile opened if help pressed. '''
-            
-        self.db_object = db_object
+        
+        self.db_table = db_table
         self.toolbar_parent = toolbar_parent
         self.portlet_parent = portlet_parent
-        
         self.form = form
-        self.parent_form = None
         self.help_path = help_path
-                
+        
+        # TODO: remove this sheenanigan asap!
+        self.parent_form = None
+        
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
@@ -73,13 +75,13 @@ class FormTable:
     # Actions -----------------------------------------------------------------
     def on_new(self, event=None):       
         try:
-            self.form(self.portlet_parent, self.db_object)
+            self.form(self.portlet_parent, self.db_table)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
     def on_edit(self, event=None):
-        self.form(self.portlet_parent, self.db_object).show(self.portlet_parent, self.primary_key)
+        self.form(self.portlet_parent, self.db_table).show(self.portlet_parent, self.primary_key)
 
 
     def on_delete(self, event=None):
@@ -110,7 +112,7 @@ class FormTable:
             self.HTMLhelp.show(self.help_path)
     
 
-    def initialize(self, db_table_object=None, definition_lod=None):
+    def initialize(self, definition_lod=None):
         ''' Initializes a treeview as table or tree. The definition_lod
             will be merged with the attributes_lod, thus the attributes_lod
             can be already contained in the definition_lod if desired!
@@ -134,9 +136,6 @@ class FormTable:
                               'numeric_scale' = ?
                               'is_nullable' = True}]'''
 
-        self.db_table = db_table_object
-        self.db_object = db_table_object.db_object
-        
         self.definition_lod = definition_lod
         self.attributes_lod = self.db_table.attributes
         
@@ -145,7 +144,7 @@ class FormTable:
             self.primary_key_column = result['column_name']
 
 
-    def populate(self, content_lod=None):        
+    def populate(self, content_lod=None):
         if self.parent_form <> None: 
             if self.parent_form.primary_key <> None:
                 # This populates a referenced table (on a parent form)
@@ -287,7 +286,7 @@ class FormFrame(wx.Frame):
     ID_PREFERENCES = 201
     ID_HELP = 202
     
-    def __init__(self, db_table=None,
+    def __init__(self, db_table,
                        remote_parent=None,
                        parent=None,
                        title=None,
@@ -303,12 +302,12 @@ class FormFrame(wx.Frame):
             The help-path enables online help, if given. '''
             
         self.db_table = db_table
+        self.remote_parent = remote_parent
         self.parent = parent 
-       
-        self.icon_path = icon_path
         self.title = title
-        self.xrc_path = xrc_path
         self.panel_name = panel_name
+        self.icon_path = icon_path
+        self.xrc_path = xrc_path
         self.help_path = help_path
         
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
@@ -337,7 +336,7 @@ class FormFrame(wx.Frame):
         
         
     def on_save(self, event=None):
-        print 'save formular'
+        print 'save formular on db_table:', self.db_table
         
         print 'content:', self.form.get_content()
         self.db_table.insert(self.form.get_content())
@@ -359,7 +358,7 @@ class FormFrame(wx.Frame):
         print 'help'
         
         
-    def initialize(self, db_table_object=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
+    def initialize(self, db_table=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
         self.definition_lod = definition_lod
         self.attributes_lod = attributes_lod
         
@@ -519,7 +518,7 @@ class OldForm(wx.Frame):
         self.toolbar_standard.AddTool(wx.ID_ANY, "Hilfe",         IconSet16.gethelp_16Bitmap())
 
 
-    def initialize(self, db_table_object=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
+    def initialize(self, db_table=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
         ''' This initializes the Form. Following Data exchanges are to met:
 
             definition_lod = [{'column_name': 'id',
@@ -545,7 +544,7 @@ class OldForm(wx.Frame):
             portlets_lod = [{'portlet':   portlet_object,
                              'container': 'alignment_address' '''
 
-        self.db_table = db_table_object
+        self.db_table = db_table
         
         self.definition_lod = definition_lod
         self.attributes_lod = attributes_lod
