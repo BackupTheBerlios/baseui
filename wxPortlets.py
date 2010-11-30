@@ -339,7 +339,7 @@ class FormFrame(wx.Frame):
         print 'save formular on db_table:', self.db_table
         
         print 'content:', self.form.get_content()
-        self.db_table.insert(self.form.get_content())
+        self.db_table.insert(content=self.form.get_content())
         
         
     def on_delete(self, event=None):
