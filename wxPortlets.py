@@ -329,6 +329,8 @@ class FormFrame(wx.Frame):
         self.aui_manager.Update()
         self.Show()
         
+        self.error_dialog = Dialogs.Error(self)
+        
         
     def on_close(self, event=None):
         del(self.toolbar_standard)
@@ -339,7 +341,10 @@ class FormFrame(wx.Frame):
         print 'save formular on db_table:', self.db_table
         
         print 'content:', self.form.get_content()
-        self.db_table.insert(content=self.form.get_content())
+        try:
+            self.db_table.insert(content=self.form.get_content())
+        except Exception, inst:
+            self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
         
         
     def on_delete(self, event=None):
