@@ -80,9 +80,6 @@ class database(object):
         self.encoding = encoding
         self.debug = debug
         
-        #self.connection = None
-        #self.cursor = None
-        
         if 'pygresql' in self.engine or \
            'psycopg2' in self.engine:
             __database = postgresql_database(self, self.engine)
@@ -342,7 +339,7 @@ class postgresql_database(generic_database):
         try:
             self.cursor.execute(sql_command)
         except:
-            raise 
+            raise
         
         
         
@@ -649,7 +646,7 @@ CREATE TABLE """ + self.name + """
                     try:
                         new_column.create(attributes_dic)
                     except:
-                        raise        
+                        raise
         return not_in_database_lod, not_in_definition_lod
         
         
