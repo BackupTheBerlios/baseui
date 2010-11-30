@@ -60,6 +60,14 @@ def get_engines():
 
 
 
+def inherit_class(thisclass, otherclass):
+    arguments = dir(otherclass)
+    for argument in arguments:
+        if not argument.startswith('__'):
+            thisclass.__setattr__(argument, otherclass.__getattribute__(argument))
+            
+            
+            
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
@@ -67,43 +75,32 @@ class database(object):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
 
-        self.connection = None
-        self.cursor = None
+        
         self.engine = engine.lower()
         self.encoding = encoding
         self.debug = debug
         
-        if self.debug == True:
-            from pprint import pprint
+        #self.connection = None
+        #self.cursor = None
+        
+        if 'pygresql' in self.engine or \
+           'psycopg2' in self.engine:
+            __database = postgresql_database(self, self.engine)
+        if self.engine == "mysql":
+            __database = mysql_database(self)
+        if self.engine == "mssql":
+            __database = mssql_database(self)
+        if self.engine == "oracle":
+            __database = oracle_database(self)
+        if self.engine == "sqlite":
+            __database = sqlite_database(self)
+        if self.engine == "odbc":
+            __database = odbc_generic_database(self)
             
-        try:
-            connector = None
-            
-            if 'pygresql' in self.engine or \
-               'psycopg2' in self.engine:
-                __database = postgresql_database(self, self.engine)
-            if self.engine == "mysql":
-                __database = mysql_database(self)
-            if self.engine == "mssql":
-                __database = mssql_database(self)
-            if self.engine == "oracle":
-                __database = oracle_database(self)
-            if self.engine == "sqlite":
-				__database = sqlite_database(self)
-            if self.engine == "odbc":
-                __database = odbc_generic_database(self)
-                
-            self.connect = __database.connect
-        except:
-            raise
-    
-        # This monkeypatch is to get foreign arguments into this class!
-        arguments = dir(__database)
-        for argument in arguments:
-            if not argument.startswith('__'):
-                 self.__setattr__(argument, __database.__getattribute__(argument))
+        inherit_class(self, __database)
 
-    
+
+            
 class generic_database(object):
     def __init__(self, main_class, engine='', debug=False):
         self.main_class = main_class
@@ -141,6 +138,7 @@ class generic_database(object):
     def set_arguments(self, **kwargs):
         self.name = kwargs.get('database')
         self.driver = kwargs.get('driver')
+        inherit_class(self.main_class, self)
         
         
     def drop(self, database):
@@ -479,38 +477,21 @@ class table(object):
         engine = self.db_object.engine
         driver = self.db_object.driver
         
-        try:
-            if 'pygresql' in engine or \
-               'psycopg2' in engine:
-                __table = postgresql_table(db_object, table_name)
-            if engine == "mysql":
-                __table = mysql_table(db_object, table_name)
-            if engine == "mssql":
-                __table = mssql_table(db_object, table_name)
-            if engine == "oracle":
-                __table = oracle_table(db_object, table_name)
-            if engine == "sqlite":
-                __table = sqlite_table(db_object, table_name)
-            if engine == "odbc":
-                __table = odbc_generic_table(db_object, table_name)
-                
-            # This monkeypatch is to get foreign arguments into this class!
-            arguments = dir(__table)
-            for argument in arguments:
-                if not argument.startswith('__'):
-                     self.__setattr__(argument, __table.__getattribute__(argument))
-        except:
-            raise
-    
-    #    ''' This initializes a database table where:
-    #            db_conn = Database connector from class db.
-    #            table_name = String which gives the name of the table. '''
-
-    #    self.db_object = db_object
-    #    self.db_cursor = db_object.cursor
-    #    self.name = table_name
-        
-    #    self.primary_key_list = []
+        if 'pygresql' in engine or \
+           'psycopg2' in engine:
+            __table = postgresql_table(db_object, table_name)
+        if engine == "mysql":
+            __table = mysql_table(db_object, table_name)
+        if engine == "mssql":
+            __table = mssql_table(db_object, table_name)
+        if engine == "oracle":
+            __table = oracle_table(db_object, table_name)
+        if engine == "sqlite":
+            __table = sqlite_table(db_object, table_name)
+        if engine == "odbc":
+            __table = odbc_generic_table(db_object, table_name)
+            
+        inherit_class(self, __table)
 
 
 
