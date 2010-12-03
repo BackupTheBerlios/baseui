@@ -116,7 +116,7 @@ class DatabaseLogin(wx.Panel):
                                          ini_section=self.ini_section,
                                          autosave=self.autosave)
         self.portlet_database.Hide()
-        self.portlet_login = Portlets.Login(parent=self)
+        self.portlet_login = Panels.Login(parent=self)
         
         png = wx.Image(self.image_path, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         self.logo = wx.StaticBitmap(self, -1, png, (10, 5), (png.GetWidth(), png.GetHeight()))

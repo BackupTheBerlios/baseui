@@ -97,14 +97,17 @@ class FormTable:
 
     def on_print(self, event=None):
         print "print"
-
-
-    def on_search(self, event=None):
-        print "search"
-
-
+        
+    
+    def on_export(self, event=None):
+        print "export"
+        
+        
     def on_preferences(self, event=None):
-        print "preferences"
+        toplevel_frame = self.portlet_parent.GetTopLevelParent()
+        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, 
+                                                              title='Einstellungen')
+        self.frame_preferences.ShowModal()
         
         
     def on_help(self, event=None):
@@ -214,6 +217,13 @@ class FormTable:
         #if preferences == True or help == True:
         self.toolbar_parent.AddSeparator()
         
+        # These lines have to be in the Preferences-Dialog!
+        #self.toolbar_parent.AddTool(self.ID_IMPORT, "Importieren", IconSet16.getfileimport_16Bitmap())
+        #self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_import, id=self.ID_IMPORT)
+        
+        #self.toolbar_parent.AddTool(self.ID_EXPORT, "Exportieren", IconSet16.getfileexport_16Bitmap())
+        #self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT)
+        
         #if preferences == True:
         self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
@@ -265,7 +275,7 @@ class FormTable:
                             if column_dic.has_key('mask'):
                                 mask = column_dic['mask']
                                 self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
-                
+        
         
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
         for content_dic in self.content_lod:
@@ -276,8 +286,8 @@ class FormTable:
             substitute_lod = self.db_object.select(table_name=referenced_table_name, column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
             content_dic[column_name] = mask % substitute_lod[0]
         
-        
-
+    
+    
 class FormFrame(wx.Frame):
     ID_SAVE = 101
     ID_DELETE = 102
@@ -356,7 +366,9 @@ class FormFrame(wx.Frame):
         
         
     def on_preferences(self, event=None):
-        print 'preferences'
+        self.frame_preferences = Dialogs.FormTablePreferences(parent=self, 
+                                                              title='Einstellungen')
+        self.frame_preferences.ShowModal()
         
         
     def on_help(self, event=None):

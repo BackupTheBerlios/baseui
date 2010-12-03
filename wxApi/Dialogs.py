@@ -58,3 +58,10 @@ class Error(res.Dialogs.Error):
         
         
         
+class FormTablePreferences(wx.Dialog):
+    ID_IMPORT = 201
+    ID_EXPORT = 202
+    
+    def __init__(self, parent, title):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title)
+        
