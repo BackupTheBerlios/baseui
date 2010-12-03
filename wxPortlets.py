@@ -9,7 +9,7 @@
 import wx, wx.aui
 
 from misc import FileSystem, HelpFile, FileTransfer
-from wxApi import Portlets, Dialogs, DataViews, Toolbars
+from wxApi import Panels, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
 from wxApi.res import IconSet16
 from dbApi import SQLdb, Tools as dbTools

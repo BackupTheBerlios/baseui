@@ -9,7 +9,7 @@
 
 import os, sys
 from distutils.core import setup
-
+from __init__ import *
 
 # First, build documentation --------------------------------------------------
 pathname = os.getcwd()
@@ -59,11 +59,11 @@ setup(name         = 'BaseUI',
                                     '_sources/misc/*.*',
                                     '_sources/misc/module/*.*',]},
                       
-      version      = '1.2',
+      version      = __version__,
       description  = 'Advanced Database and user interface API',
       license      = 'BSD',
       url          = 'http://baseui.berlios.de',
-      author       = 'Mark Muzenhardt',
+      author       = __author__,
       author_email = 'mark.muzenhardt@googlemail.com',
       platforms     = ['win32', 'linux']
       )

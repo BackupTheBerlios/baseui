@@ -7,14 +7,14 @@
 
 import wx
 
-from wxApi import Portlets, Dialogs
+from wxApi import Panels, Dialogs
 from misc.FileSystem import iniFile
 from dbApi import SQLdb, Tools as dbTools
 
 
-class Database(Portlets.Database):
+class Database(Panels.Database):
     def __init__(self, parent, ini_path, ini_section, autosave=False):
-        Portlets.Database.__init__(self, parent)
+        Panels.Database.__init__(self, parent)
         self.ErrorDialog = Dialogs.Error(self)
         
         self.ini_file = iniFile(ini_path)
