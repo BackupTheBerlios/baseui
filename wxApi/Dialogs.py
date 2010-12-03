@@ -23,15 +23,15 @@ class Error(res.Dialogs.Error):
         
         self.m_bitmap_icon.SetBitmap(IconSet32.geterror_32Bitmap())
         
-        self.m_button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked)
-        self.m_toggleBtn_detail.Bind(wx.EVT_TOGGLEBUTTON, self.on_togglebutton_detail_toggled)
+        self.button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked)
+        self.togglebutton_detail.Bind(wx.EVT_TOGGLEBUTTON, self.on_togglebutton_detail_toggled)
         
         
     def show(self, title='Fehler', instance=None, message='Error'):
-        self.m_toggleBtn_detail.SetValue(False)
+        self.togglebutton_detail.SetValue(False)
         if instance <> None:
             detail = traceback.format_exc()
-            self.m_textCtrl_traceback.SetValue(detail)
+            self.entry_traceback.SetValue(detail)
         
         self.m_staticText_text.SetLabel(message)
         self.SetTitle(title)
@@ -45,15 +45,17 @@ class Error(res.Dialogs.Error):
         is_down = event.IsChecked() 
         
         if is_down:
-            self.m_textCtrl_traceback.Show()
+            self.entry_traceback.Show()
+            self.staticline_bottom.Show()
         else:
-            self.m_textCtrl_traceback.Hide()
-        
+            self.entry_traceback.Hide()
+            self.staticline_bottom.Hide()
+            
         self.SetInitialSize()
         
         
     def on_button_ok_clicked(self, event):
-        self.m_textCtrl_traceback.Hide()
+        self.entry_traceback.Hide()
         self.Hide()
         
         

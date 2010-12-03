@@ -207,13 +207,13 @@ class generic_database(object):
         
         try:
             self.cursor.execute(sql_command)
-
-            if self.engine == 'mysql':
-                self.commit()
         except Exception, inst:
             print sql_command
             print str(inst)
-            raise
+        finally:
+            if self.engine == 'mysql' or \
+               'psycopg2' in self.engine:
+                self.commit()
         return
         
         
@@ -295,6 +295,17 @@ class postgresql_database(generic_database):
         if 'pygresql' in self.engine:
             import pgdb
             self.connector = pgdb
+            
+            
+    def connect(self, **kwargs):
+        self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
+
+        if 'pscopg2' in self.engine:
+            self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+            
+        self.cursor = self.connection.cursor()
+        self.set_arguments(**kwargs)
+        return self.connection
     
     
     def get_tables(self):
@@ -323,7 +334,7 @@ class postgresql_database(generic_database):
         lof_databases = self.listresult("SELECT datname FROM pg_database")
         return lof_databases
         
-        
+    
     def create(self, database, encoding='latin-1'):
         ''' Creates a new, blank database.
                 database = Name of the new database.
@@ -711,14 +722,6 @@ CREATE TABLE """ + self.name + """
         return
 
 
-    def get_primary_key_columns(self):
-        ''' Returns a list of all primary key column_names. '''
-
-        # TODO: Doubt that this works if foreign keys are implemented, see: http://dev.mysql.com/doc/refman/5.0/en/key-column-usage-table.html
-        pk_columns_list = self.db_object.listresult("SELECT column_name FROM information_schema.key_column_usage WHERE table_name = '" + self.name + "'")
-        return pk_columns_list
-
-
     def get_last_primary_key(self, primary_key_column=''):
         ''' Returns a value which represents the highest primary key in this table.
             This is needed for auto-incrementing (f.e. on insert). '''
@@ -947,6 +950,30 @@ class postgresql_table(generic_table):
     def __init__(self, db_object, table_name):
         generic_table.__init__(self, db_object, table_name)
         
+        
+    def get_primary_key_columns(self):
+        ''' Returns a list of all primary key column_names. '''
+
+        sql_command = '''\
+SELECT               
+  pg_attribute.attname, 
+  format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
+FROM pg_index, pg_class, pg_attribute 
+WHERE 
+  pg_class.oid = '%s'::regclass AND
+  indrelid = pg_class.oid AND
+  pg_attribute.attrelid = pg_class.oid AND 
+  pg_attribute.attnum = any(pg_index.indkey)
+  AND indisprimary''' % self.name
+        
+        pk_columns_list = []
+        pk_columns_lod = self.db_object.dictresult(sql_command)
+        for pk_columns_dict in pk_columns_lod:
+            pk_columns_list.append(pk_columns_dict.get('attname'))
+            
+        # TODO: Doubt that this works if foreign keys are implemented, see: http://dev.mysql.com/doc/refman/5.0/en/key-column-usage-table.html
+        # pk_columns_list = self.db_object.listresult("SELECT column_name FROM information_schema.key_column_usage WHERE table_name = '" + self.name + "'")
+        return pk_columns_list       
         
         
 class mysql_table(generic_table):

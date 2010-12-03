@@ -41,7 +41,6 @@ class FormTable:
             portlet_parent is the underlying parent which contains this widget.
             
             form is a form class, that creates an object here to edit datasets.
-            # parent_form is ???
             db_table is an instance of a sql_table.
             help_path is the path to the helpfile opened if help pressed. '''
         
@@ -61,7 +60,7 @@ class FormTable:
     # Callbacks ---------------------------------------------------------------
     def on_row_activate(self, content_dic=None):
         self.primary_key = content_dic[self.primary_key_column]
-        self.edit_dataset()
+        self.on_edit()
 
 
     def on_cursor_changed(self, content_dic=None):
@@ -73,15 +72,19 @@ class FormTable:
         
 
     # Actions -----------------------------------------------------------------
-    def on_new(self, event=None):       
+    def on_new(self, event=None):
         try:
-            self.form(self.portlet_parent, self.db_table)
+            self.primary_key = None
+            self.form(parent=self.portlet_parent,
+                      remote_parent=self)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
 
 
     def on_edit(self, event=None):
-        self.form(self.portlet_parent, self.db_table).show(self.portlet_parent, self.primary_key)
+        print 'editing:', self.form
+        self.form(parent=self.portlet_parent,
+                  remote_parent=self) #.show(self.portlet_parent, self.primary_key)
 
 
     def on_delete(self, event=None):
@@ -296,8 +299,7 @@ class FormFrame(wx.Frame):
     ID_PREFERENCES = 201
     ID_HELP = 202
     
-    def __init__(self, db_table,
-                       remote_parent=None,
+    def __init__(self, remote_parent=None,
                        parent=None,
                        title=None,
                        panel_name=None,
@@ -311,7 +313,6 @@ class FormFrame(wx.Frame):
             panel_name is the name of the panel which is loaded from the file behind xrc_path.
             The help-path enables online help, if given. '''
             
-        self.db_table = db_table
         self.remote_parent = remote_parent
         self.parent = parent 
         self.title = title
@@ -339,6 +340,11 @@ class FormFrame(wx.Frame):
         self.aui_manager.Update()
         self.Show()
         
+        self.db_table = remote_parent.db_table
+        if self.remote_parent.primary_key <> None:
+            self.primary_key = self.remote_parent.primary_key
+            self.edit_dataset()
+        
         self.error_dialog = Dialogs.Error(self)
         
         
@@ -350,11 +356,16 @@ class FormFrame(wx.Frame):
     def on_save(self, event=None):
         print 'save formular on db_table:', self.db_table
         
-        print 'content:', self.form.get_content()
+        form_content = self.form.get_content()
+        #pk_column_list = self.db_table.get_primary_key_columns()
+        
         try:
-            self.db_table.insert(content=self.form.get_content())
+            self.db_table.insert(key_column='id', content=form_content)
         except Exception, inst:
             self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
+        
+        print 'remote parent:', self.remote_parent
+        self.on_close()
         
         
     def on_delete(self, event=None):
@@ -375,7 +386,7 @@ class FormFrame(wx.Frame):
         print 'help'
         
         
-    def initialize(self, db_table=None, definition_lod=None, attributes_lod=None, portlets_lod=None):
+    def initialize(self, definition_lod=None, attributes_lod=None, portlets_lod=None):
         self.definition_lod = definition_lod
         self.attributes_lod = attributes_lod
         
@@ -404,8 +415,13 @@ class FormFrame(wx.Frame):
         
         self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
         self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
-
-                       
+        
+        
+    def edit_dataset(self):
+        print 'edit dataset number:', self.primary_key
+        
+        
+        
 class OldForm(wx.Frame):
     def __init__(self, parent=None,
                        parent_form=None, 
