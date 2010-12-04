@@ -87,24 +87,21 @@ class FormTable:
     def on_edit(self, event=None):
         if self.form == None:
             return
-        
-        print 'editing:', self.form
-        self.form(parent=self.portlet_parent,
-                  remote_parent=self) #.show(self.portlet_parent, self.primary_key)
+
+        form_instance = self.form(parent=self.portlet_parent,
+                                  remote_parent=self)
+        form_instance.populate()
 
 
     def on_delete(self, event=None):
-        if self.form == None:
-            return
-        
-        self.form.primary_key = self.primary_key
-        print 'primary_key for form:', self.form.primary_key
-        #response = self.form.delete_dataset()
-
-        #if response == True:
-        #    self.toolbar_parent.EnableTool(self.ID_DELETE, False)
-        #    self.toolbar_parent.EnableTool(self.ID_EDIT, False)
-            #self.update()
+        if self.primary_key <> None:
+            dial = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
+                                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+            answer = dial.ShowModal()
+            if answer == wx.ID_YES:
+                pk_column = self.db_table.get_primary_key_columns()[0]
+                self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
+                self.populate()
 
 
     def on_print(self, event=None):
@@ -157,8 +154,8 @@ class FormTable:
         result = WxTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
         if result <> None: 
             self.primary_key_column = result['column_name']
-
-
+            
+    
     def populate(self, content_lod=None):
         if self.parent_form <> None: 
             if self.parent_form.primary_key <> None:
@@ -351,9 +348,9 @@ class FormFrame(wx.Frame):
         self.Show()
         
         self.db_table = remote_parent.db_table
+        self.primary_key = None
         if self.remote_parent.primary_key <> None:
             self.primary_key = self.remote_parent.primary_key
-            self.edit_dataset()
         
         self.error_dialog = Dialogs.Error(self)
         
@@ -367,14 +364,22 @@ class FormFrame(wx.Frame):
         print 'save formular on db_table:', self.db_table
         
         form_content = self.form.get_content()
-        #pk_column_list = self.db_table.get_primary_key_columns()
-        
+        pk_column = self.db_table.get_primary_key_columns()[0]
+            
         try:
-            self.db_table.insert(key_column='id', content=form_content)
+            if self.primary_key <> None:
+                form_content[pk_column] = self.primary_key
+                print 'writing:'
+                print form_content
+                print 'primary key: ', self.primary_key
+                self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
+            else:
+                self.db_table.insert(key_column=pk_column, content=form_content)
         except Exception, inst:
             self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
         
         print 'remote parent:', self.remote_parent
+        self.remote_parent.populate()
         self.on_close()
         
         
@@ -407,6 +412,17 @@ class FormFrame(wx.Frame):
         self.SetInitialSize()
         
         
+    def populate(self):
+        print 'populating frame form!'
+        
+        if self.primary_key <> None:
+            pk_column = self.db_table.get_primary_key_columns()[0]
+            content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))
+            self.form.populate(content_dict=content_lod[0])
+        # else:
+        #    content_lod = None
+    
+    
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
         
@@ -425,10 +441,6 @@ class FormFrame(wx.Frame):
         
         self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
         self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
-        
-        
-    def edit_dataset(self):
-        print 'edit dataset number:', self.primary_key
         
         
         

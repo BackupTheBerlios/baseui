@@ -142,6 +142,9 @@ class Tree(TreeListCtrl):
     def populate(self, content_lod=None):
         ''' content_lod = [{'id': 1}] '''
         
+        # Needed to update after first population.
+        self.DeleteRoot()
+        
         root = self.AddRoot(text='Root')
         for content_dict in content_lod:
             item = self.AppendItem(parent=root, text='')
@@ -155,8 +158,8 @@ class Tree(TreeListCtrl):
                     content = ''
                 
                 self.SetItemText(item, str(content), column_number)
-
-
+                
+                
     def build_store(self, row_parent, row_dict):
         row_content = []
         # Read out definition_lod
@@ -435,27 +438,25 @@ class Form(wx.Panel):
                     widget_content = date_to_str(widget_content)
             else:
                 widget_content = ""
-
-            if widget_name.startswith('entry_') or \
-               widget_name.startswith('textview_'):
+                
+            if widget_object.__class__ ==  wx._controls.TextCtrl:
                 if widget_content <> '' and widget_content <> None:
-                    widget_object.set_text(str(widget_content).rstrip())
+                    widget_object.SetValue(str(widget_content).rstrip())
                 else:
-                    widget_object.set_text('')
-            if widget_name.startswith('comboboxentry_'):
+                    widget_object.SetValue('')
+            if widget_object.__class__ ==  wx._controls.ComboBox:
                 if widget_content <> '' and widget_content <> None:
-                    widget_object.set_text(str(widget_content).rstrip())
+                    widget_object.SetValue(str(widget_content).rstrip())
                 else:
-                    widget_object.set_text('')
-            if widget_name.startswith('checkbutton_'):
-                #print widget_name, widget_content, type(widget_content)
+                    widget_object.SetValue('')
+            if widget_object.__class__ ==  wx._controls.CheckBox:
                 if widget_content == '1' or \
                    widget_content == 'Y' or \
                    widget_content == True:
                     widget_content = 1
                 else:
                     widget_content = 0
-                widget_object.set_active(int(widget_content))
+                widget_object.SetValue(int(widget_content))
 
 
     def clear(self):
