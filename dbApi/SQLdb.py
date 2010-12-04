@@ -298,7 +298,7 @@ class postgresql_database(generic_database):
             
             
     def connect(self, **kwargs):
-        self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
+        self.connection = self.connector.connect(database="'%s'" % kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
 
         if 'pscopg2' in self.engine:
             self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
