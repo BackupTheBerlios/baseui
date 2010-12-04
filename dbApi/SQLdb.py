@@ -66,7 +66,7 @@ def inherit_class(thisclass, otherclass):
         if not argument.startswith('__'):
             thisclass.__setattr__(argument, otherclass.__getattribute__(argument))
             
-            
+# Databases --------------------------------------------------------------------
             
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
@@ -254,7 +254,7 @@ class generic_database(object):
                 del(content_lod)
                 del(column_list)
         
-# ------------------------------------------------------------------------------ 
+
 
 class sqlite_database(generic_database):
     def __init__(self, main_class, engine='sqlite'):
@@ -472,7 +472,7 @@ class odbc_generic_database(generic_database):
                 lof_table_names.append(row.table_name)
         return lof_table_names
         
-        
+# Database Tables --------------------------------------------------------------
     
 class table(object):
     ''' This handles all table-related SQL orders. '''
@@ -947,6 +947,14 @@ class sqlite_table(generic_table):
         
         
 class postgresql_table(generic_table):
+    # This is a try to get sql-transformations between databases into the cursor!
+    sql_transformation = \
+    {'string':   'VARCHAR',
+     'text':     'TEXT',
+     'integer':  'INTEGER',
+     'blob':     'BLOB',
+     'datetime': 'TIMESTAMP'}
+    
     def __init__(self, db_object, table_name):
         generic_table.__init__(self, db_object, table_name)
         
@@ -1011,11 +1019,12 @@ class odbc_generic_table(generic_table):
         return attributes_lod
            
         
+
 class odbc_excel_table(odbc_generic_table):
     def __init__(self, db_object, table_name):
         odbc_generic_table.__init__(self, db_object, table_name)
         
-        
+# Database Table Columns -------------------------------------------------------
         
 class column:
     def __init__(self, table_object, column_name):
@@ -1108,7 +1117,7 @@ class column:
             raise
         return content
 
-
+# Database Table Rows ----------------------------------------------------------
 
 class row:
     ''' This handles single table-rows. '''
@@ -1116,7 +1125,7 @@ class row:
     def __init__(self, table_object):
         pass
     
-    
+# Database Users ---------------------------------------------------------------
     
 class user:
     ''' This handles all user-related SQL orders. '''

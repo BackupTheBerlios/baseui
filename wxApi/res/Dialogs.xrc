@@ -105,7 +105,7 @@
 			</object>
 			<object class="sizeritem">
 				<option>0</option>
-				<flag>wxEXPAND</flag>
+				<flag>wxALL|wxEXPAND</flag>
 				<border>5</border>
 				<object class="wxTextCtrl" name="entry_traceback">
 					<style>wxHSCROLL|wxTE_MULTILINE|wxTE_READONLY</style>

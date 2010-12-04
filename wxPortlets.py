@@ -73,21 +73,30 @@ class FormTable:
 
     # Actions -----------------------------------------------------------------
     def on_new(self, event=None):
+        if self.form == None:
+            return
+        
         try:
             self.primary_key = None
             self.form(parent=self.portlet_parent,
                       remote_parent=self)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
-
-
+            
+            
     def on_edit(self, event=None):
+        if self.form == None:
+            return
+        
         print 'editing:', self.form
         self.form(parent=self.portlet_parent,
                   remote_parent=self) #.show(self.portlet_parent, self.primary_key)
 
 
     def on_delete(self, event=None):
+        if self.form == None:
+            return
+        
         self.form.primary_key = self.primary_key
         print 'primary_key for form:', self.form.primary_key
         #response = self.form.delete_dataset()
@@ -191,16 +200,17 @@ class FormTable:
     def populate_toolbar(self):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
-        self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_new, id=self.ID_NEW)
-
-        self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_edit, id=self.ID_EDIT)
-
-        self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
-
-        self.toolbar_parent.AddSeparator()
+        if self.form <> None:
+            self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_new, id=self.ID_NEW)
+    
+            self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_edit, id=self.ID_EDIT)
+    
+            self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
+    
+            self.toolbar_parent.AddSeparator()
         
         self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",     IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
@@ -301,7 +311,7 @@ class FormFrame(wx.Frame):
     
     def __init__(self, remote_parent=None,
                        parent=None,
-                       title=None,
+                       title='',
                        panel_name=None,
                        icon_path=None,
                        xrc_path=None,

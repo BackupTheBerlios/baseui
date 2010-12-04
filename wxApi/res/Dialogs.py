@@ -77,7 +77,7 @@ class Error ( wx.Dialog ):
 		self.entry_traceback.Hide()
 		self.entry_traceback.SetMinSize( wx.Size( 400,150 ) )
 		
-		fgSizer4.Add( self.entry_traceback, 0, wx.EXPAND, 5 )
+		fgSizer4.Add( self.entry_traceback, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		self.SetSizer( fgSizer4 )
 		self.Layout()
