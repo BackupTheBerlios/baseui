@@ -78,8 +78,7 @@ class FormTable:
         
         try:
             self.primary_key = None
-            self.form(parent=self.portlet_parent,
-                      remote_parent=self)
+            self.form(parent=self.portlet_parent, remote_parent=self)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
             
@@ -88,8 +87,7 @@ class FormTable:
         if self.form == None:
             return
 
-        form_instance = self.form(parent=self.portlet_parent,
-                                  remote_parent=self)
+        form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
         form_instance.populate()
 
 
@@ -114,8 +112,7 @@ class FormTable:
         
     def on_preferences(self, event=None):
         toplevel_frame = self.portlet_parent.GetTopLevelParent()
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, 
-                                                              title='Einstellungen')
+        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, title='Einstellungen')
         self.frame_preferences.ShowModal()
         
         
@@ -361,8 +358,6 @@ class FormFrame(wx.Frame):
         
         
     def on_save(self, event=None):
-        print 'save formular on db_table:', self.db_table
-        
         form_content = self.form.get_content()
         pk_column = self.db_table.get_primary_key_columns()[0]
             
@@ -378,7 +373,6 @@ class FormFrame(wx.Frame):
         except Exception, inst:
             self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
         
-        print 'remote parent:', self.remote_parent
         self.remote_parent.populate()
         self.on_close()
         
@@ -392,8 +386,7 @@ class FormFrame(wx.Frame):
         
         
     def on_preferences(self, event=None):
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=self, 
-                                                              title='Einstellungen')
+        self.frame_preferences = Dialogs.FormTablePreferences(parent=self, title='Einstellungen')
         self.frame_preferences.ShowModal()
         
         
@@ -413,8 +406,6 @@ class FormFrame(wx.Frame):
         
         
     def populate(self):
-        print 'populating frame form!'
-        
         if self.primary_key <> None:
             pk_column = self.db_table.get_primary_key_columns()[0]
             content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))

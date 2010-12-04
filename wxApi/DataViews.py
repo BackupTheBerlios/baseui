@@ -388,7 +388,6 @@ class Form(wx.Panel):
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
                 widget_object = wx.xrc.XRCCTRL(self, widget_name)
-                print 'widget_name:', widget_name, 'is object:', widget_object
                 # if widget_name.startswith('entry_'):                    
                 #     if data_type == 'date':
                 #         widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
