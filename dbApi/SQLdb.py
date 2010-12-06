@@ -325,7 +325,11 @@ class postgresql_database(generic_database):
         # 'id': 'SERIAL PRIMARY KEY',
         # 'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
         }
-        
+    
+    encodings = {'utf8':    'utf-8',
+                 'win1252': 'cp1252',
+                 'latin1':  'latin-1'}
+    
     def __init__(self, main_class, engine='psycopg2'):
         generic_database.__init__(self, main_class, engine)
         
@@ -335,7 +339,7 @@ class postgresql_database(generic_database):
         if 'pygresql' in self.engine:
             import pgdb
             self.connector = pgdb
-            
+        
             
     def connect(self, **kwargs):
         self.connection = self.connector.connect(database="'%s'" % kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
@@ -344,6 +348,7 @@ class postgresql_database(generic_database):
             self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             
         self.cursor = self.connection.cursor()
+        self.encoding = self.get_encoding()
         self.set_arguments(**kwargs)
         return self.connection
     
@@ -374,6 +379,14 @@ class postgresql_database(generic_database):
         lof_databases = self.listresult("SELECT datname FROM pg_database")
         return lof_databases
         
+    
+    def get_encoding(self):
+        encoding = self.listresult('SHOW client_encoding')[0].lower()
+        
+        if encoding in self.encodings.keys():
+            encoding = self.encodings[encoding]
+        return encoding
+    
     
     def create(self, database, encoding='latin-1'):
         ''' Creates a new, blank database.
@@ -845,7 +858,9 @@ CREATE TABLE """ + self.name + """
             sql_command = "SELECT * FROM [%s]"
         else:   
             sql_command = "SELECT * FROM %s"
+        
         content_lod = self.db_object.dictresult(sql_command % self.name)
+        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
         return content_lod
 
 
@@ -973,7 +988,7 @@ CREATE TABLE """ + self.name + """
         
     def select(self, distinct=False, column_list=[], where='', listresult=False):
         ''' SELECT order in SQL with transformation of output to python data types. '''
-            
+        
         if distinct == False:
             distinct = ''
         else:
@@ -996,11 +1011,11 @@ CREATE TABLE """ + self.name + """
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command)
-                return content_lod       
+                # return content_lod       
         except:
             raise
             
-        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod)
+        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
         return content_lod
     
     

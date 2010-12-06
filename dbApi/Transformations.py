@@ -51,7 +51,7 @@ def write_transform(content, engine):
     return new_content
     
 
-def normalize_content(attributes_lod, content_lod):
+def normalize_content(attributes_lod, content_lod, encoding=None):
     ''' This converts database dependent things to clear python types. '''
     
     if attributes_lod == None:
@@ -70,22 +70,18 @@ def normalize_content(attributes_lod, content_lod):
                         if data_type.lower() == 'datetime':
                             content_dic[column_name] = transform_timestamp(content)
                         if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:
-                            content_dic[column_name] = transform_string(content)
+                            content_dic[column_name] = transform_string(content, encoding)
     return content_lod
 
 
-def transform_string(content):
-    if content <> None: # and type(content) <> unicode:
+def transform_string(content, encoding=None):
+    if content <> None:
         content = content.rstrip()
         try:
-            #content = u'%s' % content
-            content = content.encode('utf-8') #, 'utf-8')
+            if encoding <> None:
+                content = unicode(content, encoding)
         except Exception, inst:
             pass
-            #print content, str(inst)
-        
-        
-            
     return content
                           
                                 

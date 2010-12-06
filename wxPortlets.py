@@ -93,9 +93,9 @@ class FormTable:
 
     def on_delete(self, event=None):
         if self.primary_key <> None:
-            dial = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
+            dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
                                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-            answer = dial.ShowModal()
+            answer = dialog.ShowModal()
             if answer == wx.ID_YES:
                 pk_column = self.db_table.get_primary_key_columns()[0]
                 self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
