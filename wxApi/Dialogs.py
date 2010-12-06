@@ -8,6 +8,7 @@
 import traceback
 import wx
 import res.Dialogs
+import Panels
 from res import IconSet32
 
 
@@ -65,5 +66,43 @@ class FormTablePreferences(wx.Dialog):
     ID_EXPORT = 202
     
     def __init__(self, parent, title):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, title)
-        
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(640, 480))
+    
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+
+        sizer_main = wx.FlexGridSizer( 1, 1, 0, 0 )
+        sizer_main.AddGrowableCol( 0 )
+        sizer_main.AddGrowableRow( 0 )
+        sizer_main.SetFlexibleDirection( wx.BOTH )
+        sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_panel2 = Panels.TableConfig(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.m_panel2, u"Allgemein", True )
+        self.m_panel3 = Panels.TableImport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.m_panel3, u"Import", False )
+        self.m_panel4 = Panels.TableExport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.m_panel4, u"Export", False )
+
+        sizer_main.Add( self.notebook, 1, wx.ALL|wx.EXPAND, 5 )
+
+        sizer_bottom = wx.FlexGridSizer( 1, 3, 0, 0 )
+        sizer_bottom.AddGrowableCol( 0 )
+        sizer_bottom.SetFlexibleDirection( wx.BOTH )
+        sizer_bottom.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+
+        sizer_bottom.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+
+        self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_bottom.Add( self.button_ok, 0, wx.ALL, 5 )
+
+        self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_bottom.Add( self.button_cancel, 0, wx.ALL, 5 )
+
+        sizer_main.Add( sizer_bottom, 1, wx.EXPAND, 5 )
+
+        self.SetSizer( sizer_main )
+        self.Layout()
+
+        self.Centre( wx.BOTH )

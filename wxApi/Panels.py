@@ -211,7 +211,25 @@ class Login(res.Portlets.Login):
             user_list.append(content.get('user'))
             
             
-            
+
+class TableImport(res.Portlets.TableImport):
+    def __init__(self, parent):
+        res.Portlets.TableImport.__init__(self, parent)
+        
+        
+        
+class TableExport(res.Portlets.TableExport):
+    def __init__(self, parent):
+        res.Portlets.TableExport.__init__(self, parent)
+        
+        
+        
+class TableConfig(res.Portlets.TableConfig):
+    def __init__(self, parent):
+        res.Portlets.TableConfig.__init__(self, parent)
+        
+        
+        
 class Webserver(res.Portlets.Webserver):
     def __init__(self, parent):
         res.Portlets.Webserver.__init__(self, parent)
