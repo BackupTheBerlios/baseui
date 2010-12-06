@@ -14,7 +14,7 @@ def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
     ''' Opposite of other '''
 
     if data_type == datetime.datetime:
-        sql_data_type = 'timestamp'
+        sql_data_type = 'datetime'
     elif data_type == datetime.date:
         sql_data_type = 'date'
     elif data_type == datetime.time:
@@ -123,56 +123,6 @@ def convert_to_sql(attributes_lod, content_lod):
     ''' This converts python data to database dependent datastream. '''
     
     return content_lod
-    
-
-def SQLite_DataTypes(self, data_type):
-    dict = \
-    {
-    'INTEGER': ['INT', 
-                'INTEGER', 
-                'TINYINT', 
-                'SMALLINT', 
-                'MEDIUMINT', 
-                'BIGINT', 
-                'UNSIGNED BIG INT', 
-                'INT2', 
-                'INT8'],
-    'TEXT':    ['CHARACTER',
-                'VARCHAR',
-                'VARYING CHARACTER'
-                'NCHAR'
-                'NATIVE CHARACTER'
-                'NVARCHAR'
-                'TEXT'
-                'CLOB'],
-    'NONE':    ['BLOB',
-                'no datatype specified'],
-    'REAL':    ['REAL',
-                'DOUBLE',
-                'DOUBLE PRECISION',
-                'FLOAT'],
-    'NUMERIC': ['NUMERIC',
-                'DECIMAL',
-                'BOOLEAN',
-                'DATE',
-                'DATETIME',
-                'NUMERIC']
-    }
-    return
-
-
-def PostgreSQL_DataTypes(self, data_type):
-    dict = \
-    {'INTEGER': []
-    }
-
-    
-def MySQL_DataTypes(self, data_type):
-    pass
-    
-    
-def Oracle_DataTypes(self, data_type):
-    pass
     
     
     

@@ -66,11 +66,11 @@ def get_engines():
 
 
 
-def inherit_class(thisclass, otherclass):
-    arguments = dir(otherclass)
+def inherit_class(from_class, into_class):
+    arguments = dir(from_class)
     for argument in arguments:
         if not argument.startswith('__'):
-            thisclass.__setattr__(argument, otherclass.__getattribute__(argument))
+            into_class.__setattr__(argument, from_class.__getattribute__(argument))
             
 # Databases --------------------------------------------------------------------
             
@@ -99,7 +99,7 @@ class database(object):
         if self.engine == "odbc":
             __database = odbc_generic_database(self)
             
-        inherit_class(self, __database)
+        inherit_class(__database, self)
         
 
             
@@ -140,7 +140,7 @@ class generic_database(object):
     def set_arguments(self, **kwargs):
         self.name = kwargs.get('database')
         self.driver = kwargs.get('driver')
-        inherit_class(self.main_class, self)
+        inherit_class(self, self.main_class)
         
         
     def drop(self, database):
@@ -672,7 +672,7 @@ class table(object):
         if engine == "odbc":
             __table = odbc_generic_table(db_object, table_name)
             
-        inherit_class(self, __table)
+        inherit_class(__table, self)
 
 
 
@@ -683,6 +683,9 @@ class generic_table(object):
         self.name = table_name
         
         self.primary_key_list = []
+        
+        print 'generic table:', self.name
+        print db_object.data_types
         
         
     def create(self, attributes_lod = None):
@@ -703,7 +706,7 @@ class generic_table(object):
 
             if attributes_lod is not given, this function creates a table with one
             primary key column named "id". '''
-
+        
         table_layout = ""
         if attributes_lod == None:
             table_layout += """\
@@ -867,7 +870,7 @@ CREATE TABLE """ + self.name + """
             
         for content in content_lod:
             result = self.select(column_list=column_list, where = '%s = %i' % (pk_column, content[pk_column]))
-            print "checking:", content 
+            print "checking:", content
             
             if result == []: 
                 print 'content:', content, 'not in table!'
@@ -1120,15 +1123,7 @@ class sqlite_table(generic_table):
         
         
         
-class postgresql_table(generic_table):
-    # This is a try to get sql-transformations between databases into the cursor!
-    sql_transformation = \
-    {'string':   'VARCHAR',
-     'text':     'TEXT',
-     'integer':  'INTEGER',
-     'blob':     'BLOB',
-     'datetime': 'TIMESTAMP'}
-    
+class postgresql_table(generic_table):    
     def __init__(self, db_object, table_name):
         generic_table.__init__(self, db_object, table_name)
         

@@ -213,7 +213,7 @@ class Webserver ( wx.Panel ):
 class TableImport ( wx.Panel ):
 	
 	def __init__( self, parent ):
-		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 500,394 ), style = wx.TAB_TRAVERSAL )
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 647,394 ), style = wx.TAB_TRAVERSAL )
 		
 		fgSizer4 = wx.FlexGridSizer( 2, 2, 0, 0 )
 		fgSizer4.AddGrowableCol( 0 )
@@ -271,6 +271,58 @@ class TableImport ( wx.Panel ):
 		combobox_targetChoices = []
 		self.combobox_target = wx.ComboBox( self, wx.ID_ANY, u"Combo!", wx.DefaultPosition, wx.Size( -1,22 ), combobox_targetChoices, 0 )
 		fgSizer61.Add( self.combobox_target, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		fgSizer81.Add( fgSizer61, 1, wx.EXPAND, 5 )
+		
+		self.tree_target = wx.TreeCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TR_DEFAULT_STYLE )
+		fgSizer81.Add( self.tree_target, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		sbSizer5.Add( fgSizer81, 1, wx.EXPAND, 5 )
+		
+		fgSizer4.Add( sbSizer5, 1, wx.EXPAND, 5 )
+		
+		self.SetSizer( fgSizer4 )
+		self.Layout()
+	
+	def __del__( self ):
+		pass
+	
+
+###########################################################################
+## Class TableExport
+###########################################################################
+
+class TableExport ( wx.Panel ):
+	
+	def __init__( self, parent ):
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 647,394 ), style = wx.TAB_TRAVERSAL )
+		
+		fgSizer4 = wx.FlexGridSizer( 2, 2, 0, 0 )
+		fgSizer4.AddGrowableCol( 0 )
+		fgSizer4.AddGrowableCol( 1 )
+		fgSizer4.AddGrowableRow( 0 )
+		fgSizer4.SetFlexibleDirection( wx.BOTH )
+		fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Zieltabelle" ), wx.VERTICAL )
+		
+		fgSizer81 = wx.FlexGridSizer( 2, 1, 0, 0 )
+		fgSizer81.AddGrowableCol( 0 )
+		fgSizer81.AddGrowableRow( 1 )
+		fgSizer81.SetFlexibleDirection( wx.BOTH )
+		fgSizer81.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		fgSizer61 = wx.FlexGridSizer( 1, 2, 0, 0 )
+		fgSizer61.AddGrowableCol( 1 )
+		fgSizer61.SetFlexibleDirection( wx.BOTH )
+		fgSizer61.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.m_staticText121 = wx.StaticText( self, wx.ID_ANY, u"Zieldatei", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText121.Wrap( -1 )
+		fgSizer61.Add( self.m_staticText121, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+		
+		self.filepicker_source1 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
+		fgSizer61.Add( self.filepicker_source1, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		fgSizer81.Add( fgSizer61, 1, wx.EXPAND, 5 )
 		
