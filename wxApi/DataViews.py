@@ -157,7 +157,9 @@ class Tree(TreeListCtrl):
                 if content == None:
                     content = ''
                 
-                self.SetItemText(item, str(content), column_number)
+                if type(content) <> unicode:
+                    content = str(content)
+                self.SetItemText(item, content, column_number)
                 
                 
     def build_store(self, row_parent, row_dict):
@@ -440,12 +442,17 @@ class Form(wx.Panel):
                 
             if widget_object.__class__ ==  wx._controls.TextCtrl:
                 if widget_content <> '' and widget_content <> None:
-                    widget_object.SetValue(str(widget_content).rstrip())
+                    if type(widget_content) <> unicode:
+                        widget_content = str(widget_content)
+                    widget_object.SetValue(widget_content.rstrip())
                 else:
                     widget_object.SetValue('')
             if widget_object.__class__ ==  wx._controls.ComboBox:
+                # For now ok, but later on there has to be some Blackmagic here!
                 if widget_content <> '' and widget_content <> None:
-                    widget_object.SetValue(str(widget_content).rstrip())
+                    if type(widget_content) <> unicode:
+                        widget_content = str(widget_content)
+                    widget_object.SetValue(widget_content.rstrip())
                 else:
                     widget_object.SetValue('')
             if widget_object.__class__ ==  wx._controls.CheckBox:
