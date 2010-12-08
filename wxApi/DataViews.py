@@ -9,7 +9,7 @@ import os
 import wx, wx.xrc
 
 from wx.gizmos import TreeListCtrl
-from res import IconSetMini, IconSet16
+from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
@@ -148,7 +148,7 @@ class Tree(TreeListCtrl):
             
             sortable = column_dict.get('sortable')
             if sortable <> False:
-                # image = IconSetMini.getleft_miniBitmap()
+                image = IconSet16.getleft_16Bitmap()
                 self.SetColumnImage(column=0, image=0)
                 
 
