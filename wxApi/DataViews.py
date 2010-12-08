@@ -9,6 +9,7 @@ import os
 import wx, wx.xrc
 
 from wx.gizmos import TreeListCtrl
+from res import IconSetMini, IconSet16
 
 from pprint import pprint
 from Transformations import *
@@ -127,6 +128,12 @@ class Tree(TreeListCtrl):
         # Before anything else happens on the treeview, clear it.
         self.clear()
         
+        # Make image list to populate them later!
+        self.il = wx.ImageList(16, 16)
+        self.idx1 = self.il.Add(IconSet16.getconnect_creating_16Bitmap())
+        self.SetImageList( self.il)
+        print 'idx1:', self.idx1
+        
         # This makes table column-setup.
         for column_dict in self.definition_lod:
             column_label = column_dict.get('column_label')
@@ -136,8 +143,14 @@ class Tree(TreeListCtrl):
             visible = column_dict.get('visible')
             if visible <> False:
                 visible = True
+            
             self.AddColumn(text=column_label, shown=visible)
-
+            
+            sortable = column_dict.get('sortable')
+            if sortable <> False:
+                # image = IconSetMini.getleft_miniBitmap()
+                self.SetColumnImage(column=0, image=0)
+                
 
     def populate(self, content_lod=None):
         ''' content_lod = [{'id': 1}] '''

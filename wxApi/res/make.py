@@ -33,7 +33,6 @@ def process(path, set='16', size='16'):
 process(path='../../res/16/',    set='16',    size='16')
 process(path='../../res/32/',    set='32',    size='32')
 process(path='../../res/flags/', set='Flags', size='16')
-process(path='../../res/mini/',  set='Mini',  size='mini')
         
 x=raw_input('press <RETURN> to exit...')
 
