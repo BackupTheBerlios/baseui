@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.wxApi Images module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import wx

@@ -1,3 +1,8 @@
+#===============================================================================
+# BaseUI.wxApi.Entrys
+# by Mark Muzenhardt, published under LGPL license.
+#===============================================================================
+
 import wx
 
 # boolean entry:    checkbox    (wx.Checkbox)

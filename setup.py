@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI setup module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under LGPL license.
 #
 # Give "python setup.py bdist_wininst" to make windows installer.
 #===============================================================================

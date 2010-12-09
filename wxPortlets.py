@@ -2,10 +2,9 @@
 
 #===============================================================================
 # BaseUI.wxPortlets module.
-# published under BSD license by Mark Muzenhardt.
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
-#import sys
 import wx, wx.aui
 
 from misc import FileSystem, HelpFile, FileTransfer

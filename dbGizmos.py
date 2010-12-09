@@ -2,7 +2,7 @@
 
 #===============================================================================
 # dbGizmos module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 from misc.FileSystem import iniFile 

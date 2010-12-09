@@ -1,3 +1,8 @@
+#===============================================================================
+# BaseUI.wxApi.Panels
+# by Mark Muzenhardt, published under LGPL license.
+#===============================================================================
+
 import wx
 import res.Portlets
 

@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.wx.Toolbars module
-# (c) by Mark Muzenhardt
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import wx

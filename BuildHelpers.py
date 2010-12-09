@@ -3,8 +3,7 @@
 
 #===============================================================================
 # BuildHelpers 
-#
-# (c) by Mark Muzenhardt
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import sys, os, imp, shutil

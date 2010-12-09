@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.wxPortlets module.
-# published under BSD license by Mark Muzenhardt.
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import wx

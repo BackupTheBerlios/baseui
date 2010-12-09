@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.wx.Dialogs module
-# (c) by Mark Muzenhardt
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import traceback
