@@ -249,7 +249,7 @@ class FormTable:
 
         self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
         self.Table.set_row_activate_function(self.on_row_activate)
-        self.Table.set_cursor_changed_function(self.on_cursor_changed)
+        self.Table.set_cursor_change_function(self.on_cursor_changed)
         
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:

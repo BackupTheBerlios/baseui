@@ -28,9 +28,26 @@ class Tree(TreeListCtrl):
     
         self.Hide()
         self.row_activate_function = None
-        self.cursor_changed_function = None
+        self.cursor_change_function = None
+        
+        self.number_of_columns = 0
+        self.sort_column_number = None
+        self.sort_ascending = None
+        
+        self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id = wx.ID_ANY)
 
-
+        
+    def OnCompareItems(self, a, b):
+        a_data = self.GetItemText(a, self.sort_column_number).lower()
+        b_data = self.GetItemText(b, self.sort_column_number).lower()
+        
+        if self.sort_ascending == True:
+            result = cmp(a_data, b_data)
+        else:
+            result = cmp(b_data, a_data)
+        return result
+    
+    
     def on_row_activated(self, event=None):
         row_content = self.get_selected_row_content()
         if self.row_activate_function <> None:
@@ -39,8 +56,13 @@ class Tree(TreeListCtrl):
 
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
-        if self.cursor_changed_function <> None:
-            self.cursor_changed_function(row_content)
+        if self.cursor_change_function <> None:
+            self.cursor_change_function(row_content)
+            
+            
+    def on_header_clicked(self, event=None):
+        clicked_column = event.GetColumn()
+        self.set_sort_column(column_number=clicked_column)
     
     
     # Actions -----------------------------------------------------------------
@@ -130,8 +152,12 @@ class Tree(TreeListCtrl):
         
         # Make image list to populate them later!
         self.image_list = wx.ImageList(16, 16)
+        
         self.ID_LEFT = self.image_list.Add(IconSet16.getleft_16Bitmap())
-        self.SetImageList( self.image_list)
+        self.ID_UP = self.image_list.Add(IconSet16.getup_16Bitmap())
+        self.ID_DOWN = self.image_list.Add(IconSet16.getdown_16Bitmap())
+        
+        self.SetImageList(self.image_list)
         
         # This makes table column-setup.
         column_number = 0
@@ -146,12 +172,12 @@ class Tree(TreeListCtrl):
             
             self.AddColumn(text=column_label, shown=visible)
             
-            
             sortable = column_dict.get('sortable')
             if sortable <> False:
                 self.SetColumnImage(column=column_number, image=self.ID_LEFT)
                 
             column_number += 1
+        self.number_of_columns = column_number
                 
 
     def populate(self, content_lod=None):
@@ -160,9 +186,9 @@ class Tree(TreeListCtrl):
         # Needed to update after first population.
         self.DeleteRoot()
         
-        root = self.AddRoot(text='Root')
+        self.root = self.AddRoot(text='Root')
         for content_dict in content_lod:
-            item = self.AppendItem(parent=root, text='')
+            item = self.AppendItem(parent=self.root, text='')
             
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
@@ -300,35 +326,36 @@ class Tree(TreeListCtrl):
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_activated, id=wx.ID_ANY)
 
 
-    def set_cursor_changed_function(self, cursor_changed_function):
-        self.cursor_changed_function = cursor_changed_function
+    def set_cursor_change_function(self, cursor_change_function):
+        self.cursor_change_function = cursor_change_function
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_cursor_changed,   id=wx.ID_ANY)
 
 
-    def set_sort_column(self, column_name='', sort_ascending=True):
-        ''' Enables the sort-feature for the column given with column_name
-            and triggers the sort_liststore function. '''
-
-        definition_dic = search_lod(self.definition_lod, 'column_name', column_name)
-        self.sort_column = definition_dic['column_number']
-        self.sort_ascending = sort_ascending
-        self.sort_liststore()
-
-
-    def sort_liststore(self): #, column):
-        ''' sorts the entire liststore with following args:
-                self.sort_column    = column number to sort
-                self.sort_ascending = True: Sort ascending / False: Sort descending '''
-
-        if self.store == None:
-            return
+    def set_sort_column(self, column_name=None, column_label=None, column_number=None, ascending=None):
+        ''' Enables to sort this widget, even from external. '''
         
-        if self.sort_ascending == True: algorithm = gtk.SORT_ASCENDING
-        if self.sort_ascending == False: algorithm = gtk.SORT_DESCENDING
-
-        self.store.set_default_sort_func(lambda *args: self.sort_column)
-        self.store.set_sort_column_id(self.sort_column, algorithm)
-        #return column
+        if column_number <> None:
+            self.sort_column_number = column_number
+        if ascending <> None:
+            self.sort_ascending = ascending
+        
+        if self.sort_ascending == None:
+            self.sort_ascending = True
+        elif self.sort_ascending == True:
+            self.sort_ascending = False
+        elif self.sort_ascending == False:
+            self.sort_ascending = True
+        
+        for column in xrange(self.number_of_columns):
+            if column <> self.sort_column_number:
+                self.SetColumnImage(column=column, image=self.ID_LEFT)
+            else:
+                if self.sort_ascending == True:
+                    self.SetColumnImage(column=column, image=self.ID_DOWN)
+                elif self.sort_ascending == False:
+                    self.SetColumnImage(column=column, image=self.ID_UP)
+                    
+        self.SortChildren(self.root)
 
 
 
