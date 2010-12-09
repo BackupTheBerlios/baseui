@@ -2,7 +2,7 @@
 
 #===============================================================================
 # Portlets module.
-# by Mark Muzenhardt, published under LGPL license.
+# by Mark Muzenhardt, published under GPL-License.
 #===============================================================================
 
 import sys

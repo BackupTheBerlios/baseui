@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI setup module.
-# by Mark Muzenhardt, published under LGPL license.
+# by Mark Muzenhardt, published under GPL-License.
 #
 # Give "python setup.py bdist_wininst" to make windows installer.
 #===============================================================================
@@ -61,7 +61,7 @@ setup(name         = 'BaseUI',
                       
       version      = __version__,
       description  = 'Advanced Database and user interface API',
-      license      = 'BSD',
+      license      = 'GPL',
       url          = 'http://baseui.berlios.de',
       author       = __author__,
       author_email = 'mark.muzenhardt@googlemail.com',

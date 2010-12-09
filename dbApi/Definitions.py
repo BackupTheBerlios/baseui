@@ -2,7 +2,7 @@
 
 #===============================================================================
 # DBapi Definitions module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under GPL-License.
 #===============================================================================
 
 data_types_lod = \

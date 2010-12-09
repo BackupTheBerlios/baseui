@@ -2,7 +2,7 @@
 
 #===============================================================================
 # GTKapi Dialogs module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under GPL-License.
 #
 # Dialogs are pre-defined windows for common things to do.
 #===============================================================================

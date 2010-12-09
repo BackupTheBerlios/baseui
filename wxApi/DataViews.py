@@ -135,8 +135,6 @@ class Tree(TreeListCtrl):
                               'is_nullable' = True}]'''
 
         self.definition_lod = definition_lod
-        #treeview_column_list = []
-        #self.type_list = []
         
         # Merge definition_lod and attributes_lod together.
         self.definition_lod = merge_two_lods(self.definition_lod, attributes_lod, 'column_name')
@@ -334,16 +332,21 @@ class Tree(TreeListCtrl):
     def set_sort_column(self, column_name=None, column_label=None, column_number=None, ascending=None):
         ''' Enables to sort this widget, even from external. '''
         
+        old_column_number = self.sort_column_number
+        
         if column_number <> None:
             self.sort_column_number = column_number
         if ascending <> None:
             self.sort_ascending = ascending
         
-        if self.sort_ascending == None:
-            self.sort_ascending = True
-        elif self.sort_ascending == True:
-            self.sort_ascending = False
-        elif self.sort_ascending == False:
+        if old_column_number == self.sort_column_number:
+            if self.sort_ascending == None:
+                self.sort_ascending = True
+            elif self.sort_ascending == True:
+                self.sort_ascending = False
+            elif self.sort_ascending == False:
+                self.sort_ascending = True
+        else:
             self.sort_ascending = True
         
         for column in xrange(self.number_of_columns):
