@@ -129,12 +129,12 @@ class Tree(TreeListCtrl):
         self.clear()
         
         # Make image list to populate them later!
-        self.il = wx.ImageList(16, 16)
-        self.idx1 = self.il.Add(IconSet16.getconnect_creating_16Bitmap())
-        self.SetImageList( self.il)
-        print 'idx1:', self.idx1
+        self.image_list = wx.ImageList(16, 16)
+        self.ID_LEFT = self.image_list.Add(IconSet16.getleft_16Bitmap())
+        self.SetImageList( self.image_list)
         
         # This makes table column-setup.
+        column_number = 0
         for column_dict in self.definition_lod:
             column_label = column_dict.get('column_label')
             if column_label == None:
@@ -146,10 +146,12 @@ class Tree(TreeListCtrl):
             
             self.AddColumn(text=column_label, shown=visible)
             
+            
             sortable = column_dict.get('sortable')
             if sortable <> False:
-                image = IconSet16.getleft_16Bitmap()
-                self.SetColumnImage(column=0, image=0)
+                self.SetColumnImage(column=column_number, image=self.ID_LEFT)
+                
+            column_number += 1
                 
 
     def populate(self, content_lod=None):
@@ -336,7 +338,7 @@ class Form(wx.Panel):
 
     def __init__(self, parent, xrc_path, panel_name):
         # Preload a panel to subclass it from this class!
-        print xrc_path
+        
         pre_panel = wx.PrePanel()
         self.xrc_resource = wx.xrc.XmlResource(xrc_path)
         self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
