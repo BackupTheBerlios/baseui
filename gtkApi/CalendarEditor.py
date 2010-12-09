@@ -2,7 +2,7 @@
 
 #===============================================================================
 # GTKapi CalendarEditor module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under GPL-License.
 #===============================================================================
 
 import gtk
