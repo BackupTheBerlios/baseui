@@ -493,7 +493,6 @@ class Form(wx.Panel):
                 else:
                     widget_object.SetValue('')
             if widget_object.__class__ ==  wx._controls.ComboBox:
-                # For now ok, but later on there has to be some Blackmagic here!
                 if widget_content <> '' and widget_content <> None:
                     if type(widget_content) <> unicode:
                         widget_content = str(widget_content)
@@ -540,16 +539,12 @@ class Form(wx.Panel):
                 else:
                     self.content_dict[column_name] = None
             if widget_object.__class__ == wx._controls.ComboBox:
-                # TODO: If there is a db-column sub-referenced, there has to be some code for that!
-                
-                #if dic.has_key('referenced_column_name'):
-                #    if selection <> None:
-                #        referenced_column_name = dic['referenced_column_name']
-                #        widget_content = selection[referenced_column_name]
-                #    else:
-                #        widget_content = None
-                #else:
-                widget_content = widget_object.GetValue()
+                client_data = None
+                selection = widget_object.GetSelection()
+                if selection <> -1:
+                    client_data = widget_object.GetClientData(selection)
+                    
+                widget_content = client_data #widget_object.GetValue()
                 if widget_content <> '':
                     self.content_dict[column_name] = widget_content
                 else:

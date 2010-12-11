@@ -44,6 +44,7 @@ class FormTable:
             help_path is the path to the helpfile opened if help pressed. '''
         
         self.db_table = db_table
+        self.db_object = db_table.db_object
         self.toolbar_parent = toolbar_parent
         self.portlet_parent = portlet_parent
         self.form = form
@@ -289,7 +290,8 @@ class FormTable:
             foreign_key = content_dic[column_name]
             if foreign_key in [None, 'NULL']:
                 return
-            substitute_lod = self.db_object.select(table_name=referenced_table_name, column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
+            referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
             content_dic[column_name] = mask % substitute_lod[0]
         
     
@@ -344,6 +346,8 @@ class FormFrame(wx.Frame):
         self.Show()
         
         self.db_table = remote_parent.db_table
+        self.db_object = self.db_table.db_object
+        
         self.primary_key = None
         if self.remote_parent.primary_key <> None:
             self.primary_key = self.remote_parent.primary_key
@@ -408,9 +412,35 @@ class FormFrame(wx.Frame):
         if self.primary_key <> None:
             pk_column = self.db_table.get_primary_key_columns()[0]
             content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))
-            self.form.populate(content_dict=content_lod[0])
-        # else:
-        #    content_lod = None
+            content_dict = content_lod[0]
+            self.form.populate(content_dict)
+            
+            # This populates the dropdown of comboboxes.
+            definition_lod = self.form.definition_lod
+            for dic in definition_lod:
+                populate_from = dic.get('populate_from')
+                mask = dic.get('mask')
+                referenced_table_name = dic.get('referenced_table_name')
+                referenced_column_name = dic.get('referenced_column_name')
+                widget_object = dic.get('widget_object')
+                column_name = dic.get('column_name')
+                
+                if populate_from == None:
+                    continue
+                
+                populate_from.append(referenced_column_name)
+                referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+                result = referenced_table_object.select(column_list=populate_from)
+                item_list = []
+                for item in result:
+                    widget_object.Append(mask % item, item.get(referenced_column_name))
+                
+                # Overwrite crap in combobox
+                foreign_key = content_dict.get(column_name)
+                if foreign_key <> None:
+                    result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
+                    result_dict = result[0]
+                    widget_object.SetValue(mask % result_dict)
     
     
     def create_toolbar(self, dataset=True, report=True, help=True):
