@@ -367,9 +367,6 @@ class FormFrame(wx.Frame):
         try:
             if self.primary_key <> None:
                 form_content[pk_column] = self.primary_key
-                print 'writing:'
-                print form_content
-                print 'primary key: ', self.primary_key
                 self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
             else:
                 self.db_table.insert(key_column=pk_column, content=form_content)
