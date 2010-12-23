@@ -16,61 +16,16 @@ from dbApi import SQLdb, Tools as dbTools
 from pprint import pprint
 
 
-class WebserverPreferences:
-    pass
-    
-    
-class FormTable:
-    ID_NEW = 101
-    ID_EDIT = 102
-    ID_DELETE = 103
-    
-    ID_PRINT = 201
-    
-    ID_PREFERENCES = 401
-    ID_HELP = 402
-    
-    
-    def __init__(self, db_table, form=None, \
-                 toolbar_parent=None, portlet_parent=None, \
-                 help_path=None):
-        
-        ''' db_object is the current opened database object.
-            toolbar_parent is an aui toolbar, which has to be populated from here.
-            portlet_parent is the underlying parent which contains this widget.
-            
-            form is a form class, that creates an object here to edit datasets.
-            db_table is an instance of a sql_table.
-            help_path is the path to the helpfile opened if help pressed. '''
-        
+class DatabaseTableBase:
+    def __init__(self, db_table, portlet_parent=None):
         self.db_table = db_table
         self.db_object = db_table.db_object
-        self.toolbar_parent = toolbar_parent
         self.portlet_parent = portlet_parent
-        self.form = form
-        self.help_path = help_path
-        
-        # TODO: remove this sheenanigan asap!
-        self.parent_form = None
-        
+    
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
-    
-    # Callbacks ---------------------------------------------------------------
-    def on_row_activate(self, content_dic=None):
-        self.primary_key = content_dic[self.primary_key_column]
-        self.on_edit()
-
-
-    def on_cursor_changed(self, content_dic=None):
-        self.toolbar_parent.EnableTool(self.ID_EDIT, True)
-        self.toolbar_parent.EnableTool(self.ID_DELETE, True)
         
-        self.primary_key = content_dic[self.primary_key_column]
-        # print self.primary_key
-        
-
     # Actions -----------------------------------------------------------------
     def on_new(self, event=None):
         if self.form == None:
@@ -100,27 +55,8 @@ class FormTable:
                 pk_column = self.db_table.get_primary_key_columns()[0]
                 self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
                 self.populate()
-
-
-    def on_print(self, event=None):
-        print "print"
-        
-    
-    def on_export(self, event=None):
-        print "export"
-        
-        
-    def on_preferences(self, event=None):
-        toplevel_frame = self.portlet_parent.GetTopLevelParent()
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, title='Einstellungen')
-        self.frame_preferences.ShowModal()
-        
-        
-    def on_help(self, event=None):
-        if self.help_path <> None:
-            self.HTMLhelp.show(self.help_path)
-    
-
+                
+                
     def initialize(self, definition_lod=None):
         ''' Initializes a treeview as table or tree. The definition_lod
             will be merged with the attributes_lod, thus the attributes_lod
@@ -183,6 +119,229 @@ class FormTable:
                 definition_dic['populate_function'](definition_dic)
                 
                 
+    def populate_portlet(self):
+        self.Table = DataViews.Tree(self.portlet_parent)
+        sizer = self.portlet_parent.GetSizer()
+        sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+
+        self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
+        self.Table.set_row_activate_function(self.on_row_activate)
+        self.Table.set_cursor_change_function(self.on_cursor_changed)
+        
+        # Just populate immideately if this is not a child-table of a form!
+        if self.parent_form == None:
+            self.populate()
+            
+        self.Table.Show()
+        sizer.Layout()
+        return self.Table
+        
+        
+    def add_filter(self, filter_name=None, filter_function=None):
+        self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
+
+
+    def set_filter(self, filter_name=None):
+        pass
+        
+        
+    def check_column_substitutions(self):
+        for column_dic in self.definition_lod:
+            if column_dic.has_key('populate_from'):
+                populate_from = column_dic['populate_from']
+                if column_dic.has_key('column_name'):
+                    column_name = column_dic['column_name']
+                    if column_dic.has_key('referenced_table_name'):
+                        referenced_table_name = column_dic['referenced_table_name']
+                        if column_dic.has_key('referenced_column_name'):
+                            referenced_column_name = column_dic['referenced_column_name']                                        
+                            if column_dic.has_key('mask'):
+                                mask = column_dic['mask']
+                                self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
+        
+        
+    def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
+        for content_dic in self.content_lod:
+            substitute_dic = {}
+            foreign_key = content_dic[column_name]
+            if foreign_key in [None, 'NULL']:
+                return
+            referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
+            content_dic[column_name] = mask % substitute_lod[0]
+        
+
+                
+    
+class SubTable(DatabaseTableBase):
+    def __init__(self, db_table, form=None, portlet_parent=None):
+        DatabaseTableBase.__init__(self, db_table, portlet_parent)
+        
+    
+    
+    
+class FormTable(DatabaseTableBase):
+    ID_NEW = 101
+    ID_EDIT = 102
+    ID_DELETE = 103
+    
+    ID_PRINT = 201
+    
+    ID_PREFERENCES = 401
+    ID_HELP = 402
+    
+    
+    def __init__(self, db_table, form=None, \
+                 toolbar_parent=None, portlet_parent=None, \
+                 help_path=None):
+        
+        ''' db_object is the current opened database object.
+            toolbar_parent is an aui toolbar, which has to be populated from here.
+            portlet_parent is the underlying parent which contains this widget.
+            
+            form is a form class, that creates an object here to edit datasets.
+            db_table is an instance of a sql_table.
+            help_path is the path to the helpfile opened if help pressed. '''
+        
+        DatabaseTableBase.__init__(self, db_table, portlet_parent)
+        
+        self.toolbar_parent = toolbar_parent
+        self.form = form
+        self.help_path = help_path
+        
+        # TODO: remove this sheenanigan asap!
+        self.parent_form = None
+        
+        #self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
+        #self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
+        
+    
+    # Callbacks ---------------------------------------------------------------
+    def on_row_activate(self, content_dic=None):
+        self.primary_key = content_dic[self.primary_key_column]
+        self.on_edit()
+
+
+    def on_cursor_changed(self, content_dic=None):
+        self.toolbar_parent.EnableTool(self.ID_EDIT, True)
+        self.toolbar_parent.EnableTool(self.ID_DELETE, True)
+        
+        self.primary_key = content_dic[self.primary_key_column]
+        #print self.primary_key
+        
+
+    # # Actions -----------------------------------------------------------------
+    # def on_new(self, event=None):
+        # if self.form == None:
+            # return
+        
+        # try:
+            # self.primary_key = None
+            # self.form(parent=self.portlet_parent, remote_parent=self)
+        # except Exception, inst:
+            # self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
+            
+            
+    # def on_edit(self, event=None):
+        # if self.form == None:
+            # return
+
+        # form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
+        # form_instance.populate()
+
+
+    # def on_delete(self, event=None):
+        # if self.primary_key <> None:
+            # dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
+                                    # wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+            # answer = dialog.ShowModal()
+            # if answer == wx.ID_YES:
+                # pk_column = self.db_table.get_primary_key_columns()[0]
+                # self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
+                # self.populate()
+
+
+    def on_print(self, event=None):
+        print "print"
+        
+    
+    def on_export(self, event=None):
+        print "export"
+        
+        
+    def on_preferences(self, event=None):
+        toplevel_frame = self.portlet_parent.GetTopLevelParent()
+        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, title='Einstellungen')
+        self.frame_preferences.ShowModal()
+        
+        
+    def on_help(self, event=None):
+        if self.help_path <> None:
+            self.HTMLhelp.show(self.help_path)
+    
+
+    # def initialize(self, definition_lod=None):
+        # ''' Initializes a treeview as table or tree. The definition_lod
+            # will be merged with the attributes_lod, thus the attributes_lod
+            # can be already contained in the definition_lod if desired!
+
+            # definition_lod = [{'column_name': 'id',
+
+                               # 'column_label': 'Primärschlüssel',
+                               # 'column_number': 0,
+
+                               # 'visible': True,
+                               # 'editable': True,
+                               # 'sortable': True,
+                               # 'resizeable': True,
+                               # 'reorderable': True}]
+
+           # attributes_lod = [{'column_name': 'id'
+
+                              # 'data_type': 'bigint'
+                              # 'character_maximum_length': = 20
+                              # 'numeric_precision' = 2
+                              # 'numeric_scale' = ?
+                              # 'is_nullable' = True}]'''
+
+        # self.definition_lod = definition_lod
+        # self.attributes_lod = self.db_table.attributes
+        
+        # result = WxTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
+        # if result <> None: 
+            # self.primary_key_column = result['column_name']
+            
+    
+    # def populate(self, content_lod=None):
+        # if self.parent_form <> None: 
+            # if self.parent_form.primary_key <> None:
+                # # This populates a referenced table (on a parent form)
+                # attributes_lod = self.db_table.attributes
+                # primary_key_column = self.primary_key_column
+                # referenced_table_name = self.parent_form.db_table.name
+                
+                # self.foreign_key_column_name = \
+                    # self.db_table.get_foreign_key_column_name(attributes_lod, 
+                                                              # primary_key_column, 
+                                                              # referenced_table_name)
+                
+                # self.content_lod = self.db_table.select(where='%s = %i' % (self.foreign_key_column_name, self.parent_form.primary_key))
+            # else:
+                # # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
+                # self.content_lod = []
+        # else:
+            # self.content_lod = self.db_table.get_content()
+
+        # # Before populating, check if there are any substitutions from referenced tables
+        # self.check_column_substitutions()
+        # self.Table.populate(self.content_lod)
+        
+        # # Do callbacks for the population of higher-level widgets.
+        # for definition_dic in self.definition_lod:
+            # if definition_dic.has_key('populate_function'):
+                # definition_dic['populate_function'](definition_dic)
+                
+                
     def update(self):
         self.button_new.set_sensitive(1)
         self.button_delete.set_sensitive(0)
@@ -242,57 +401,57 @@ class FormTable:
         self.toolbar_parent.Realize()
     
     
-    def populate_portlet(self):
-        self.Table = DataViews.Tree(self.portlet_parent)
-        sizer = self.portlet_parent.GetSizer()
-        sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+    # def populate_portlet(self):
+        # self.Table = DataViews.Tree(self.portlet_parent)
+        # sizer = self.portlet_parent.GetSizer()
+        # sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
 
-        self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
-        self.Table.set_row_activate_function(self.on_row_activate)
-        self.Table.set_cursor_change_function(self.on_cursor_changed)
+        # self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
+        # self.Table.set_row_activate_function(self.on_row_activate)
+        # self.Table.set_cursor_change_function(self.on_cursor_changed)
         
         # Just populate immideately if this is not a child-table of a form!
-        if self.parent_form == None:
-            self.populate()
+        # if self.parent_form == None:
+            # self.populate()
             
-        self.Table.Show()
-        sizer.Layout()
-        return self.Table
+        # self.Table.Show()
+        # sizer.Layout()
+        # return self.Table
         
         
-    def add_filter(self, filter_name=None, filter_function=None):
-        self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
+    # def add_filter(self, filter_name=None, filter_function=None):
+        # self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
 
 
-    def set_filter(self, filter_name=None):
-        pass
+    # def set_filter(self, filter_name=None):
+        # pass
         #print 'set filter to:', filter_name
         
         
-    def check_column_substitutions(self):
-        for column_dic in self.definition_lod:
-            if column_dic.has_key('populate_from'):
-                populate_from = column_dic['populate_from']
-                if column_dic.has_key('column_name'):
-                    column_name = column_dic['column_name']
-                    if column_dic.has_key('referenced_table_name'):
-                        referenced_table_name = column_dic['referenced_table_name']
-                        if column_dic.has_key('referenced_column_name'):
-                            referenced_column_name = column_dic['referenced_column_name']                                        
-                            if column_dic.has_key('mask'):
-                                mask = column_dic['mask']
-                                self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
+    # def check_column_substitutions(self):
+        # for column_dic in self.definition_lod:
+            # if column_dic.has_key('populate_from'):
+                # populate_from = column_dic['populate_from']
+                # if column_dic.has_key('column_name'):
+                    # column_name = column_dic['column_name']
+                    # if column_dic.has_key('referenced_table_name'):
+                        # referenced_table_name = column_dic['referenced_table_name']
+                        # if column_dic.has_key('referenced_column_name'):
+                            # referenced_column_name = column_dic['referenced_column_name']                                        
+                            # if column_dic.has_key('mask'):
+                                # mask = column_dic['mask']
+                                # self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
         
         
-    def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
-        for content_dic in self.content_lod:
-            substitute_dic = {}
-            foreign_key = content_dic[column_name]
-            if foreign_key in [None, 'NULL']:
-                return
-            referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
-            substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
-            content_dic[column_name] = mask % substitute_lod[0]
+    # def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
+        # for content_dic in self.content_lod:
+            # substitute_dic = {}
+            # foreign_key = content_dic[column_name]
+            # if foreign_key in [None, 'NULL']:
+                # return
+            # referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            # substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
+            # content_dic[column_name] = mask % substitute_lod[0]
         
     
     
