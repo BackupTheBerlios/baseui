@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-1 -*-
+
 import wx
 
 
@@ -47,9 +49,9 @@ class TrayIcon(wx.TaskBarIcon):
         self.Bind(wx.EVT_TASKBAR_RIGHT_UP, self.show_menu)
  
         self.menu = wx.Menu()
-        self.menu.Append(101, '&Resume')
+        self.menu.Append(101, u'&Wiederherstellen')
         self.menu.AppendSeparator()
-        self.menu.Append(wx.ID_EXIT, '&Close')
+        self.menu.Append(wx.ID_EXIT, u'&Schlieﬂen')
         
 
     def show_menu(self, event):
