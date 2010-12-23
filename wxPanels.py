@@ -2,19 +2,19 @@
 
 #===============================================================================
 # BaseUI.wxPortlets module.
-# published under BSD license by Mark Muzenhardt.
+# published under GPL license by Mark Muzenhardt.
 #===============================================================================
 
 import wx
 
-from wxApi import Portlets, Dialogs
+from wxApi import Panels, Dialogs
 from misc.FileSystem import iniFile
 from dbApi import SQLdb, Tools as dbTools
 
 
-class Database(Portlets.Database):
+class Database(Panels.Database):
     def __init__(self, parent, ini_path, ini_section, autosave=False):
-        Portlets.Database.__init__(self, parent)
+        Panels.Database.__init__(self, parent)
         self.ErrorDialog = Dialogs.Error(self)
         
         self.ini_file = iniFile(ini_path)
@@ -116,7 +116,7 @@ class DatabaseLogin(wx.Panel):
                                          ini_section=self.ini_section,
                                          autosave=self.autosave)
         self.portlet_database.Hide()
-        self.portlet_login = Portlets.Login(parent=self)
+        self.portlet_login = Panels.Login(parent=self)
         
         png = wx.Image(self.image_path, wx.BITMAP_TYPE_ANY).ConvertToBitmap()
         self.logo = wx.StaticBitmap(self, -1, png, (10, 5), (png.GetWidth(), png.GetHeight()))

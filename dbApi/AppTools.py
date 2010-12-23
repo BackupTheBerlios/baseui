@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI AppTools module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under GPL-License.
 #===============================================================================
 
 

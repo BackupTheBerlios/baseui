@@ -3,11 +3,11 @@
 
 #===============================================================================
 # BuildHelpers 
-#
-# (c) by Mark Muzenhardt
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import sys, os, imp, shutil
+
 from pprint import pprint
 
 
@@ -261,8 +261,9 @@ def makeAbout(tpl_path, svg_path, author, version, revision, license, make_png=F
                      'svgpath': svg_path,
                      'pngpath': 'res\\about.png'}
         
-        holygrail = '%(programfiles)s\\Inkscape\\inkscape.exe -f "%(thisdir)s\\%(svgpath)s" -e "%(thisdir)s\\%(pngpath)s"' % opts_dict
-        os.popen(holygrail)
+        os.chdir("%(programfiles)s\\Inkscape\\" % opts_dict)
+        command = 'inkscape.exe -f "%(thisdir)s\\%(svgpath)s" -e "%(thisdir)s\\%(pngpath)s"' % opts_dict
+        os.popen(command)
         
     
 def makeSphinx(pathname, build_dir):

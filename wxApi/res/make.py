@@ -3,66 +3,36 @@ import wx
 
 from wx.tools.img2py import *
 
-path = '../../res/16/'
-file_list = os.listdir(path)
-append_file = False
+IGNORES = ['Thumbs.db']
 
-for filename in file_list:
-    img2py(image_file=path + filename,
-           python_file='../res/IconSet16.py', 
-           append=append_file, 
-           compressed=False, 
-           maskClr=None, 
-           imgName=filename.replace('.png', '_16'), 
-           icon=False, 
-           catalog=False, 
-           functionCompatible=True, 
-           functionCompatibile=-1)
-           
-    if append_file == False:
-        append_file = True
 
-# This could be done better, dont't repeat yourselve, but ok for them moment.
-path = '../../res/32/'
-file_list = os.listdir(path)
-append_file = False
+def process(path, set='16', size='16'):
+    append_file=False
+    file_list = os.listdir(path)
+    
+    for filename in file_list:
+        if filename in IGNORES:
+            print '... ignoring %s' % filename
+            continue
+            
+        img2py(image_file=path + filename,
+               python_file='../res/IconSet%s.py' % set, 
+               append=append_file, 
+               compressed=False, 
+               maskClr=None, 
+               imgName=filename.replace('.png', '_%s' % size), 
+               icon=False, 
+               catalog=False, 
+               functionCompatible=True, 
+               functionCompatibile=-1)
+               
+        if append_file == False:
+            append_file = True
 
-for filename in file_list:
-    img2py(image_file=path + filename,
-           python_file='../res/IconSet32.py', 
-           append=append_file, 
-           compressed=False, 
-           maskClr=None, 
-           imgName=filename.replace('.png', '_32'), 
-           icon=False, 
-           catalog=False, 
-           functionCompatible=True, 
-           functionCompatibile=-1)
-           
-    if append_file == False:
-        append_file = True
-
-        
-path = '../../res/flags/'
-file_list = os.listdir(path)
-append_file = False
-
-for filename in file_list:
-    img2py(image_file=path + filename,
-           python_file='../res/IconSetFlags.py', 
-           append=append_file, 
-           compressed=False, 
-           maskClr=None, 
-           imgName=filename.replace('.png', '_16'), 
-           icon=False, 
-           catalog=False, 
-           functionCompatible=True, 
-           functionCompatibile=-1)
-           
-    if append_file == False:
-        append_file = True
-        
-        
+            
+process(path='../../res/16/',    set='16',    size='16')
+process(path='../../res/32/',    set='32',    size='32')
+process(path='../../res/flags/', set='Flags', size='16')
         
 x=raw_input('press <RETURN> to exit...')
 

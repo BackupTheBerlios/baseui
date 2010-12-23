@@ -1,3 +1,8 @@
+#===============================================================================
+# BaseUI.wxApi.Panels
+# by Mark Muzenhardt, published under LGPL license.
+#===============================================================================
+
 import wx
 import res.Portlets
 
@@ -5,6 +10,48 @@ from res import IconSet16
 from Buttons import BitmapToggleButton
 
 
+class Subtable ( wx.Panel ):
+	
+	def __init__( self, parent, text=u'Daten' ):
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 500,300 ), style = wx.TAB_TRAVERSAL )
+		
+		sizer = wx.FlexGridSizer( 2, 2, 0, 0 )
+		sizer.AddGrowableCol( 0 )
+		sizer.AddGrowableRow( 1 )
+		sizer.SetFlexibleDirection( wx.BOTH )
+		sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.m_staticText16 = wx.StaticText( self, wx.ID_ANY, text, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText16.Wrap( -1 )
+		sizer.Add( self.m_staticText16, 0, wx.ALL, 5 )
+		
+		
+		sizer.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+		
+		self.m_listCtrl1 = wx.ListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LC_ICON )
+		sizer.Add( self.m_listCtrl1, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		sizer_button = wx.BoxSizer( wx.VERTICAL )
+		
+		self.button_edit = wx.Button( self, wx.ID_ANY, u"Bearbeiten...", wx.DefaultPosition, wx.DefaultSize, 0 )
+		sizer_button.Add( self.button_edit, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		self.button_delete = wx.Button( self, wx.ID_ANY, u"Entfernen...", wx.DefaultPosition, wx.DefaultSize, 0 )
+		sizer_button.Add( self.button_delete, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		self.button_new = wx.Button( self, wx.ID_ANY, u"Neu...", wx.DefaultPosition, wx.DefaultSize, 0 )
+		sizer_button.Add( self.button_new, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		sizer.Add( sizer_button, 1, wx.EXPAND, 5 )
+		
+		self.SetSizer( sizer )
+		self.Layout()
+	
+	def __del__( self ):
+		pass
+        
+        
+        
 class Database(res.Portlets.Database):
     def __init__(self, parent):
         """ If autosave = False, there is a save-button appearing! """
@@ -211,7 +258,25 @@ class Login(res.Portlets.Login):
             user_list.append(content.get('user'))
             
             
-            
+
+class TableImport(res.Portlets.TableImport):
+    def __init__(self, parent):
+        res.Portlets.TableImport.__init__(self, parent)
+        
+        
+        
+class TableExport(res.Portlets.TableExport):
+    def __init__(self, parent):
+        res.Portlets.TableExport.__init__(self, parent)
+        
+        
+        
+class TableConfig(res.Portlets.TableConfig):
+    def __init__(self, parent):
+        res.Portlets.TableConfig.__init__(self, parent)
+        
+        
+        
 class Webserver(res.Portlets.Webserver):
     def __init__(self, parent):
         res.Portlets.Webserver.__init__(self, parent)

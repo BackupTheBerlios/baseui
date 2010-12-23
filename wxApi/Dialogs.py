@@ -2,12 +2,13 @@
 
 #===============================================================================
 # BaseUI.wx.Dialogs module
-# (c) by Mark Muzenhardt
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import traceback
 import wx
 import res.Dialogs
+import Panels
 from res import IconSet32
 
 
@@ -23,15 +24,15 @@ class Error(res.Dialogs.Error):
         
         self.m_bitmap_icon.SetBitmap(IconSet32.geterror_32Bitmap())
         
-        self.m_button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked)
-        self.m_toggleBtn_detail.Bind(wx.EVT_TOGGLEBUTTON, self.on_togglebutton_detail_toggled)
+        self.button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked)
+        self.togglebutton_detail.Bind(wx.EVT_TOGGLEBUTTON, self.on_togglebutton_detail_toggled)
         
         
     def show(self, title='Fehler', instance=None, message='Error'):
-        self.m_toggleBtn_detail.SetValue(False)
+        self.togglebutton_detail.SetValue(False)
         if instance <> None:
             detail = traceback.format_exc()
-            self.m_textCtrl_traceback.SetValue(detail)
+            self.entry_traceback.SetValue(detail)
         
         self.m_staticText_text.SetLabel(message)
         self.SetTitle(title)
@@ -45,16 +46,63 @@ class Error(res.Dialogs.Error):
         is_down = event.IsChecked() 
         
         if is_down:
-            self.m_textCtrl_traceback.Show()
+            self.entry_traceback.Show()
+            self.staticline_bottom.Show()
         else:
-            self.m_textCtrl_traceback.Hide()
-        
+            self.entry_traceback.Hide()
+            self.staticline_bottom.Hide()
+            
         self.SetInitialSize()
         
         
     def on_button_ok_clicked(self, event):
-        self.m_textCtrl_traceback.Hide()
+        self.entry_traceback.Hide()
         self.Hide()
         
         
         
+class FormTablePreferences(wx.Dialog):
+    ID_IMPORT = 201
+    ID_EXPORT = 202
+    
+    def __init__(self, parent, title):
+        wx.Dialog.__init__(self, parent, wx.ID_ANY, title, size=(640, 480))
+    
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+
+        sizer_main = wx.FlexGridSizer( 1, 1, 0, 0 )
+        sizer_main.AddGrowableCol( 0 )
+        sizer_main.AddGrowableRow( 0 )
+        sizer_main.SetFlexibleDirection( wx.BOTH )
+        sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_panel2 = Panels.TableConfig(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.m_panel2, u"Allgemein", True )
+        self.m_panel3 = Panels.TableImport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.m_panel3, u"Import", False )
+        self.m_panel4 = Panels.TableExport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.m_panel4, u"Export", False )
+
+        sizer_main.Add( self.notebook, 1, wx.ALL|wx.EXPAND, 5 )
+
+        sizer_bottom = wx.FlexGridSizer( 1, 3, 0, 0 )
+        sizer_bottom.AddGrowableCol( 0 )
+        sizer_bottom.SetFlexibleDirection( wx.BOTH )
+        sizer_bottom.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+
+        sizer_bottom.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+
+        self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_bottom.Add( self.button_ok, 0, wx.ALL, 5 )
+
+        self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_bottom.Add( self.button_cancel, 0, wx.ALL, 5 )
+
+        sizer_main.Add( sizer_bottom, 1, wx.EXPAND, 5 )
+
+        self.SetSizer( sizer_main )
+        self.Layout()
+
+        self.Centre( wx.BOTH )

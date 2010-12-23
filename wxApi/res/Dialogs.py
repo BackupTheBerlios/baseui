@@ -16,7 +16,7 @@ import wx
 class Error ( wx.Dialog ):
 	
 	def __init__( self, parent ):
-		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( -1,-1 ), style = wx.DEFAULT_DIALOG_STYLE )
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 456,175 ), style = wx.DEFAULT_DIALOG_STYLE )
 		
 		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 		
@@ -52,13 +52,6 @@ class Error ( wx.Dialog ):
 		
 		fgSizer1.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 		
-		self.m_textCtrl_traceback = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.TE_MULTILINE|wx.TE_READONLY )
-		self.m_textCtrl_traceback.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 73, 90, 90, False, "Courier New" ) )
-		self.m_textCtrl_traceback.Hide()
-		self.m_textCtrl_traceback.SetMinSize( wx.Size( 400,150 ) )
-		
-		fgSizer1.Add( self.m_textCtrl_traceback, 0, wx.EXPAND, 5 )
-		
 		fgSizer4.Add( fgSizer1, 1, wx.ALL|wx.EXPAND, 5 )
 		
 		bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
@@ -66,23 +59,34 @@ class Error ( wx.Dialog ):
 		
 		bSizer2.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 		
-		self.m_toggleBtn_detail = wx.ToggleButton( self, wx.ID_ANY, u"Details", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer2.Add( self.m_toggleBtn_detail, 0, wx.ALL, 5 )
+		self.togglebutton_detail = wx.ToggleButton( self, wx.ID_ANY, u"Details", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer2.Add( self.togglebutton_detail, 0, wx.ALL, 5 )
 		
-		self.m_button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
-		bSizer2.Add( self.m_button_ok, 0, wx.ALL, 5 )
+		self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer2.Add( self.button_ok, 0, wx.ALL, 5 )
 		
 		fgSizer4.Add( bSizer2, 1, wx.EXPAND, 5 )
 		
+		self.staticline_bottom = wx.StaticLine( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL )
+		self.staticline_bottom.Hide()
+		
+		fgSizer4.Add( self.staticline_bottom, 0, wx.EXPAND |wx.ALL, 5 )
+		
+		self.entry_traceback = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.TE_MULTILINE|wx.TE_READONLY )
+		self.entry_traceback.SetFont( wx.Font( wx.NORMAL_FONT.GetPointSize(), 73, 90, 90, False, "Courier New" ) )
+		self.entry_traceback.Hide()
+		self.entry_traceback.SetMinSize( wx.Size( 400,150 ) )
+		
+		fgSizer4.Add( self.entry_traceback, 0, wx.ALL|wx.EXPAND, 5 )
+		
 		self.SetSizer( fgSizer4 )
 		self.Layout()
-		fgSizer4.Fit( self )
 		
 		self.Centre( wx.BOTH )
 		
 		# Connect Events
-		self.m_toggleBtn_detail.Bind( wx.EVT_TOGGLEBUTTON, self.on_button_detail_toggled )
-		self.m_button_ok.Bind( wx.EVT_BUTTON, self.on_button_ok_clicked )
+		self.togglebutton_detail.Bind( wx.EVT_TOGGLEBUTTON, self.on_button_detail_toggled )
+		self.button_ok.Bind( wx.EVT_BUTTON, self.on_button_ok_clicked )
 	
 	def __del__( self ):
 		pass

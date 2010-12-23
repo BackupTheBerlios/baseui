@@ -14,7 +14,7 @@ def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
     ''' Opposite of other '''
 
     if data_type == datetime.datetime:
-        sql_data_type = 'timestamp'
+        sql_data_type = 'datetime'
     elif data_type == datetime.date:
         sql_data_type = 'date'
     elif data_type == datetime.time:
@@ -51,7 +51,7 @@ def write_transform(content, engine):
     return new_content
     
 
-def normalize_content(attributes_lod, content_lod):
+def normalize_content(attributes_lod, content_lod, encoding=None):
     ''' This converts database dependent things to clear python types. '''
     
     if attributes_lod == None:
@@ -70,22 +70,18 @@ def normalize_content(attributes_lod, content_lod):
                         if data_type.lower() == 'datetime':
                             content_dic[column_name] = transform_timestamp(content)
                         if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:
-                            content_dic[column_name] = transform_string(content)
+                            content_dic[column_name] = transform_string(content, encoding)
     return content_lod
 
 
-def transform_string(content):
-    if content <> None: # and type(content) <> unicode:
+def transform_string(content, encoding=None):
+    if content <> None:
         content = content.rstrip()
         try:
-            #content = u'%s' % content
-            content = content.encode('utf-8') #, 'utf-8')
+            if encoding <> None:
+                content = unicode(content, encoding)
         except Exception, inst:
             pass
-            #print content, str(inst)
-        
-        
-            
     return content
                           
                                 
@@ -123,56 +119,6 @@ def convert_to_sql(attributes_lod, content_lod):
     ''' This converts python data to database dependent datastream. '''
     
     return content_lod
-    
-
-def SQLite_DataTypes(self, data_type):
-    dict = \
-    {
-    'INTEGER': ['INT', 
-                'INTEGER', 
-                'TINYINT', 
-                'SMALLINT', 
-                'MEDIUMINT', 
-                'BIGINT', 
-                'UNSIGNED BIG INT', 
-                'INT2', 
-                'INT8'],
-    'TEXT':    ['CHARACTER',
-                'VARCHAR',
-                'VARYING CHARACTER'
-                'NCHAR'
-                'NATIVE CHARACTER'
-                'NVARCHAR'
-                'TEXT'
-                'CLOB'],
-    'NONE':    ['BLOB',
-                'no datatype specified'],
-    'REAL':    ['REAL',
-                'DOUBLE',
-                'DOUBLE PRECISION',
-                'FLOAT'],
-    'NUMERIC': ['NUMERIC',
-                'DECIMAL',
-                'BOOLEAN',
-                'DATE',
-                'DATETIME',
-                'NUMERIC']
-    }
-    return
-
-
-def PostgreSQL_DataTypes(self, data_type):
-    dict = \
-    {'INTEGER': []
-    }
-
-    
-def MySQL_DataTypes(self, data_type):
-    pass
-    
-    
-def Oracle_DataTypes(self, data_type):
-    pass
     
     
     

@@ -1,3 +1,8 @@
+#===============================================================================
+# Buttons wxApi module.
+# by Mark Muzenhardt, published under LGPL license.
+#===============================================================================
+
 import wx
 
 from wx.lib.buttons import GenBitmapToggleButton, ThemedGenBitmapTextToggleButton

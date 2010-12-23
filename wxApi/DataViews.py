@@ -2,13 +2,14 @@
 
 #===============================================================================
 # BaseUI.wx.DataViews module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import os
 import wx, wx.xrc
 
 from wx.gizmos import TreeListCtrl
+from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
@@ -27,9 +28,26 @@ class Tree(TreeListCtrl):
     
         self.Hide()
         self.row_activate_function = None
-        self.cursor_changed_function = None
+        self.cursor_change_function = None
+        
+        self.number_of_columns = 0
+        self.sort_column_number = None
+        self.sort_ascending = None
+        
+        self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id = wx.ID_ANY)
 
-
+        
+    def OnCompareItems(self, a, b):
+        a_data = self.GetItemText(a, self.sort_column_number).lower()
+        b_data = self.GetItemText(b, self.sort_column_number).lower()
+        
+        if self.sort_ascending == True:
+            result = cmp(a_data, b_data)
+        else:
+            result = cmp(b_data, a_data)
+        return result
+    
+    
     def on_row_activated(self, event=None):
         row_content = self.get_selected_row_content()
         if self.row_activate_function <> None:
@@ -38,8 +56,13 @@ class Tree(TreeListCtrl):
 
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
-        if self.cursor_changed_function <> None:
-            self.cursor_changed_function(row_content)
+        if self.cursor_change_function <> None:
+            self.cursor_change_function(row_content)
+            
+            
+    def on_header_clicked(self, event=None):
+        clicked_column = event.GetColumn()
+        self.set_sort_column(column_number=clicked_column)
     
     
     # Actions -----------------------------------------------------------------
@@ -112,8 +135,6 @@ class Tree(TreeListCtrl):
                               'is_nullable' = True}]'''
 
         self.definition_lod = definition_lod
-        #treeview_column_list = []
-        #self.type_list = []
         
         # Merge definition_lod and attributes_lod together.
         self.definition_lod = merge_two_lods(self.definition_lod, attributes_lod, 'column_name')
@@ -127,7 +148,17 @@ class Tree(TreeListCtrl):
         # Before anything else happens on the treeview, clear it.
         self.clear()
         
+        # Make image list to populate them later!
+        self.image_list = wx.ImageList(16, 16)
+        
+        self.ID_LEFT = self.image_list.Add(IconSet16.getleft_16Bitmap())
+        self.ID_UP = self.image_list.Add(IconSet16.getup_16Bitmap())
+        self.ID_DOWN = self.image_list.Add(IconSet16.getdown_16Bitmap())
+        
+        self.SetImageList(self.image_list)
+        
         # This makes table column-setup.
+        column_number = 0
         for column_dict in self.definition_lod:
             column_label = column_dict.get('column_label')
             if column_label == None:
@@ -136,15 +167,26 @@ class Tree(TreeListCtrl):
             visible = column_dict.get('visible')
             if visible <> False:
                 visible = True
+            
             self.AddColumn(text=column_label, shown=visible)
-
+            
+            sortable = column_dict.get('sortable')
+            if sortable <> False:
+                self.SetColumnImage(column=column_number, image=self.ID_LEFT)
+                
+            column_number += 1
+        self.number_of_columns = column_number
+                
 
     def populate(self, content_lod=None):
         ''' content_lod = [{'id': 1}] '''
         
-        root = self.AddRoot(text='Root')
+        # Needed to update after first population.
+        self.DeleteRoot()
+        
+        self.root = self.AddRoot(text='Root')
         for content_dict in content_lod:
-            item = self.AppendItem(parent=root, text='')
+            item = self.AppendItem(parent=self.root, text='')
             
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
@@ -154,9 +196,11 @@ class Tree(TreeListCtrl):
                 if content == None:
                     content = ''
                 
-                self.SetItemText(item, str(content), column_number)
-
-
+                if type(content) <> unicode:
+                    content = str(content)
+                self.SetItemText(item, content, column_number)
+                
+                
     def build_store(self, row_parent, row_dict):
         row_content = []
         # Read out definition_lod
@@ -280,35 +324,41 @@ class Tree(TreeListCtrl):
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_activated, id=wx.ID_ANY)
 
 
-    def set_cursor_changed_function(self, cursor_changed_function):
-        self.cursor_changed_function = cursor_changed_function
+    def set_cursor_change_function(self, cursor_change_function):
+        self.cursor_change_function = cursor_change_function
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_cursor_changed,   id=wx.ID_ANY)
 
 
-    def set_sort_column(self, column_name='', sort_ascending=True):
-        ''' Enables the sort-feature for the column given with column_name
-            and triggers the sort_liststore function. '''
-
-        definition_dic = search_lod(self.definition_lod, 'column_name', column_name)
-        self.sort_column = definition_dic['column_number']
-        self.sort_ascending = sort_ascending
-        self.sort_liststore()
-
-
-    def sort_liststore(self): #, column):
-        ''' sorts the entire liststore with following args:
-                self.sort_column    = column number to sort
-                self.sort_ascending = True: Sort ascending / False: Sort descending '''
-
-        if self.store == None:
-            return
+    def set_sort_column(self, column_name=None, column_label=None, column_number=None, ascending=None):
+        ''' Enables to sort this widget, even from external. '''
         
-        if self.sort_ascending == True: algorithm = gtk.SORT_ASCENDING
-        if self.sort_ascending == False: algorithm = gtk.SORT_DESCENDING
-
-        self.store.set_default_sort_func(lambda *args: self.sort_column)
-        self.store.set_sort_column_id(self.sort_column, algorithm)
-        #return column
+        old_column_number = self.sort_column_number
+        
+        if column_number <> None:
+            self.sort_column_number = column_number
+        if ascending <> None:
+            self.sort_ascending = ascending
+        
+        if old_column_number == self.sort_column_number:
+            if self.sort_ascending == None:
+                self.sort_ascending = True
+            elif self.sort_ascending == True:
+                self.sort_ascending = False
+            elif self.sort_ascending == False:
+                self.sort_ascending = True
+        else:
+            self.sort_ascending = True
+        
+        for column in xrange(self.number_of_columns):
+            if column <> self.sort_column_number:
+                self.SetColumnImage(column=column, image=self.ID_LEFT)
+            else:
+                if self.sort_ascending == True:
+                    self.SetColumnImage(column=column, image=self.ID_DOWN)
+                elif self.sort_ascending == False:
+                    self.SetColumnImage(column=column, image=self.ID_UP)
+                    
+        self.SortChildren(self.root)
 
 
 
@@ -318,7 +368,7 @@ class Form(wx.Panel):
 
     def __init__(self, parent, xrc_path, panel_name):
         # Preload a panel to subclass it from this class!
-        print xrc_path
+        
         pre_panel = wx.PrePanel()
         self.xrc_resource = wx.xrc.XmlResource(xrc_path)
         self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
@@ -385,7 +435,6 @@ class Form(wx.Panel):
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
                 widget_object = wx.xrc.XRCCTRL(self, widget_name)
-                print 'widget_name:', widget_name, 'is object:', widget_object
                 # if widget_name.startswith('entry_'):                    
                 #     if data_type == 'date':
                 #         widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
@@ -435,27 +484,29 @@ class Form(wx.Panel):
                     widget_content = date_to_str(widget_content)
             else:
                 widget_content = ""
-
-            if widget_name.startswith('entry_') or \
-               widget_name.startswith('textview_'):
+                
+            if widget_object.__class__ ==  wx._controls.TextCtrl:
                 if widget_content <> '' and widget_content <> None:
-                    widget_object.set_text(str(widget_content).rstrip())
+                    if type(widget_content) <> unicode:
+                        widget_content = str(widget_content)
+                    widget_object.SetValue(widget_content.rstrip())
                 else:
-                    widget_object.set_text('')
-            if widget_name.startswith('comboboxentry_'):
+                    widget_object.SetValue('')
+            if widget_object.__class__ ==  wx._controls.ComboBox:
                 if widget_content <> '' and widget_content <> None:
-                    widget_object.set_text(str(widget_content).rstrip())
+                    if type(widget_content) <> unicode:
+                        widget_content = str(widget_content)
+                    widget_object.SetValue(widget_content.rstrip())
                 else:
-                    widget_object.set_text('')
-            if widget_name.startswith('checkbutton_'):
-                #print widget_name, widget_content, type(widget_content)
+                    widget_object.SetValue('')
+            if widget_object.__class__ ==  wx._controls.CheckBox:
                 if widget_content == '1' or \
                    widget_content == 'Y' or \
                    widget_content == True:
                     widget_content = 1
                 else:
                     widget_content = 0
-                widget_object.set_active(int(widget_content))
+                widget_object.SetValue(int(widget_content))
 
 
     def clear(self):
@@ -488,16 +539,12 @@ class Form(wx.Panel):
                 else:
                     self.content_dict[column_name] = None
             if widget_object.__class__ == wx._controls.ComboBox:
-                # TODO: If there is a db-column sub-referenced, there has to be some code for that!
-                
-                #if dic.has_key('referenced_column_name'):
-                #    if selection <> None:
-                #        referenced_column_name = dic['referenced_column_name']
-                #        widget_content = selection[referenced_column_name]
-                #    else:
-                #        widget_content = None
-                #else:
-                widget_content = widget_object.GetValue()
+                client_data = None
+                selection = widget_object.GetSelection()
+                if selection <> -1:
+                    client_data = widget_object.GetClientData(selection)
+                    
+                widget_content = client_data #widget_object.GetValue()
                 if widget_content <> '':
                     self.content_dict[column_name] = widget_content
                 else:
