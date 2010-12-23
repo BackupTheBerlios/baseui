@@ -21,7 +21,7 @@ class WebserverPreferences:
     pass
     
     
-class Table:
+class FormTable:
     ID_NEW = 101
     ID_EDIT = 102
     ID_DELETE = 103
@@ -279,7 +279,7 @@ class Table:
         
         
 
-class Form(wx.Frame):
+class FormFrame(wx.Frame):
     ID_SAVE = 101
     ID_DELETE = 102
     ID_PRINT = 103
