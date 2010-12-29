@@ -101,7 +101,7 @@ class DatabaseTableBase:
                     self.db_table.get_foreign_key_column_name(attributes_lod, 
                                                               primary_key_column, 
                                                               referenced_table_name)
-                
+                    
                 self.content_lod = self.db_table.select(where='%s = %i' % (self.foreign_key_column_name, self.parent_form.primary_key))
             else:
                 # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
@@ -175,7 +175,26 @@ class DatabaseTableBase:
     
 class SubTable(DatabaseTableBase):
     def __init__(self, db_table, form=None, portlet_parent=None):
-        DatabaseTableBase.__init__(self, db_table, portlet_parent)
+        self.portlet_parent = portlet_parent
+        print 'Subtable portlet parent:', portlet_parent
+        
+        self.sizer = wx.FlexGridSizer( 2, 2, 0, 0 )
+        self.sizer.SetFlexibleDirection( wx.BOTH )
+        self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        
+        self.portlet_parent.SetSizer(self.sizer)
+        
+        self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
+        self.sizer.Add(self.button_add)
+        
+        self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.sizer.Add(self.button_edit)
+        
+        self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.sizer.Add(self.button_delete)
+        # self.panel = wx.Panel()
+        
+        # DatabaseTableBase.__init__(self, db_table, portlet_parent)
         
     
     
@@ -227,38 +246,6 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.EnableTool(self.ID_DELETE, True)
         
         self.primary_key = content_dic[self.primary_key_column]
-        #print self.primary_key
-        
-
-    # # Actions -----------------------------------------------------------------
-    # def on_new(self, event=None):
-        # if self.form == None:
-            # return
-        
-        # try:
-            # self.primary_key = None
-            # self.form(parent=self.portlet_parent, remote_parent=self)
-        # except Exception, inst:
-            # self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
-            
-            
-    # def on_edit(self, event=None):
-        # if self.form == None:
-            # return
-
-        # form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
-        # form_instance.populate()
-
-
-    # def on_delete(self, event=None):
-        # if self.primary_key <> None:
-            # dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
-                                    # wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-            # answer = dialog.ShowModal()
-            # if answer == wx.ID_YES:
-                # pk_column = self.db_table.get_primary_key_columns()[0]
-                # self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
-                # self.populate()
 
 
     def on_print(self, event=None):
@@ -279,68 +266,6 @@ class FormTable(DatabaseTableBase):
         if self.help_path <> None:
             self.HTMLhelp.show(self.help_path)
     
-
-    # def initialize(self, definition_lod=None):
-        # ''' Initializes a treeview as table or tree. The definition_lod
-            # will be merged with the attributes_lod, thus the attributes_lod
-            # can be already contained in the definition_lod if desired!
-
-            # definition_lod = [{'column_name': 'id',
-
-                               # 'column_label': 'Primärschlüssel',
-                               # 'column_number': 0,
-
-                               # 'visible': True,
-                               # 'editable': True,
-                               # 'sortable': True,
-                               # 'resizeable': True,
-                               # 'reorderable': True}]
-
-           # attributes_lod = [{'column_name': 'id'
-
-                              # 'data_type': 'bigint'
-                              # 'character_maximum_length': = 20
-                              # 'numeric_precision' = 2
-                              # 'numeric_scale' = ?
-                              # 'is_nullable' = True}]'''
-
-        # self.definition_lod = definition_lod
-        # self.attributes_lod = self.db_table.attributes
-        
-        # result = WxTransformations.search_lod(self.attributes_lod, 'is_primary_key', True)
-        # if result <> None: 
-            # self.primary_key_column = result['column_name']
-            
-    
-    # def populate(self, content_lod=None):
-        # if self.parent_form <> None: 
-            # if self.parent_form.primary_key <> None:
-                # # This populates a referenced table (on a parent form)
-                # attributes_lod = self.db_table.attributes
-                # primary_key_column = self.primary_key_column
-                # referenced_table_name = self.parent_form.db_table.name
-                
-                # self.foreign_key_column_name = \
-                    # self.db_table.get_foreign_key_column_name(attributes_lod, 
-                                                              # primary_key_column, 
-                                                              # referenced_table_name)
-                
-                # self.content_lod = self.db_table.select(where='%s = %i' % (self.foreign_key_column_name, self.parent_form.primary_key))
-            # else:
-                # # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
-                # self.content_lod = []
-        # else:
-            # self.content_lod = self.db_table.get_content()
-
-        # # Before populating, check if there are any substitutions from referenced tables
-        # self.check_column_substitutions()
-        # self.Table.populate(self.content_lod)
-        
-        # # Do callbacks for the population of higher-level widgets.
-        # for definition_dic in self.definition_lod:
-            # if definition_dic.has_key('populate_function'):
-                # definition_dic['populate_function'](definition_dic)
-                
                 
     def update(self):
         self.button_new.set_sensitive(1)

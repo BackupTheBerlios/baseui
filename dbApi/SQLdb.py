@@ -697,9 +697,6 @@ class generic_table(object):
         
         self.primary_key_list = []
         
-        print 'generic table:', self.name
-        print db_object.data_types
-        
         
     def create(self, attributes_lod = None):
         ''' Creates an empty table in the given database and returnes the SQLcommand.
