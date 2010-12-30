@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.wxPortlets module.
-# by Mark Muzenhardt, published under LGPL license.
+# by Mark Muzenhardt, published under GPL license.
 #===============================================================================
 
 import wx, wx.aui
@@ -27,7 +27,7 @@ class DatabaseTableBase:
         
         
     # Actions -----------------------------------------------------------------
-    def on_new(self, event=None):
+    def new(self, *args, **kwargs):
         if self.form == None:
             return
         
@@ -38,7 +38,7 @@ class DatabaseTableBase:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
             
             
-    def on_edit(self, event=None):
+    def edit(self, *args, **kwargs):
         if self.form == None:
             return
 
@@ -46,7 +46,7 @@ class DatabaseTableBase:
         form_instance.populate()
 
 
-    def on_delete(self, event=None):
+    def delete(self, *args, **kwargs):
         if self.primary_key <> None:
             dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
                                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
@@ -170,32 +170,48 @@ class DatabaseTableBase:
             substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
             content_dic[column_name] = mask % substitute_lod[0]
         
-
-                
+            
     
 class SubTable(DatabaseTableBase):
-    def __init__(self, db_table, form=None, portlet_parent=None):
+    def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None):
         self.portlet_parent = portlet_parent
-        print 'Subtable portlet parent:', portlet_parent
         
-        self.sizer = wx.FlexGridSizer( 2, 2, 0, 0 )
+        self.sizer = wx.FlexGridSizer( 1, 2, 0, 0 )
+        self.sizer.AddGrowableCol( 0 )
+        self.sizer.AddGrowableRow( 0 )
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
         self.portlet_parent.SetSizer(self.sizer)
         
+        self.m_treeCtrl2 = wx.TreeCtrl( self.portlet_parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TR_DEFAULT_STYLE )
+        self.sizer.Add( self.m_treeCtrl2, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        self.sizer_buttons = wx.BoxSizer( wx.VERTICAL )
+        
         self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
-        self.sizer.Add(self.button_add)
+        self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5 )
         
         self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.sizer.Add(self.button_edit)
+        self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5 )
         
         self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.sizer.Add(self.button_delete)
+        self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5 )
         # self.panel = wx.Panel()
+        self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
         
         # DatabaseTableBase.__init__(self, db_table, portlet_parent)
         
+    def on_add_clicked(self, event=None):
+        pass
+    
+    
+    def on_edit_clicked(self, event=None):
+        pass
+    
+    
+    def on_delete_clicked(self, event=None):
+        pass
     
     
     
@@ -231,14 +247,11 @@ class FormTable(DatabaseTableBase):
         # TODO: remove this sheenanigan asap!
         self.parent_form = None
         
-        #self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
-        #self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
-        
     
     # Callbacks ---------------------------------------------------------------
     def on_row_activate(self, content_dic=None):
         self.primary_key = content_dic[self.primary_key_column]
-        self.on_edit()
+        self.edit()
 
 
     def on_cursor_changed(self, content_dic=None):
@@ -280,13 +293,13 @@ class FormTable(DatabaseTableBase):
         
         if self.form <> None:
             self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_new, id=self.ID_NEW)
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
     
             self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_edit, id=self.ID_EDIT)
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
     
             self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete, id=self.ID_DELETE)
     
             self.toolbar_parent.AddSeparator()
         
