@@ -17,11 +17,13 @@ from pprint import pprint
 
 
 class DatabaseTableBase:
-    def __init__(self, db_table, portlet_parent=None):
+    def __init__(self, db_table, form=None, portlet_parent=None):
         self.db_table = db_table
         self.db_object = db_table.db_object
+        self.form = form
         self.portlet_parent = portlet_parent
-    
+        
+        self.primary_key = None
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
@@ -174,8 +176,8 @@ class DatabaseTableBase:
     
 class SubTable(DatabaseTableBase):
     def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None):
-        self.portlet_parent = portlet_parent
-        
+        DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
+                
         self.sizer = wx.FlexGridSizer( 1, 2, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
         self.sizer.AddGrowableRow( 0 )
@@ -191,27 +193,33 @@ class SubTable(DatabaseTableBase):
         
         self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
         self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5 )
+        self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
         
         self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5 )
+        self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
         
         self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5 )
-        # self.panel = wx.Panel()
+        self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
+        
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
         
         # DatabaseTableBase.__init__(self, db_table, portlet_parent)
         
     def on_add_clicked(self, event=None):
-        pass
+        self.new()
+        print 'add'
     
     
     def on_edit_clicked(self, event=None):
-        pass
+        self.edit()
+        print 'edit'
     
     
     def on_delete_clicked(self, event=None):
-        pass
+        self.delete()
+        print 'delete'
     
     
     
@@ -238,10 +246,9 @@ class FormTable(DatabaseTableBase):
             db_table is an instance of a sql_table.
             help_path is the path to the helpfile opened if help pressed. '''
         
-        DatabaseTableBase.__init__(self, db_table, portlet_parent)
+        DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
         
         self.toolbar_parent = toolbar_parent
-        self.form = form
         self.help_path = help_path
         
         # TODO: remove this sheenanigan asap!
