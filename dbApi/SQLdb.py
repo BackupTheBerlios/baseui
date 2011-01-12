@@ -290,7 +290,6 @@ class sqlite_database(generic_database):
     def connect(self, **kwargs):
         self.connection = self.connector.connect(kwargs['filepath'])
         self.cursor = self.connection.cursor()
-		
         self.set_arguments(**kwargs)
         return self.connection
         
@@ -342,14 +341,9 @@ class postgresql_database(generic_database):
         
             
     def connect(self, **kwargs):
-        self.connection = self.connector.connect(database="'%s'" % kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
-
+        super(postgresql_database, self).connect(**kwargs)
         if 'pscopg2' in self.engine:
             self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            
-        self.cursor = self.connection.cursor()
-        self.encoding = self.get_encoding()
-        self.set_arguments(**kwargs)
         return self.connection
     
     

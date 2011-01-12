@@ -16,7 +16,7 @@ from dbApi import SQLdb, Tools as dbTools
 from pprint import pprint
 
 
-class DatabaseTableBase:
+class DatabaseTableBase(object):
     def __init__(self, db_table, form=None, portlet_parent=None):
         self.db_table = db_table
         self.db_object = db_table.db_object
@@ -37,10 +37,6 @@ class DatabaseTableBase:
 
 
     def on_cursor_changed(self, content_dic=None):
-        if self.toolbar_parent <> None:
-            self.toolbar_parent.EnableTool(self.ID_EDIT, True)
-            self.toolbar_parent.EnableTool(self.ID_DELETE, True)
-            
         self.primary_key = content_dic[self.primary_key_column]
 
 
@@ -278,6 +274,15 @@ class FormTable(DatabaseTableBase):
         
     
     # Callbacks ---------------------------------------------------------------
+    def on_cursor_changed(self, content_dic=None):
+        # First, call the overwritten method to determine primary key.
+        super(FormTable, self).on_cursor_changed(content_dic)
+        
+        if self.toolbar_parent <> None:
+            self.toolbar_parent.EnableTool(self.ID_EDIT, True)
+            self.toolbar_parent.EnableTool(self.ID_DELETE, True)
+        
+
     def on_print(self, event=None):
         print "print"
         
