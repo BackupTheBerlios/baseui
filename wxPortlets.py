@@ -22,26 +22,44 @@ class DatabaseTableBase:
         self.db_object = db_table.db_object
         self.form = form
         self.portlet_parent = portlet_parent
+        self.toolbar_parent = None
+        self.parent_form = None
         
         self.primary_key = None
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
         
+    # Callbacks ---------------------------------------------------------------
+    def on_row_activate(self, content_dic=None):
+        self.primary_key = content_dic[self.primary_key_column]
+        self.edit()
+
+
+    def on_cursor_changed(self, content_dic=None):
+        if self.toolbar_parent <> None:
+            self.toolbar_parent.EnableTool(self.ID_EDIT, True)
+            self.toolbar_parent.EnableTool(self.ID_DELETE, True)
+            
+        self.primary_key = content_dic[self.primary_key_column]
+
+
     # Actions -----------------------------------------------------------------
     def new(self, *args, **kwargs):
         if self.form == None:
+            print 'no form defined!'
             return
         
         try:
             self.primary_key = None
-            self.form(parent=self.portlet_parent, remote_parent=self)
+            form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
             
             
     def edit(self, *args, **kwargs):
         if self.form == None:
+            print 'no form defined!'
             return
 
         form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
@@ -92,28 +110,32 @@ class DatabaseTableBase:
             
     
     def populate(self, content_lod=None):
-        if self.parent_form <> None: 
-            if self.parent_form.primary_key <> None:
-                # This populates a referenced table (on a parent form)
-                attributes_lod = self.db_table.attributes
-                primary_key_column = self.primary_key_column
-                referenced_table_name = self.parent_form.db_table.name
-                
-                self.foreign_key_column_name = \
-                    self.db_table.get_foreign_key_column_name(attributes_lod, 
-                                                              primary_key_column, 
-                                                              referenced_table_name)
-                    
-                self.content_lod = self.db_table.select(where='%s = %i' % (self.foreign_key_column_name, self.parent_form.primary_key))
-            else:
-                # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
-                self.content_lod = []
-        else:
-            self.content_lod = self.db_table.get_content()
+#        if self.parent_form <> None: 
+#            if self.parent_form.primary_key <> None:
+#                # This populates a referenced table (on a parent form)
+#                attributes_lod = self.db_table.attributes
+#                primary_key_column = self.primary_key_column
+#                referenced_table_name = self.parent_form.db_table.name
+#                
+#                self.foreign_key_column_name = \
+#                    self.db_table.get_foreign_key_column_name(attributes_lod, 
+#                                                              primary_key_column, 
+#                                                              referenced_table_name)
+#                    
+#                self.content_lod = self.db_table.select(where='%s = %i' % (self.foreign_key_column_name, self.parent_form.primary_key))
+#            else:
+#                # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
+#                self.content_lod = []
+#        else:
+        self.content_lod = self.db_table.get_content()
 
         # Before populating, check if there are any substitutions from referenced tables
         self.check_column_substitutions()
-        self.Table.populate(self.content_lod)
+        
+        # Check, if the Table object is still alive. If deleted, just go on.
+        attr_list = dir(self.Table)
+        if 'populate' in attr_list: #, type(attr_list)
+            self.Table.populate(self.content_lod)
         
         # Do callbacks for the population of higher-level widgets.
         for definition_dic in self.definition_lod:
@@ -256,18 +278,6 @@ class FormTable(DatabaseTableBase):
         
     
     # Callbacks ---------------------------------------------------------------
-    def on_row_activate(self, content_dic=None):
-        self.primary_key = content_dic[self.primary_key_column]
-        self.edit()
-
-
-    def on_cursor_changed(self, content_dic=None):
-        self.toolbar_parent.EnableTool(self.ID_EDIT, True)
-        self.toolbar_parent.EnableTool(self.ID_DELETE, True)
-        
-        self.primary_key = content_dic[self.primary_key_column]
-
-
     def on_print(self, event=None):
         print "print"
         
@@ -410,10 +420,10 @@ class FormFrame(wx.Frame):
     
     def __init__(self, remote_parent=None,
                        parent=None,
-                       title='',
-                       panel_name=None,
                        icon_path=None,
+                       title='',
                        xrc_path=None,
+                       panel_name=None,
                        help_path=None):
         
         ''' db_table is the the table in which this Form writes the data. The remote_parent
@@ -430,20 +440,22 @@ class FormFrame(wx.Frame):
         self.xrc_path = xrc_path
         self.help_path = help_path
         
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
-        self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(640,480))
+        if icon_path <> None:
+            self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
+        
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
         self.aui_manager = wx.aui.AuiManager(self)
         
-        self.panel_main = wx.Panel(self, -1, size = (320, 240))
         self.create_toolbar()
+        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
         
         self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
                          Name("toolbar_standard").Caption("Standard").
                          ToolbarPane().Top().Resizable().
                          LeftDockable(False).RightDockable(False))
-        self.aui_manager.AddPane(self.panel_main, wx.aui.AuiPaneInfo().CaptionVisible(False).
+        self.aui_manager.AddPane(self.form, wx.aui.AuiPaneInfo().CaptionVisible(False).
                                  Name("panel_main").TopDockable(False).
                                  Center().Layer(1).CloseButton(False))
         self.aui_manager.Update()
@@ -502,11 +514,9 @@ class FormFrame(wx.Frame):
         self.definition_lod = definition_lod
         self.attributes_lod = attributes_lod
         
-        self.form = DataViews.Form(self.panel_main, self.xrc_path, self.panel_name)
         self.form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.form.definition_lod
-        self.SetInitialSize()
         
         
     def populate(self):

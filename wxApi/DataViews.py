@@ -9,6 +9,7 @@ import os
 import wx, wx.xrc
 
 from wx.gizmos import TreeListCtrl
+from Widgets import DatePicker
 from res import IconSet16
 
 from pprint import pprint
@@ -373,10 +374,9 @@ class Form(wx.Panel):
         self.xrc_resource = wx.xrc.XmlResource(xrc_path)
         self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
         self.PostCreate(pre_panel)
-
-        self.parent = parent
-        self.parent.SetInitialSize()
         self.Layout()
+        
+        self.parent = parent      
         
         self.content_edited = False
         self.definition_lod = None
@@ -386,10 +386,6 @@ class Form(wx.Panel):
 
     def on_widget_changed(self, widget=None, widget_definition_dict=None):
         self.validate_widget(widget_definition_dict)
-
-        
-    def close(self):
-        self.window.destroy()
 
 
     def initialize(self, definition_lod=None, attributes_lod=None):
@@ -482,6 +478,7 @@ class Form(wx.Panel):
                 widget_content = content_dict[column_name]
                 if data_type == 'date':
                     widget_content = date_to_str(widget_content)
+                    print DatePicker
             else:
                 widget_content = ""
                 
