@@ -22,7 +22,7 @@ class Database ( wx.Panel ):
 		
 		frame_database = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Datenbank" ), wx.VERTICAL )
 		
-		sizer_content = wx.FlexGridSizer( 5, 2, 0, 0 )
+		sizer_content = wx.FlexGridSizer( 8, 2, 0, 0 )
 		sizer_content.AddGrowableCol( 1 )
 		sizer_content.SetFlexibleDirection( wx.BOTH )
 		sizer_content.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )

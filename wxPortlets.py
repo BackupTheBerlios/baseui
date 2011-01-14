@@ -143,7 +143,7 @@ class DatabaseTableBase(object):
         self.Table = DataViews.Tree(self.portlet_parent)
         sizer = self.portlet_parent.GetSizer()
         sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
-
+        
         self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
         self.Table.set_row_activate_function(self.on_row_activate)
         self.Table.set_cursor_change_function(self.on_cursor_changed)
@@ -196,17 +196,32 @@ class SubTable(DatabaseTableBase):
     def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None):
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
                 
-        self.sizer = wx.FlexGridSizer( 1, 2, 0, 0 )
-        self.sizer.AddGrowableCol( 0 )
-        self.sizer.AddGrowableRow( 0 )
+        self.sizer = wx.FlexGridSizer(1, 4, 0, 0)
+        self.sizer.AddGrowableCol(0)
+        self.sizer.AddGrowableRow(0)
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
         self.portlet_parent.SetSizer(self.sizer)
         
-        self.m_treeCtrl2 = wx.TreeCtrl( self.portlet_parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TR_DEFAULT_STYLE )
-        self.sizer.Add( self.m_treeCtrl2, 0, wx.ALL|wx.EXPAND, 5 )
         
+    def on_add_clicked(self, event=None):
+        self.new()
+        print 'add'
+    
+    
+    def on_edit_clicked(self, event=None):
+        self.edit()
+        print 'edit'
+    
+    
+    def on_delete_clicked(self, event=None):
+        self.delete()
+        print 'delete'
+        
+        
+    def populate_portlet(self):
+        super(SubTable, self).populate_portlet()
         self.sizer_buttons = wx.BoxSizer( wx.VERTICAL )
         
         self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
@@ -223,22 +238,6 @@ class SubTable(DatabaseTableBase):
         
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
         
-        # DatabaseTableBase.__init__(self, db_table, portlet_parent)
-        
-    def on_add_clicked(self, event=None):
-        self.new()
-        print 'add'
-    
-    
-    def on_edit_clicked(self, event=None):
-        self.edit()
-        print 'edit'
-    
-    
-    def on_delete_clicked(self, event=None):
-        self.delete()
-        print 'delete'
-    
     
     
 class FormTable(DatabaseTableBase):

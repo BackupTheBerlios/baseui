@@ -93,7 +93,7 @@ class Database(Panels.Database):
        
 class DatabaseLogin(wx.Panel):
     def __init__(self, parent, image_path, ini_path, ini_section, autosave=True):
-        wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,460 ), style = wx.TAB_TRAVERSAL)
+        wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
         self.image_path = image_path
@@ -104,7 +104,7 @@ class DatabaseLogin(wx.Panel):
         self.on_connect = None
         self.on_disconnect = None
         
-        self.sizer = wx.FlexGridSizer( 2, 1, 0, 0 )
+        self.sizer = wx.FlexGridSizer( 3, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
         self.sizer.AddGrowableRow( 0, 1 )
         
@@ -126,6 +126,7 @@ class DatabaseLogin(wx.Panel):
         
         self.SetSizer(self.sizer)
         self.Layout()
+        self.SetInitialSize()
         
         # Add bottom panel with buttons ---------------------------------------
         bottom_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
