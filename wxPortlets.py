@@ -203,7 +203,7 @@ class SubTable(DatabaseTableBase):
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
         self.portlet_parent.SetSizer(self.sizer)
-        
+
         
     def on_add_clicked(self, event=None):
         self.new()
@@ -237,6 +237,7 @@ class SubTable(DatabaseTableBase):
         self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
         
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
+        self.portlet_parent.Layout()
         
     
     
@@ -413,7 +414,75 @@ class FormTable(DatabaseTableBase):
             # content_dic[column_name] = mask % substitute_lod[0]
         
     
+
+class SearchFrame(wx.Frame):
+    def __init__(self, remote_parent=None,
+                       parent=None,
+                       icon_path=None,
+                       title='Suche'):
+        
+        ''' This is a database table search form '''
+        
+        self.remote_parent = remote_parent
+        self.parent = parent
+        self.icon_path = icon_path
+        self.title = title
+        
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
+        if icon_path <> None:
+            self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
+        
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+        
+        self.aui_manager = wx.aui.AuiManager(self)
+        
+        self.create_toolbar()
+        self.panel = wx.Panel(self, wx.ID_ANY)
+        
+        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
+                         Name("toolbar_standard").Caption("Standard").
+                         ToolbarPane().Top().Resizable().
+                         LeftDockable(False).RightDockable(False))
+        #self.aui_manager.AddPane(self.form, wx.aui.AuiPaneInfo().CaptionVisible(False).
+        #                         Name("panel_main").TopDockable(False).
+        #                         Center().Layer(1).CloseButton(False))
+        self.aui_manager.Update()
+        self.Show()
+        
+        self.db_table = remote_parent.db_table
+        self.db_object = self.db_table.db_object
+        
+        self.error_dialog = Dialogs.Error(self)
+        
+        
+    def on_close(self, event=None):
+        del(self.toolbar_standard)
+        self.Destroy()
+        
+        
+    def create_toolbar(self, dataset=True, report=True, help=True):
+        self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
+        
+        entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY)
+        self.toolbar_standard.AddControl(entry_search) 
+        
+        self.toolbar_standard.AddSeparator()
+        
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Speichern", IconSet16.getfilesave_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
+        
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Löschen", IconSet16.getdelete_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
+        
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken", IconSet16.getprint_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        
+        self.toolbar_standard.AddSeparator()
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+
     
+        
 class FormFrame(wx.Frame):
     ID_SAVE = 101
     ID_DELETE = 102
@@ -444,7 +513,7 @@ class FormFrame(wx.Frame):
         self.xrc_path = xrc_path
         self.help_path = help_path
         
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(640,480))
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -529,6 +598,7 @@ class FormFrame(wx.Frame):
 #            print 'getting %s' % container + ':', widget
 #            print 'sizer is:', widget.GetSizer()
         print portlets_lod
+        print 'form size:', self.form.GetSize()
         
         
     def populate(self):

@@ -376,7 +376,7 @@ class Form(wx.Panel):
         self.PostCreate(pre_panel)
         self.Layout()
         
-        self.parent = parent      
+        parent.SetSize(self.GetSize()) 
         
         self.content_edited = False
         self.definition_lod = None
