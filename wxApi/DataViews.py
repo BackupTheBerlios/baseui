@@ -478,7 +478,13 @@ class Form(wx.Panel):
                 widget_content = content_dict[column_name]
                 if data_type == 'date':
                     widget_content = date_to_str(widget_content)
-                    print DatePicker
+                    print 'DatePicker', widget_object, widget_object.GetSizer()
+                    #pprint (dir(widget_object))
+                    #sizer = widget_object.GetParent().GetSizer()
+                    #print sizer
+                    #widget_object.Destroy()
+                    #widget_object = wx.GenericDatePickerCtrl(self)
+                    #sizer.Add(widget_object)
             else:
                 widget_content = ""
                 

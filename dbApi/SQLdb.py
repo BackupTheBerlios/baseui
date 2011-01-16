@@ -8,6 +8,7 @@
 import Transformations 
    
 from copy import copy
+from pprint import pprint
 
 
 def get_engines():
@@ -454,7 +455,7 @@ class mysql_database(generic_database):
         }
         
     def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, engine)
+        generic_database.__init__(self, main_class, engine)
         
         import MySQLdb
         self.connector = MySQLdb
@@ -524,7 +525,7 @@ class oracle_database(generic_database):
         }
         
     def __init__(self, main_class, engine='oracle'):
-        generic_database.__init__(self, engine)
+        generic_database.__init__(self, main_class, engine)
         
         import cx_Oracle
         self.connector = cx_Oracle
@@ -578,7 +579,7 @@ class informix_database(generic_database):
         }
         
     def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, engine)
+        generic_database.__init__(self, main_class, engine)
         
         import informixdb
         self.connector = informixdb
@@ -605,7 +606,7 @@ class db2_database(generic_database):
         }
         
     def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, engine)
+        generic_database.__init__(self, main_class, engine)
         
         # import MySQLdb
         # self.connector = MySQLdb
@@ -614,7 +615,7 @@ class db2_database(generic_database):
     
 class odbc_generic_database(generic_database):
     def __init__(self, main_class, engine='odbc'):
-        generic_database.__init__(self, engine)
+        generic_database.__init__(self, main_class, engine)
         
         import pyodbc
         self.connector = pyodbc
@@ -637,7 +638,7 @@ class odbc_generic_database(generic_database):
         connection_string = connection_string % kwargs
         self.connection = self.connector.connect(connection_string, autocommit=True)
         self.cursor = self.connection.cursor()
-        self.set_arguments(kwargs)
+        self.set_arguments(**kwargs)
         return self.connection
         
         
@@ -1192,6 +1193,28 @@ class odbc_generic_table(generic_table):
                 'is_nullable':              is_nullable,
             })
         return attributes_lod
+    
+    
+    def get_primary_key_columns(self):
+        ''' Uses ODBC-driver function primaryKeys
+            primaryKeys(table, catalog=None, schema=None) --> Cursor
+
+            Creates a result set of column names that make up the primary key for a table by executing the SQLPrimaryKeys function.
+
+            Each row has the following columns:
+            
+            0: table_cat
+            1: table_schem
+            2: table_name
+            3: column_name
+            4: key_seq
+            5: pk_name'''
+
+        rows = self.db_object.cursor.primaryKeys(self.name)
+        pk_columns_list = []
+        for key in rows:
+            pk_columns_list.append(key[3])
+        return pk_columns_list   
            
         
 
