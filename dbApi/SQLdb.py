@@ -1208,7 +1208,7 @@ class odbc_generic_table(generic_table):
             2: table_name
             3: column_name
             4: key_seq
-            5: pk_name'''
+            5: pk_name '''
 
         rows = self.db_object.cursor.primaryKeys(self.name)
         pk_columns_list = []

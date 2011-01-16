@@ -445,6 +445,8 @@ class Form(wx.Panel):
                 #     widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
                 
                 self.definition_lod[row]['widget_object'] = widget_object
+            
+            #print self.portlets_lod
             #pprint (self.definition_lod)
             
 
@@ -571,8 +573,12 @@ class Form(wx.Panel):
                     widget_content = '%04i-%02i-%02i' % (year, month, day)
                     self.content_dict[column_name] = widget_content
         return self.content_dict
-
+    
+    
+    def get_widget(self, widget_name):
+        return wx.xrc.XRCCTRL(self, widget_name)
         
+
         
 if __name__ == "__main__":
     dummy = raw_input('press <RETURN> to exit...')

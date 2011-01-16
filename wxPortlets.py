@@ -522,6 +522,14 @@ class FormFrame(wx.Frame):
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.form.definition_lod
         
+#        for portlet_dict in portlets_lod:
+#            portlet = portlet_dict.get('portlet')
+#            container = portlet_dict.get('container')
+#            widget = self.form.get_widget(widget_name=container)
+#            print 'getting %s' % container + ':', widget
+#            print 'sizer is:', widget.GetSizer()
+        print portlets_lod
+        
         
     def populate(self):
         if self.primary_key <> None:
@@ -579,5 +587,9 @@ class FormFrame(wx.Frame):
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         
+    def get_widget(self, widget_name):
+        widget = self.form.get_widget(widget_name)
+        return widget
 
+        
         
