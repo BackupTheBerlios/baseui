@@ -476,29 +476,30 @@ class Form(wx.Panel):
             if widget_object == None:
                 continue
 
-            if content_dict.has_key(column_name):
+            # DatePickerCtrl ---------------------------------------------------
+            if widget_object.__class__ ==  wx._controls.DatePickerCtrl:
                 widget_content = content_dict[column_name]
-                if data_type == 'date':
+                if widget_content <> None:
                     widget_content = date_to_str(widget_content)
-                    print 'DatePicker', widget_object, widget_object.GetSizer()
-                    #pprint (dir(widget_object))
-                    #sizer = widget_object.GetParent().GetSizer()
-                    #print sizer
-                    #widget_object.Destroy()
-                    #widget_object = wx.GenericDatePickerCtrl(self)
-                    #sizer.Add(widget_object)
+                    datetime = wx.DateTime()
+                    datetime.ParseDate(widget_content)
+                    widget_object.SetValue(datetime)
             else:
                 widget_content = ""
-                
+            
+            # TextCtrl --------------------------------------------------------- 
             if widget_object.__class__ ==  wx._controls.TextCtrl:
-                if widget_content <> '' and widget_content <> None:
+                if widget_content <> None:
                     if type(widget_content) <> unicode:
                         widget_content = str(widget_content)
                     widget_object.SetValue(widget_content.rstrip())
                 else:
                     widget_object.SetValue('')
+            
+            # Combobox ---------------------------------------------------------
             if widget_object.__class__ ==  wx._controls.ComboBox:
-                if widget_content <> '' and widget_content <> None:
+                # This works just if no foreign table is there, otherwise it will be overwritten!
+                if widget_content <> None:
                     if type(widget_content) <> unicode:
                         widget_content = str(widget_content)
                     widget_object.SetValue(widget_content.rstrip())
@@ -544,12 +545,15 @@ class Form(wx.Panel):
                 else:
                     self.content_dict[column_name] = None
             if widget_object.__class__ == wx._controls.ComboBox:
-                client_data = None
-                selection = widget_object.GetSelection()
-                if selection <> -1:
-                    client_data = widget_object.GetClientData(selection)
-                    
-                widget_content = client_data #widget_object.GetValue()
+                # If this widget has a foreign relation, get client data. Else get Value.
+                if dic.get('referenced_column_name') <> None:
+                    client_data = None
+                    selection = widget_object.GetSelection()
+                    if selection <> -1:
+                        client_data = widget_object.GetClientData(selection)
+                    widget_content = client_data
+                else:
+                    widget_content = widget_object.GetValue()
                 if widget_content <> '':
                     self.content_dict[column_name] = widget_content
                 else:
@@ -557,9 +561,15 @@ class Form(wx.Panel):
             if widget_object.__class__ == wx._controls.CheckBox:
                 widget_content = widget_object.GetValue()
                 self.content_dict[column_name] = widget_content
+            if widget_object.__class__ == wx._controls.DatePickerCtrl:
+                widget_content = widget_object.GetValue()
+                pprint (dir(widget_content))
+                print str(widget_content)
+                self.content_dict[column_name] = str(widget_content)
+                #print 'saving:', widget_object, widget_content, dir(widget_content)
             
             # Make usdate from german date
-            # TODO: Whats' this shit here?
+            # TODO: Whats' this date-shit here?
             if data_type == 'date':
                 if widget_content <> '':
                     try:

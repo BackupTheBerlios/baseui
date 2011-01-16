@@ -169,6 +169,7 @@ class generic_database(object):
             if self.debug: print sql_command
             self.cursor.execute(sql_command)
         except:
+            print sql_command
             raise
 
         tmp_result = self.cursor.fetchall()
@@ -194,6 +195,7 @@ class generic_database(object):
             if self.debug: print sql_command
             self.cursor.execute(sql_command)
         except:
+            print sql_command
             raise
         
         lol_result = self.cursor.fetchall()
@@ -978,7 +980,7 @@ CREATE TABLE """ + self.name + """
         konstrukt = ('referenced_table_name, referenced_column_name, column_name')
         
         
-    def select(self, distinct=False, column_list=[], where='', listresult=False):
+    def select(self, distinct=False, join=[], column_list=[], where='', listresult=False):
         ''' SELECT order in SQL with transformation of output to python data types. '''
         
         if distinct == False:
@@ -986,28 +988,34 @@ CREATE TABLE """ + self.name + """
         else:
             distinct = 'DISTINCT '
             
+        if join == []:
+            from_str = self.name
+        else:
+            from_str = self.name
+            for table in join:
+                from_str += ', %s' % table
+                
         if column_list == []:
-            sql_command = 'SELECT %s* FROM %s' % (distinct, self.name)
+            sql_command = 'SELECT %s* FROM %s' % (distinct, from_str)
         else:
             column_list_str = str(column_list)
             column_list_str = column_list_str[1:len(column_list_str) - 1]
             column_list_str = column_list_str.replace("'", "")
-            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, self.name)
+            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, from_str)
             
         if where <> '':
             sql_command += ' WHERE %s' % where
         
         try:
             if listresult == False:
-                content_lod = self.db_object.dictresult(sql_command)     
+                content_lod = self.db_object.dictresult(sql_command)
+                content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)    
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command)
                 # return content_lod       
         except:
             raise
-            
-        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
         return content_lod
     
     
@@ -1028,6 +1036,7 @@ CREATE TABLE """ + self.name + """
             content_lod = content
             
         # Iterate the rows and insert it in the table.
+        actual_pk = None
         for content_dict in content_lod:
             if key_column <> '':
                 actual_pk = self.get_last_primary_key(primary_key_column=key_column) + 1
@@ -1054,7 +1063,7 @@ CREATE TABLE """ + self.name + """
                 self.db_object.execute(sql_command)
             except:
                 raise
-        return
+        return actual_pk
 
 
     def update(self, content_dict=None, column_list=None, where=''):

@@ -166,6 +166,9 @@ class DatabaseTableBase(object):
         
         
     def check_column_substitutions(self):
+        ''' Search for one to one relationships in that table and if any there,
+            call the do_column_substitutions function and replace them with content. ''' 
+        
         for column_dic in self.definition_lod:
             if column_dic.has_key('populate_from'):
                 populate_from = column_dic['populate_from']
@@ -175,21 +178,24 @@ class DatabaseTableBase(object):
                         referenced_table_name = column_dic['referenced_table_name']
                         if column_dic.has_key('referenced_column_name'):
                             referenced_column_name = column_dic['referenced_column_name']                                        
-                            if column_dic.has_key('mask'):
-                                mask = column_dic['mask']
-                                self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
+                            mask = column_dic.get('mask')
+                            self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
         
         
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
+        ''' Substitute foreign keys with content from the foreign tables. '''
+        
         for content_dic in self.content_lod:
             substitute_dic = {}
             foreign_key = content_dic[column_name]
             if foreign_key in [None, 'NULL']:
-                return
+                continue
             referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
             substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
+            if mask == None:
+                mask = '%(' +'%s' % populate_from[0] + ')s'
             content_dic[column_name] = mask % substitute_lod[0]
-        
+
             
     
 class SubTable(DatabaseTableBase):
@@ -463,24 +469,19 @@ class SearchFrame(wx.Frame):
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
         
+        self.toolbar_standard.AddTool(wx.ID_ANY, "Ok", IconSet16.getok_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
+        
+        self.toolbar_standard.AddSeparator()
+        
         entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY)
         self.toolbar_standard.AddControl(entry_search) 
         
         self.toolbar_standard.AddSeparator()
         
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Speichern", IconSet16.getfilesave_16Bitmap())
-        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
-        
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Löschen", IconSet16.getdelete_16Bitmap())
-        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
-        
         self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken", IconSet16.getprint_16Bitmap())
         #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
-        self.toolbar_standard.AddSeparator()
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
-
     
         
 class FormFrame(wx.Frame):
@@ -513,6 +514,10 @@ class FormFrame(wx.Frame):
         self.xrc_path = xrc_path
         self.help_path = help_path
         
+        # This lists are made to get portlets going.
+        self.save_function_list = []
+        self.delete_function_list = []
+        
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
@@ -533,6 +538,7 @@ class FormFrame(wx.Frame):
                                  Center().Layer(1).CloseButton(False))
         self.aui_manager.Update()
         self.Show()
+        self.Centre()
         
         self.db_table = remote_parent.db_table
         self.db_object = self.db_table.db_object
@@ -552,22 +558,26 @@ class FormFrame(wx.Frame):
     def on_save(self, event=None):
         form_content = self.form.get_content()
         pk_column = self.db_table.get_primary_key_columns()[0]
-            
+        
         try:
             if self.primary_key <> None:
                 form_content[pk_column] = self.primary_key
                 self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
             else:
-                self.db_table.insert(key_column=pk_column, content=form_content)
+                self.primary_key = self.db_table.insert(key_column=pk_column, content=form_content)
         except Exception, inst:
             self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
         
         self.remote_parent.populate()
+        for function in self.save_function_list:
+            function(self.primary_key)
         self.on_close()
         
         
     def on_delete(self, event=None):
         print 'delete formular'
+        for function in self.delete_function_list:
+            function(self.primary_key)
         
         
     def on_print(self, event=None):
@@ -590,16 +600,7 @@ class FormFrame(wx.Frame):
         self.form.initialize(definition_lod=self.definition_lod, 
                              attributes_lod=self.attributes_lod)
         self.definition_lod = self.form.definition_lod
-        
-#        for portlet_dict in portlets_lod:
-#            portlet = portlet_dict.get('portlet')
-#            container = portlet_dict.get('container')
-#            widget = self.form.get_widget(widget_name=container)
-#            print 'getting %s' % container + ':', widget
-#            print 'sizer is:', widget.GetSizer()
-        print portlets_lod
-        print 'form size:', self.form.GetSize()
-        
+
         
     def populate(self):
         if self.primary_key <> None:
@@ -620,7 +621,9 @@ class FormFrame(wx.Frame):
                 
                 if populate_from == None:
                     continue
-                
+                if mask == None:
+                    mask = '%(' +'%s' % populate_from[0] + ')s'
+                    
                 populate_from.append(referenced_column_name)
                 referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
                 result = referenced_table_object.select(column_list=populate_from)
@@ -633,7 +636,7 @@ class FormFrame(wx.Frame):
                 if foreign_key <> None:
                     result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
                     result_dict = result[0]
-                    widget_object.SetValue(mask % result_dict)
+                    widget_object.SetStringSelection(mask % result_dict)
     
     
     def create_toolbar(self, dataset=True, report=True, help=True):
@@ -660,6 +663,16 @@ class FormFrame(wx.Frame):
     def get_widget(self, widget_name):
         widget = self.form.get_widget(widget_name)
         return widget
+    
+    
+    def add_save_function(self, function):
+        self.save_function_list.append(function)
 
+    
+    def add_delete_function(self, function):
+        self.delete_function_list.append(function)
+        
+        
+        
         
         
