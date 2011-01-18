@@ -26,6 +26,7 @@ class DatabaseTableBase(object):
         self.parent_form = None
         
         self.primary_key = None
+        self.filter = None
         
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
@@ -33,7 +34,6 @@ class DatabaseTableBase(object):
         
     # Callbacks ---------------------------------------------------------------
     def on_row_activate(self, content_dic=None):
-        
         self.primary_key = content_dic[self.primary_key_column]
         self.edit()
 
@@ -125,8 +125,10 @@ class DatabaseTableBase(object):
 #                # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
 #                self.content_lod = []
 #        else:
-        self.content_lod = self.db_table.get_content()
-
+        if self.filter == None:
+            self.content_lod = self.db_table.get_content()
+        else:
+            self.content_lod = self.db_table.select(where=self.filter)
         # Before populating, check if there are any substitutions from referenced tables
         self.check_column_substitutions()
         
@@ -201,9 +203,12 @@ class DatabaseTableBase(object):
             
     
 class SubTable(DatabaseTableBase):
-    def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None):
+    def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None, editable=True):
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
-                
+        
+        self.editable = editable
+        self.parent_form = parent_form
+        
         self.sizer = wx.FlexGridSizer(1, 4, 0, 0)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
@@ -236,9 +241,10 @@ class SubTable(DatabaseTableBase):
         self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5 )
         self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
         
-        self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5 )
-        self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
+        if self.editable == True:
+            self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
+            self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5 )
+            self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
         
         self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5 )
@@ -246,9 +252,10 @@ class SubTable(DatabaseTableBase):
         
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
         self.portlet_parent.Layout()
+        self.populate()
         
-    
-    
+        
+        
 class FormTable(DatabaseTableBase):
     ID_NEW = 101
     ID_EDIT = 102
@@ -375,6 +382,8 @@ class FormTable(DatabaseTableBase):
 
 # Form frames ------------------------------------------------------------------
 class SearchFrame(wx.Frame):
+    ID_OK = 101
+    
     def __init__(self, db_table,
                        parent,
                        icon_path=None,
@@ -389,7 +398,7 @@ class SearchFrame(wx.Frame):
         self.title = title
         self.remote_parent = remote_parent
         
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) 
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(640, 480))
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -422,6 +431,9 @@ class SearchFrame(wx.Frame):
         self.error_dialog = Dialogs.Error(self)
         
         
+    def on_ok(self, event=None):
+        self.edit()
+        
         
     def on_close(self, event=None):
         del(self.toolbar_standard)
@@ -431,8 +443,8 @@ class SearchFrame(wx.Frame):
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
         
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Ok", IconSet16.getok_16Bitmap())
-        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
+        self.toolbar_standard.AddTool(self.ID_OK, "Ok", IconSet16.getok_16Bitmap())
+        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_ok, id=self.ID_OK)
         
         self.toolbar_standard.AddSeparator()
         
@@ -455,8 +467,13 @@ class SearchFrame(wx.Frame):
         
         
     def edit(self):
-        print self.table.primary_key
+        self.add_dataset(self.table.primary_key)
+        self.remote_parent.populate()
         self.Close()
+        
+        
+    def populate(self):
+        pass
         
         
         

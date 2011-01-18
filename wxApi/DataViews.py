@@ -94,7 +94,6 @@ class Tree(TreeListCtrl):
             column_name = definition_dict.get('column_name')
             content = self.GetItemText(item, column_number)
             content_dict[column_name] = content
-            
         return content_dict
 
 
