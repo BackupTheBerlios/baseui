@@ -466,6 +466,12 @@ class Form(wx.Panel):
                 widget_name = self.definition_lod[row]['widget_name']
                 widget_object = self.definition_lod[row]['widget_object']
                 column_name = self.definition_lod[row]['column_name']
+                try:
+                    widget_content = content_dict[column_name]
+                except:
+                    print content_dict
+                    raise
+                
                 if self.definition_lod[row].has_key('data_type'):
                     data_type = self.definition_lod[row]['data_type']
                 else:
@@ -478,14 +484,11 @@ class Form(wx.Panel):
 
             # DatePickerCtrl ---------------------------------------------------
             if widget_object.__class__ ==  wx._controls.DatePickerCtrl:
-                widget_content = content_dict[column_name]
                 if widget_content <> None:
                     widget_content = date_to_str(widget_content)
                     datetime = wx.DateTime()
                     datetime.ParseDate(widget_content)
                     widget_object.SetValue(datetime)
-            else:
-                widget_content = ""
             
             # TextCtrl --------------------------------------------------------- 
             if widget_object.__class__ ==  wx._controls.TextCtrl:
