@@ -760,7 +760,7 @@ CREATE TABLE """ + self.name + """
 
         # Create a list of primary key columns.
         primary_key_columns_list = self.get_primary_key_columns()
-
+        
         attributes_lod = []
         for iter in xrange(len(column_name_list)):
             attributes_dict = {}
@@ -1184,23 +1184,30 @@ class odbc_generic_table(generic_table):
         ''' Gets the table attributes and gives them back as list of dictionarys.
             See function 'create' for key description. '''
 
+        # Create a list of primary key columns.
+        primary_key_list = self.get_primary_key_columns()
+        
         attributes_lod = []
         for row in self.db_object.cursor.columns(table=self.name):
+            attributes_dict = {}
+            
             is_nullable = row[17]
             if is_nullable == 'YES':
                 is_nullable = True
             else:
                 is_nullable = False
                 
-            attributes_lod.append(\
-            {
-                'column_name':              row[3],
-                'data_type':                row[5],
-                'character_maximum_length': row[6],
-                'numeric_precision':        None, #FIXME: This numeric precision is to get.
-                'numeric_scale':            None, #FIXME: This numeric scale is to get.
-                'is_nullable':              is_nullable,
-            })
+            attributes_dict['column_name'] = row[3]  
+            attributes_dict['data_type'] = row[5] 
+            attributes_dict['character_maximum_length'] = row[6]
+            attributes_dict['numeric_precision'] = None, #FIXME: This numeric precision is to get.
+            attributes_dict['numeric_scale'] = None #FIXME: This numeric scale is to get.
+            attributes_dict['is_nullable'] = is_nullable
+            
+            if row[3] in primary_key_list:
+                attributes_dict['is_primary_key'] = True
+            
+            attributes_lod.append(attributes_dict)
         return attributes_lod
     
     

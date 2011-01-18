@@ -26,12 +26,14 @@ class DatabaseTableBase(object):
         self.parent_form = None
         
         self.primary_key = None
+        
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
         
     # Callbacks ---------------------------------------------------------------
     def on_row_activate(self, content_dic=None):
+        
         self.primary_key = content_dic[self.primary_key_column]
         self.edit()
 
@@ -349,13 +351,6 @@ class FormTable(DatabaseTableBase):
         #if preferences == True or help == True:
         self.toolbar_parent.AddSeparator()
         
-        # These lines have to be in the Preferences-Dialog!
-        #self.toolbar_parent.AddTool(self.ID_IMPORT, "Importieren", IconSet16.getfileimport_16Bitmap())
-        #self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_import, id=self.ID_IMPORT)
-        
-        #self.toolbar_parent.AddTool(self.ID_EXPORT, "Exportieren", IconSet16.getfileexport_16Bitmap())
-        #self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT)
-        
         #if preferences == True:
         self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
@@ -365,26 +360,9 @@ class FormTable(DatabaseTableBase):
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         self.toolbar_parent.Realize()
+        
     
-    
-    # def populate_portlet(self):
-        # self.Table = DataViews.Tree(self.portlet_parent)
-        # sizer = self.portlet_parent.GetSizer()
-        # sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
-
-        # self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
-        # self.Table.set_row_activate_function(self.on_row_activate)
-        # self.Table.set_cursor_change_function(self.on_cursor_changed)
-        
-        # Just populate immideately if this is not a child-table of a form!
-        # if self.parent_form == None:
-            # self.populate()
-            
-        # self.Table.Show()
-        # sizer.Layout()
-        # return self.Table
-        
-        
+    # This has to come back here!
     # def add_filter(self, filter_name=None, filter_function=None):
         # self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
 
@@ -393,48 +371,25 @@ class FormTable(DatabaseTableBase):
         # pass
         #print 'set filter to:', filter_name
         
-        
-    # def check_column_substitutions(self):
-        # for column_dic in self.definition_lod:
-            # if column_dic.has_key('populate_from'):
-                # populate_from = column_dic['populate_from']
-                # if column_dic.has_key('column_name'):
-                    # column_name = column_dic['column_name']
-                    # if column_dic.has_key('referenced_table_name'):
-                        # referenced_table_name = column_dic['referenced_table_name']
-                        # if column_dic.has_key('referenced_column_name'):
-                            # referenced_column_name = column_dic['referenced_column_name']                                        
-                            # if column_dic.has_key('mask'):
-                                # mask = column_dic['mask']
-                                # self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
-        
-        
-    # def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
-        # for content_dic in self.content_lod:
-            # substitute_dic = {}
-            # foreign_key = content_dic[column_name]
-            # if foreign_key in [None, 'NULL']:
-                # return
-            # referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
-            # substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
-            # content_dic[column_name] = mask % substitute_lod[0]
-        
     
 
+# Form frames ------------------------------------------------------------------
 class SearchFrame(wx.Frame):
-    def __init__(self, remote_parent=None,
-                       parent=None,
+    def __init__(self, db_table,
+                       parent,
                        icon_path=None,
-                       title='Suche'):
+                       title='Suche',
+                       remote_parent=None):
         
         ''' This is a database table search form '''
         
-        self.remote_parent = remote_parent
+        self.db_table = db_table
         self.parent = parent
         self.icon_path = icon_path
         self.title = title
+        self.remote_parent = remote_parent
         
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) 
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -443,22 +398,29 @@ class SearchFrame(wx.Frame):
         self.aui_manager = wx.aui.AuiManager(self)
         
         self.create_toolbar()
-        self.panel = wx.Panel(self, wx.ID_ANY)
-        
         self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
                          Name("toolbar_standard").Caption("Standard").
                          ToolbarPane().Top().Resizable().
                          LeftDockable(False).RightDockable(False))
-        #self.aui_manager.AddPane(self.form, wx.aui.AuiPaneInfo().CaptionVisible(False).
-        #                         Name("panel_main").TopDockable(False).
-        #                         Center().Layer(1).CloseButton(False))
+        
+        self.panel = wx.Panel(self, wx.ID_ANY, size=(300, 200))
+        self.sizer = wx.FlexGridSizer(1, 4, 0, 0)
+        self.sizer.AddGrowableCol(0)
+        self.sizer.AddGrowableRow(0)
+        self.sizer.SetFlexibleDirection( wx.BOTH )
+        self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        self.panel.SetSizer(self.sizer)
+        self.aui_manager.AddPane(self.panel, wx.aui.AuiPaneInfo().CaptionVisible(False).
+                                 Name("panel_main").TopDockable(False).
+                                 Center().Layer(1).CloseButton(False))
+        self.populate_table()
         self.aui_manager.Update()
         self.Show()
         
-        self.db_table = remote_parent.db_table
         self.db_object = self.db_table.db_object
         
         self.error_dialog = Dialogs.Error(self)
+        
         
         
     def on_close(self, event=None):
@@ -480,9 +442,23 @@ class SearchFrame(wx.Frame):
         self.toolbar_standard.AddSeparator()
         
         self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken", IconSet16.getprint_16Bitmap())
-        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
     
+    def populate_table(self):
+        self.table = DatabaseTableBase(self.db_table, portlet_parent=self.panel)
+        self.db_table.attributes = self.db_table.get_attributes()
+        
+        self.table.initialize(self.definition)
+        self.table.populate_portlet()
+        
+        self.table.edit = self.edit
+        
+        
+    def edit(self):
+        print self.table.primary_key
+        self.Close()
+        
+        
         
 class FormFrame(wx.Frame):
     ID_SAVE = 101
@@ -492,27 +468,27 @@ class FormFrame(wx.Frame):
     ID_PREFERENCES = 201
     ID_HELP = 202
     
-    def __init__(self, remote_parent=None,
-                       parent=None,
+    def __init__(self, parent=None,
                        icon_path=None,
                        title='',
                        xrc_path=None,
                        panel_name=None,
-                       help_path=None):
+                       help_path=None,
+                       remote_parent=None):
         
         ''' db_table is the the table in which this Form writes the data. The remote_parent
             is triggered on save and close, so that the parent widget can be updated. parent
             is simply the wxWidgets-Parent, usually a Frame. title is the Frame-title, 
             panel_name is the name of the panel which is loaded from the file behind xrc_path.
             The help-path enables online help, if given. '''
-            
-        self.remote_parent = remote_parent
+        
         self.parent = parent 
         self.title = title
         self.panel_name = panel_name
         self.icon_path = icon_path
         self.xrc_path = xrc_path
         self.help_path = help_path
+        self.remote_parent = remote_parent
         
         # This lists are made to get portlets going.
         self.save_function_list = []
