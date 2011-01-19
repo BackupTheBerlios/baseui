@@ -485,8 +485,13 @@ class Form(wx.Panel):
             if widget_object.__class__ ==  wx._controls.DatePickerCtrl:
                 if widget_content <> None:
                     widget_content = date_to_str(widget_content)
+                    dt = widget_content.split('.')
+                    day = int(dt[0])
+                    month = int(dt[1])-1
+                    year = int(dt[2])
+                    
                     datetime = wx.DateTime()
-                    datetime.ParseDate(widget_content)
+                    datetime.Set(day=day, month=month, year=year)
                     widget_object.SetValue(datetime)
             
             # TextCtrl --------------------------------------------------------- 
@@ -565,7 +570,12 @@ class Form(wx.Panel):
                 self.content_dict[column_name] = widget_content
             if widget_object.__class__ == wx._controls.DatePickerCtrl:
                 widget_content = widget_object.GetValue()
-                self.content_dict[column_name] = str(widget_content)
+                
+                # Not pretty, but works for MSsql over odbc.
+                year = widget_content.GetYear()
+                month = widget_content.GetMonth() + 1
+                day = widget_content.GetDay()
+                self.content_dict[column_name] = '%02i.%02i.%04i' % (day, month, year)
             
             # Make usdate from german date
             # TODO: Whats' this date-shit here?
