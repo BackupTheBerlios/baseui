@@ -51,6 +51,7 @@ class DatabaseTableBase(object):
         try:
             self.primary_key = None
             form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
+            form_instance.populate()
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
             
@@ -618,29 +619,34 @@ class FormFrame(wx.Frame):
             content_dict = content_lod[0]
             self.form.populate(content_dict)
             
-            # This populates the dropdown of comboboxes.
-            definition_lod = self.form.definition_lod
-            for dic in definition_lod:
-                populate_from = dic.get('populate_from')
-                mask = dic.get('mask')
-                referenced_table_name = dic.get('referenced_table_name')
-                referenced_column_name = dic.get('referenced_column_name')
-                widget_object = dic.get('widget_object')
-                column_name = dic.get('column_name')
+        # This populates the dropdown of comboboxes.
+        definition_lod = self.form.definition_lod
+        for dic in definition_lod:
+            populate_from = dic.get('populate_from')
+            mask = dic.get('mask')
+            referenced_table_name = dic.get('referenced_table_name')
+            referenced_column_name = dic.get('referenced_column_name')
+            widget_object = dic.get('widget_object')
+            column_name = dic.get('column_name')
+            on_populate = dic.get('on_populate')
+            
+            if on_populate <> None:
+                on_populate(dic)
                 
-                if populate_from == None:
-                    continue
-                if mask == None:
-                    mask = '%(' +'%s' % populate_from[0] + ')s'
-                    
-                populate_from.append(referenced_column_name)
-                referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
-                result = referenced_table_object.select(column_list=populate_from)
-                item_list = []
-                for item in result:
-                    widget_object.Append(mask % item, item.get(referenced_column_name))
+            if populate_from == None:
+                continue
+            if mask == None:
+                mask = '%(' +'%s' % populate_from[0] + ')s'
                 
-                # Overwrite crap in combobox
+            populate_from.append(referenced_column_name)
+            referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            result = referenced_table_object.select(column_list=populate_from)
+            item_list = []
+            for item in result:
+                widget_object.Append(mask % item, item.get(referenced_column_name))
+            
+            if self.primary_key <> None:
+                # Overwrite crap in combobox if feeded from foreign table!
                 foreign_key = content_dict.get(column_name)
                 if foreign_key <> None:
                     result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
