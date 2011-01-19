@@ -565,10 +565,7 @@ class Form(wx.Panel):
                 self.content_dict[column_name] = widget_content
             if widget_object.__class__ == wx._controls.DatePickerCtrl:
                 widget_content = widget_object.GetValue()
-                pprint (dir(widget_content))
-                print str(widget_content)
                 self.content_dict[column_name] = str(widget_content)
-                #print 'saving:', widget_object, widget_content, dir(widget_content)
             
             # Make usdate from german date
             # TODO: Whats' this date-shit here?
