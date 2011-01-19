@@ -40,8 +40,8 @@ class DatabaseTableBase(object):
 
     def on_cursor_changed(self, content_dic=None):
         self.primary_key = content_dic[self.primary_key_column]
-
-
+        
+        
     # Actions -----------------------------------------------------------------
     def new(self, *args, **kwargs):
         if self.form == None:
@@ -127,6 +127,8 @@ class DatabaseTableBase(object):
 #        else:
         if self.filter == None:
             self.content_lod = self.db_table.get_content()
+        elif self.filter == False:
+            return
         else:
             self.content_lod = self.db_table.select(where=self.filter)
         # Before populating, check if there are any substitutions from referenced tables
@@ -252,7 +254,17 @@ class SubTable(DatabaseTableBase):
         
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
         self.portlet_parent.Layout()
-        self.populate()
+        
+        if self.parent_form <> None:
+            if self.parent_form.primary_key <> None:
+                self.populate()
+            else:
+                self.button_add.Enable(False)
+                self.button_delete.Enable(False)
+                if self.editable == True:
+                    self.button_edit.Enable(False)
+        else:
+            self.populate()
         
         
         
@@ -294,9 +306,14 @@ class FormTable(DatabaseTableBase):
         super(FormTable, self).on_cursor_changed(content_dic)
         
         if self.toolbar_parent <> None:
-            self.toolbar_parent.EnableTool(self.ID_EDIT, True)
-            self.toolbar_parent.EnableTool(self.ID_DELETE, True)
-        
+            if str(self.primary_key).lower() == 'root':
+                self.toolbar_parent.EnableTool(self.ID_EDIT, False)
+                self.toolbar_parent.EnableTool(self.ID_DELETE, False)
+            else:
+                self.toolbar_parent.EnableTool(self.ID_EDIT, True)
+                self.toolbar_parent.EnableTool(self.ID_DELETE, True)
+            self.toolbar_parent.Realize()
+            
 
     def on_print(self, event=None):
         print "print"
@@ -329,10 +346,10 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
         if self.form <> None:
-            self.toolbar_parent.AddTool(self.ID_NEW,  "Neu",        IconSet16.getfilenew_16Bitmap())
+            self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap())
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
     
-            self.toolbar_parent.AddTool(self.ID_EDIT,  "Bearbeiten", IconSet16.getedit_16Bitmap())
+            self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap())
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
     
             self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
@@ -340,13 +357,13 @@ class FormTable(DatabaseTableBase):
     
             self.toolbar_parent.AddSeparator()
         
-        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",     IconSet16.getprint_16Bitmap())
+        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
-
+        
         #if filter == True:
         self.toolbar_parent.AddSeparator()
         combobox_filter = wx.ComboBox(
-            parent=self.toolbar_parent, id=-1, choices=["", "This", "is a", "wx.ComboBox"],
+            parent=self.toolbar_parent, id=-1, choices=['<alle>'],
             size=(150,-1), style=wx.CB_DROPDOWN)
         self.toolbar_parent.AddControl(combobox_filter)
         
@@ -363,11 +380,10 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
         
         if self.help_path <> None:
-            self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe",         bitmap=IconSet16.gethelp_16Bitmap())
+            self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         self.toolbar_parent.Realize()
-        
     
     # This has to come back here!
     # def add_filter(self, filter_name=None, filter_function=None):
@@ -517,6 +533,10 @@ class FormFrame(wx.Frame):
         
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
+        self.primary_key = None
+        if self.remote_parent.primary_key <> None:
+            self.primary_key = self.remote_parent.primary_key
+        
         self.aui_manager = wx.aui.AuiManager(self)
         
         self.create_toolbar()
@@ -535,10 +555,6 @@ class FormFrame(wx.Frame):
         
         self.db_table = remote_parent.db_table
         self.db_object = self.db_table.db_object
-        
-        self.primary_key = None
-        if self.remote_parent.primary_key <> None:
-            self.primary_key = self.remote_parent.primary_key
         
         self.error_dialog = Dialogs.Error(self)
         
@@ -644,6 +660,11 @@ class FormFrame(wx.Frame):
         self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap())
         self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
+        # If no primary key is there, just deactivate delete and print!
+        if self.primary_key == None:
+            self.toolbar_standard.EnableTool(self.ID_DELETE, False)
+            self.toolbar_standard.EnableTool(self.ID_PRINT,  False)
+            
         self.toolbar_standard.AddSeparator()
         self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
         self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)

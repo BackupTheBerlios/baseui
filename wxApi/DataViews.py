@@ -15,8 +15,6 @@ from res import IconSet16
 from pprint import pprint
 from Transformations import *
 
-PATH = os.path.dirname(__file__)
-
 
 class Tree(TreeListCtrl):
     ''' This is a framework for the famous wxTreeControl. It builds tables
@@ -53,7 +51,7 @@ class Tree(TreeListCtrl):
         row_content = self.get_selected_row_content()
         if self.row_activate_function <> None:
             self.row_activate_function(row_content)
-
+            
 
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
@@ -121,7 +119,8 @@ class Tree(TreeListCtrl):
                                'editable': True,
                                'sortable': True,
                                'resizeable': True,
-                               'reorderable': True}]
+                               'reorderable': True,
+                               'width': 175}]
 
            attributes_lod = [{'column_name': 'id'
 
@@ -173,7 +172,10 @@ class Tree(TreeListCtrl):
             sortable = column_dict.get('sortable')
             if sortable <> False:
                 self.SetColumnImage(column=column_number, image=self.ID_LEFT)
-                
+            
+            width = column_dict.get('width')
+            if width <> None:
+                self.SetColumnWidth(column_number, width)    
             column_number += 1
         self.number_of_columns = column_number
                 
