@@ -10,29 +10,97 @@ import datetime
 from pprint import pprint
 
 
-def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
-    ''' Opposite of other '''
+class SQLtoPythonTransformer(object):    
+    def __init__(self, data_types):
+        self.py_data_types = {
+            'bool':     self.bool,
+            'char':     self.char,
+            'varchar':  self.varchar,
+            'text':     self.string,
+            'integer':  self.integer,
+            'bigint':   self.long,
+            'float':    self.float,
+            'numeric':  self.numeric,
+            'date':     self.date,
+            'time':     self.time,
+            'datetime': self.datetime,
+            'blob':     self.string,
+            }
+        self.db_data_types = data_types
+    
+    
+    def transform_dict(self, content_dict, attributes_dict):
+        pass
+    
+    
+    def transform_lod(self, content_lod, attributes_lod):
+        pass
+    
+    
+    def bool(self, value, attributes):
+        pass
+    
+    
+    def char(self, value, attributes):
+        pass
+    
+    
+    def varchar(self, value, attributes):
+        pass
+    
+    
+    def integer(self, value, attributes):
+        pass
+    
+    
+    def long(self, value, attributes):
+        pass
+    
+    
+    def float(self, value, attributes):
+        pass
+    
+    
+    def numeric(self, value, attributes):
+        pass
+    
+    
+    def date(self, value, attributes):
+        pass
+    
+    
+    def time(self, value, attributes):
+        pass
+    
+    
+    def datetime(self, value, attributes):
+        pass
 
-    if data_type == datetime.datetime:
-        sql_data_type = 'datetime'
-    elif data_type == datetime.date:
-        sql_data_type = 'date'
-    elif data_type == datetime.time:
-        sql_data_type = 'time'
-    elif data_type == str and length <= 255:
-        if mssql == True:
-            sql_data_type = 'nvarchar'
-        else:
-            sql_data_type = 'varchar'
-    elif data_type == int:
-        sql_data_type = 'int'
-    elif data_type == long:
-        sql_data_type = 'bigint'
-    elif data_type == bool:
-        sql_data_type = 'boolean'
-    elif data_type == float:
-        sql_data_type = 'float'
-    return sql_data_type
+
+
+#def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
+#    ''' Opposite of other '''
+#
+#    if data_type == datetime.datetime:
+#        sql_data_type = 'datetime'
+#    elif data_type == datetime.date:
+#        sql_data_type = 'date'
+#    elif data_type == datetime.time:
+#        sql_data_type = 'time'
+#    elif data_type == str and length <= 255:
+#        if mssql == True:
+#            sql_data_type = 'nvarchar'
+#        else:
+#            sql_data_type = 'varchar'
+#    elif data_type == int:
+#        sql_data_type = 'int'
+#    elif data_type == long:
+#        sql_data_type = 'bigint'
+#    elif data_type == bool:
+#        sql_data_type = 'boolean'
+#    elif data_type == float:
+#        sql_data_type = 'float'
+#    return sql_data_type
 
 
 def write_transform(content, engine):

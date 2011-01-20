@@ -68,13 +68,17 @@ def get_engines():
 
 
 def inherit_class(from_class, into_class):
+    # This imports all functions from_class to into_class.
     arguments = dir(from_class)
     for argument in arguments:
         if not argument.startswith('__'):
             into_class.__setattr__(argument, from_class.__getattribute__(argument))
             
-# Databases --------------------------------------------------------------------
             
+            
+# Databases --------------------------------------------------------------------
+#class connector(object):
+    
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
@@ -615,12 +619,13 @@ class db2_database(generic_database):
         
     
     
-class odbc_generic_database(generic_database):
+class odbc_generic_database(generic_database):    
     def __init__(self, main_class, engine='odbc'):
         generic_database.__init__(self, main_class, engine)
         
         import pyodbc
         self.connector = pyodbc
+        self.main_class = main_class
     
     
     def connect(self, **kwargs):
@@ -641,6 +646,15 @@ class odbc_generic_database(generic_database):
         self.connection = self.connector.connect(connection_string, autocommit=True)
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
+        print 'ODBC driver is:', kwargs.get('driver')
+        
+        if kwargs.get('driver').lower() == 'sql server':
+            __database = odbc_mssql_database(self)
+        
+        # Write from selected odbc_class object to self, then write self to database object.
+        __super_main_class = self.main_class
+        inherit_class(__database, self)
+        inherit_class(self, __super_main_class)
         return self.connection
         
         
@@ -655,9 +669,32 @@ class odbc_generic_database(generic_database):
             for row in self.cursor.tables():
                 lof_table_names.append(row.table_name)
         return lof_table_names
+    
+    
+    
+class odbc_mssql_database(odbc_generic_database):
+    # This works for msSQL, not for others!
+    data_types = {
+        'bool':     'BIT',
+        'string':   'VARCHAR(%(length)s)',
+        'text':     'TEXT',
+        'integer':  'INT',
+        'bigint':   'BIGINT',
+        'float':    'FLOAT',
+        'numeric':  'NUMERIC(%(precision)s,%(scale)s)',
+        'date':     'DATETIME',
+        'time':     'CHAR(8)',
+        'datetime': 'DATETIME',
+        'blob':     'IMAGE',
+        }
+    
+    def __init__(self, main_class):
+        # Write from generic_odbc instance to self to get the cursor etc.
+        inherit_class(main_class, self)
+    
+    
         
 # Database Tables --------------------------------------------------------------
-    
 class table(object):
     ''' This handles all table-related SQL orders. '''
 
@@ -751,6 +788,23 @@ CREATE TABLE """ + self.name + """
         ''' Gets the table attributes and gives them back as list of dictionarys.
             See function 'create' for key description. '''
 
+        # alternative approach:
+#        alt_app = self.select(column_list=['column_name', 
+#                                           'data_type', 
+#                                           'character_maximum_length'
+#                                           'numeric_precision',
+#                                           'numeric_scale',
+#                                           'is_nullable'], 
+#                              where='table_name = %s' % self.name)
+#                    
+#        print 'Getting alternative attributes:'
+#        print '... ' + alt_app
+        
+#        for attribute in alt_app:
+#            if attribute.get('column_name') in primary_key_columns_list:
+#                attribute['is_primary_key'] = True
+#                
+            
         column_name_list              = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         data_type_list                = self.db_object.listresult("SELECT data_type FROM information_schema.columns WHERE table_name = '" + self.name + "';")
         character_maximum_length_list = self.db_object.listresult("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = '" + self.name + "'")
@@ -806,6 +860,9 @@ CREATE TABLE """ + self.name + """
             convert = If True, try to convert the content with minimum possible data loss.
             '''
 
+        #print 'data types of db_object', self.db_object, 'are:'
+        #print self.db_object.data_types
+        
         if action <> None:
             print 'check_attributes action="%s" (Table %s) is deprecated...' % (action, self.name)
             
@@ -827,6 +884,7 @@ CREATE TABLE """ + self.name + """
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
         for attributes_dic in attributes_lod:
+            #print attributes_dic
             column_name = attributes_dic['column_name']
             if column_name not in database_column_list:
                 not_in_database_lod.append(attributes_dic)                                  
