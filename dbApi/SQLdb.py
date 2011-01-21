@@ -890,11 +890,7 @@ CREATE TABLE """ + self.name + """
     def get_content(self):
         ''' Fetches all rows and gives them back as list of dictionarys. '''
         
-        # The [%s] is a workaround for excel over odbc.
-        if self.db_object.engine == 'odbc':
-            sql_command = "SELECT * FROM [%s]"
-        else:   
-            sql_command = "SELECT * FROM %s"
+        sql_command = "SELECT * FROM %s"
         
         content_lod = self.db_object.dictresult(sql_command % self.name)
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
@@ -1281,8 +1277,18 @@ class odbc_excel_table(odbc_generic_table):
     def __init__(self, db_object, table_name):
         odbc_generic_table.__init__(self, db_object, table_name)
         
-# Database Table Columns -------------------------------------------------------
         
+    def get_content(self):
+        ''' Fetches all rows and gives them back as list of dictionarys. '''
+        
+        sql_command = "SELECT * FROM [%s]"
+        
+        content_lod = self.db_object.dictresult(sql_command % self.name)
+        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
+        
+        
+        
+# Database Table Columns -------------------------------------------------------
 class column:
     def __init__(self, table_object, column_name):
         ''' This initializes a database columns where:
@@ -1306,16 +1312,21 @@ class column:
 
         column_layout = ''
         column_layout += attributes_dic['column_name'] + " "
+        
         if attributes_dic.has_key('data_type'):
             column_layout += attributes_dic['data_type']
+            
         if attributes_dic.has_key('character_maximum_length'):
             column_layout += " (" + str(attributes_dic['character_maximum_length']) + ")"
+            
         if attributes_dic.has_key('is_nullable'):
             if attributes_dic['is_nullable'] == False:
                 column_layout += " NOT NULL"
+                
         if attributes_dic.has_key('is_primary_key'):
             if attributes_dic['is_primary_key'] == True:
                 column_layout += " PRIMARY KEY"
+                
         if attributes_dic.has_key('referenced_table_name'):
             if attributes_dic.has_key('referenced_column_name'):
                 column_layout += " REFERENCES %(referenced_table_name)s (%(referenced_column_name)s)" % attributes_dic
@@ -1326,6 +1337,7 @@ class column:
                 if attributes_dic.has_key('character_maximum_length'):
                     referenced_table_attributes[0]['character_maximum_length'] = attributes_dic['character_maximum_length']
                 referenced_table.check_attributes(referenced_table_attributes, add=True)
+                
         column_layout = column_layout.rstrip()
         return column_layout
 
@@ -1374,16 +1386,18 @@ class column:
             raise
         return content
 
-# Database Table Rows ----------------------------------------------------------
 
+
+# Database Table Rows ----------------------------------------------------------
 class row:
     ''' This handles single table-rows. '''
     
     def __init__(self, table_object):
         pass
-    
+
+
+
 # Database Users ---------------------------------------------------------------
-    
 class user:
     ''' This handles all user-related SQL orders. '''
 
