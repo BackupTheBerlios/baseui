@@ -67,12 +67,12 @@ def get_engines():
 
 
 
-def inherit_class(from_class, into_class):
-    # This imports all functions from_class to into_class.
-    arguments = dir(from_class)
+def delegate_object(from_object, into_object):
+    # This imports all functions from_object to into_object.
+    arguments = dir(from_object)
     for argument in arguments:
         if not argument.startswith('__'):
-            into_class.__setattr__(argument, from_class.__getattribute__(argument))
+            into_object.__setattr__(argument, from_object.__getattribute__(argument))
             
             
             
@@ -104,7 +104,7 @@ class database(object):
         if self.engine == "odbc":
             __database = odbc_generic_database(self)
             
-        inherit_class(__database, self)
+        delegate_object(__database, self)
         
 
             
@@ -145,7 +145,7 @@ class generic_database(object):
     def set_arguments(self, **kwargs):
         self.name = kwargs.get('database')
         self.driver = kwargs.get('driver')
-        inherit_class(self, self.main_class)
+        delegate_object(self, self.main_class)
         
         
     def drop(self, database):
@@ -653,8 +653,8 @@ class odbc_generic_database(generic_database):
         
         # Write from selected odbc_class object to self, then write self to database object.
         __super_main_class = self.main_class
-        inherit_class(__database, self)
-        inherit_class(self, __super_main_class)
+        delegate_object(__database, self)
+        delegate_object(self, __super_main_class)
         return self.connection
         
         
@@ -690,7 +690,7 @@ class odbc_mssql_database(odbc_generic_database):
     
     def __init__(self, main_class):
         # Write from generic_odbc instance to self to get the cursor etc.
-        inherit_class(main_class, self)
+        delegate_object(main_class, self)
     
     
         
@@ -719,7 +719,7 @@ class table(object):
         if engine == "odbc":
             __table = odbc_generic_table(db_object, table_name)
             
-        inherit_class(__table, self)
+        delegate_object(__table, self)
 
 
 
@@ -844,28 +844,15 @@ CREATE TABLE """ + self.name + """
         return attributes_lod
 
 
-    def check_attributes(self, attributes_lod, action=None, add=False, drop=False, convert=False):
+    def check_attributes(self, attributes_lod, add=False, drop=False, convert=False):
         ''' Returns differences_lod, if attributes_lod differ from the real database table definition.
             See function 'create' for key description of attributes_lod.
 
-            action: A switch with following possible values:
-                analyze = just gives back differences, does nothing else.
-                add     = gives back differences and adds only columns that not exist.
-                cleanup = adds not existing columns and drops the columns which are not defined but in the database.
-                convert = convert already existing columns with minimum possible data loss.
-                replace = like before, but drops all columns in the database which are not in attributes_lod. 
-                
             add = If True, add not existing columns to the table.
             drop = If True, drop columns which are in the database but not in attributes_lod.
             convert = If True, try to convert the content with minimum possible data loss.
             '''
 
-        #print 'data types of db_object', self.db_object, 'are:'
-        #print self.db_object.data_types
-        
-        if action <> None:
-            print 'check_attributes action="%s" (Table %s) is deprecated...' % (action, self.name)
-            
         not_in_database_lod = []
         not_in_definition_lod = []
 
@@ -873,9 +860,7 @@ CREATE TABLE """ + self.name + """
         table_list = self.db_object.get_tables()
         
         if self.name not in table_list:
-            if action == 'add' or add == True or \
-               action == 'convert' or \
-               action == 'replace':
+            if add == True:
                 try:
                     self.create(attributes_lod)
                 except:
@@ -891,7 +876,7 @@ CREATE TABLE """ + self.name + """
         
                 
         # Is there any difference?
-        if action <> 'analyze' or add == True:
+        if add == True:
             if len(not_in_database_lod) > 0:
                 for attributes_dic in not_in_database_lod:
                     new_column = column(self, attributes_dic['column_name'])
