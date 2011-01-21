@@ -68,7 +68,8 @@ def get_engines():
 
 
 def delegate_object(from_object, into_object):
-    # This imports all functions from_object to into_object.
+    ''' This delegates all attributes from_object to into_object. '''
+    
     arguments = dir(from_object)
     for argument in arguments:
         if not argument.startswith('__'):
@@ -109,8 +110,8 @@ class database(object):
 
             
 class generic_database(object):
-    def __init__(self, main_class, engine='', debug=False):
-        self.main_class = main_class
+    def __init__(self, base_object, engine='', debug=False):
+        self.base_object = base_object
         self.engine = engine.lower()
         self.driver = None
         self.debug = debug
@@ -145,7 +146,7 @@ class generic_database(object):
     def set_arguments(self, **kwargs):
         self.name = kwargs.get('database')
         self.driver = kwargs.get('driver')
-        delegate_object(self, self.main_class)
+        delegate_object(self, self.base_object)
         
         
     def drop(self, database):
@@ -287,8 +288,8 @@ class sqlite_database(generic_database):
         # 'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
         }
         
-    def __init__(self, main_class, engine='sqlite'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='sqlite'):
+        generic_database.__init__(self, base_object, engine)
         
         import sqlite3
         self.connector = sqlite3
@@ -336,8 +337,8 @@ class postgresql_database(generic_database):
                  'win1252': 'cp1252',
                  'latin1':  'latin-1'}
     
-    def __init__(self, main_class, engine='psycopg2'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='psycopg2'):
+        generic_database.__init__(self, base_object, engine)
         
         if 'psycopg2' in self.engine:
             import psycopg2
@@ -427,8 +428,8 @@ class mssql_database(generic_database):
         # 'reference TFK': ' CONSTRAINT FK_%(foreign_table)s_PK FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s',
         }
         
-    def __init__(self, main_class, engine='mssql'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='mssql'):
+        generic_database.__init__(self, base_object, engine)
         
         import pymssql
         self.connector = pymssql
@@ -460,8 +461,8 @@ class mysql_database(generic_database):
         # 'reference': 'INT, INDEX %(field_name)s__idx (%(field_name)s), FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
         }
         
-    def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='mysql'):
+        generic_database.__init__(self, base_object, engine)
         
         import MySQLdb
         self.connector = MySQLdb
@@ -530,8 +531,8 @@ class oracle_database(generic_database):
         #'reference': 'NUMBER, CONSTRAINT %(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
         }
         
-    def __init__(self, main_class, engine='oracle'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='oracle'):
+        generic_database.__init__(self, base_object, engine)
         
         import cx_Oracle
         self.connector = cx_Oracle
@@ -556,7 +557,7 @@ class firebird_database(generic_database):
         #'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
         }
         
-    def __init__(self, main_class, engine='mysql'):
+    def __init__(self, base_object, engine='mysql'):
         generic_database.__init__(self, engine)
         
         # import MySQLdb
@@ -584,8 +585,8 @@ class informix_database(generic_database):
         #'reference TFK': 'FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s CONSTRAINT TFK_%(table_name)s_%(field_name)s',
         }
         
-    def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='mysql'):
+        generic_database.__init__(self, base_object, engine)
         
         import informixdb
         self.connector = informixdb
@@ -611,8 +612,8 @@ class db2_database(generic_database):
         #'reference TFK': ' CONSTRAINT FK_%(foreign_table)s_PK FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s',
         }
         
-    def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='mysql'):
+        generic_database.__init__(self, base_object, engine)
         
         # import MySQLdb
         # self.connector = MySQLdb
@@ -620,12 +621,12 @@ class db2_database(generic_database):
     
     
 class odbc_generic_database(generic_database):    
-    def __init__(self, main_class, engine='odbc'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='odbc'):
+        generic_database.__init__(self, base_object, engine)
         
         import pyodbc
         self.connector = pyodbc
-        self.main_class = main_class
+        self.base_object = base_object
     
     
     def connect(self, **kwargs):
@@ -652,9 +653,9 @@ class odbc_generic_database(generic_database):
             __database = odbc_mssql_database(self)
         
         # Write from selected odbc_class object to self, then write self to database object.
-        __super_main_class = self.main_class
+        __super_base_object = self.base_object
         delegate_object(__database, self)
-        delegate_object(self, __super_main_class)
+        delegate_object(self, __super_base_object)
         return self.connection
         
         
@@ -688,9 +689,9 @@ class odbc_mssql_database(odbc_generic_database):
         'blob':     'IMAGE',
         }
     
-    def __init__(self, main_class):
+    def __init__(self, base_object):
         # Write from generic_odbc instance to self to get the cursor etc.
-        delegate_object(main_class, self)
+        delegate_object(base_object, self)
     
     
         
