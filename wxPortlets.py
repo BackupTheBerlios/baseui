@@ -181,15 +181,15 @@ class DatabaseTableBase(object):
                 populate_from = column_dic['populate_from']
                 if column_dic.has_key('column_name'):
                     column_name = column_dic['column_name']
-                    if column_dic.has_key('referenced_table_name'):
-                        referenced_table_name = column_dic['referenced_table_name']
+                    if column_dic.has_key('referenced_table_object'):
+                        referenced_table_object = column_dic['referenced_table_object']
                         if column_dic.has_key('referenced_column_name'):
                             referenced_column_name = column_dic['referenced_column_name']                                        
                             mask = column_dic.get('mask')
-                            self.do_column_substitutions(column_name, populate_from, mask, referenced_table_name, referenced_column_name)
+                            self.do_column_substitutions(column_name, populate_from, mask, referenced_table_object, referenced_column_name)
         
         
-    def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_name, referenced_column_name):
+    def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
         ''' Substitute foreign keys with content from the foreign tables. '''
         
         for content_dic in self.content_lod:
@@ -197,7 +197,7 @@ class DatabaseTableBase(object):
             foreign_key = content_dic[column_name]
             if foreign_key in [None, 'NULL']:
                 continue
-            referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            #referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
             substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
             if mask == None:
                 mask = '%(' +'%s' % populate_from[0] + ')s'
@@ -475,7 +475,6 @@ class SearchFrame(wx.Frame):
     
     def populate_table(self):
         self.table = DatabaseTableBase(self.db_table, portlet_parent=self.panel)
-        self.db_table.attributes = self.db_table.get_attributes()
         
         self.table.initialize(self.definition)
         self.table.populate_portlet()
@@ -624,7 +623,7 @@ class FormFrame(wx.Frame):
         for dic in definition_lod:
             populate_from = dic.get('populate_from')
             mask = dic.get('mask')
-            referenced_table_name = dic.get('referenced_table_name')
+            referenced_table_object = dic.get('referenced_table_object')
             referenced_column_name = dic.get('referenced_column_name')
             widget_object = dic.get('widget_object')
             column_name = dic.get('column_name')
@@ -639,7 +638,7 @@ class FormFrame(wx.Frame):
                 mask = '%(' +'%s' % populate_from[0] + ')s'
                 
             populate_from.append(referenced_column_name)
-            referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            #referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
             result = referenced_table_object.select(column_list=populate_from)
             item_list = []
             for item in result:

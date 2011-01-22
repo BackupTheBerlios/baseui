@@ -620,7 +620,7 @@ class db2_database(generic_database):
         
     
     
-class odbc_generic_database(generic_database):    
+class odbc_generic_database(generic_database):
     def __init__(self, base_object, engine='odbc'):
         generic_database.__init__(self, base_object, engine)
         
@@ -677,12 +677,13 @@ class odbc_mssql_database(odbc_generic_database):
     # This works for msSQL, not for others!
     data_types = {
         'bool':     'BIT',
-        'string':   'VARCHAR(%(length)s)',
+        'char':     'CHAR(%(character_maximum_length)s',
+        'varchar':  'VARCHAR(%(character_maximum_length)s)',
         'text':     'TEXT',
         'integer':  'INT',
         'bigint':   'BIGINT',
         'float':    'FLOAT',
-        'numeric':  'NUMERIC(%(precision)s,%(scale)s)',
+        'numeric':  'NUMERIC(%(numeric_precision)s,%(numeric_scale)s)',
         'date':     'DATETIME',
         'time':     'CHAR(8)',
         'datetime': 'DATETIME',
@@ -692,8 +693,8 @@ class odbc_mssql_database(odbc_generic_database):
     def __init__(self, base_object):
         # Write from generic_odbc instance to self to get the cursor etc.
         delegate_object(base_object, self)
-    
-    
+        
+        
         
 # Database Tables --------------------------------------------------------------
 class table(object):
@@ -708,24 +709,25 @@ class table(object):
         
         if 'pygresql' in engine or \
            'psycopg2' in engine:
-            __table = postgresql_table(db_object, table_name)
+            __table = postgresql_table(self, db_object, table_name)
         if engine == "mysql":
-            __table = mysql_table(db_object, table_name)
+            __table = mysql_table(self, db_object, table_name)
         if engine == "mssql":
-            __table = mssql_table(db_object, table_name)
+            __table = mssql_table(self, db_object, table_name)
         if engine == "oracle":
-            __table = oracle_table(db_object, table_name)
+            __table = oracle_table(self, db_object, table_name)
         if engine == "sqlite":
-            __table = sqlite_table(db_object, table_name)
+            __table = sqlite_table(self, db_object, table_name)
         if engine == "odbc":
-            __table = odbc_generic_table(db_object, table_name)
+            __table = odbc_generic_table(self, db_object, table_name)
             
         delegate_object(__table, self)
 
 
 
 class generic_table(object):
-    def __init__(self, db_object, table_name):
+    def __init__(self, base_object, db_object, table_name):
+        self.base_object = base_object
         self.db_object = db_object
         self.db_cursor = db_object.cursor
         self.name = table_name
@@ -853,10 +855,13 @@ CREATE TABLE """ + self.name + """
             drop = If True, drop columns which are in the database but not in attributes_lod.
             convert = If True, try to convert the content with minimum possible data loss.
             '''
-
+        
+        self.attributes = attributes_lod
+        delegate_object(self, self.base_object)
+        
         not_in_database_lod = []
         not_in_definition_lod = []
-
+        
         # First, look up if this table exists in database.
         table_list = self.db_object.get_tables()
         
@@ -893,6 +898,8 @@ CREATE TABLE """ + self.name + """
         
         sql_command = "SELECT * FROM %s"
         
+        print self.name
+        print self.attributes
         content_lod = self.db_object.dictresult(sql_command % self.name)
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
         return content_lod
@@ -1023,6 +1030,9 @@ CREATE TABLE """ + self.name + """
     def select(self, distinct=False, join=[], column_list=[], where='', listresult=False):
         ''' SELECT order in SQL with transformation of output to python data types. '''
         
+        print self.name
+        print self.attributes
+        
         if distinct == False:
             distinct = ''
         else:
@@ -1145,8 +1155,8 @@ CREATE TABLE """ + self.name + """
     
 
 class sqlite_table(generic_table):
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_attributes(self):
@@ -1180,8 +1190,8 @@ class sqlite_table(generic_table):
         
         
 class postgresql_table(generic_table):    
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_primary_key_columns(self):
@@ -1210,14 +1220,14 @@ WHERE
         
         
 class mysql_table(generic_table):
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
 
         
      
 class odbc_generic_table(generic_table):
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_attributes(self):
@@ -1274,9 +1284,15 @@ class odbc_generic_table(generic_table):
            
         
 
+class odbc_mssql_table(odbc_generic_table):
+    def __init__(self, base_object, db_object, table_name):
+        odbc_generic_table.__init__(self, base_object, db_object, table_name)
+        
+        
+        
 class odbc_excel_table(odbc_generic_table):
-    def __init__(self, db_object, table_name):
-        odbc_generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        odbc_generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_content(self):
