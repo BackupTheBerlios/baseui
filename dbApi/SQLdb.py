@@ -647,7 +647,7 @@ class odbc_generic_database(generic_database):
         self.connection = self.connector.connect(connection_string, autocommit=True)
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
-        print 'ODBC driver is:', kwargs.get('driver')
+        #print 'ODBC driver is:', kwargs.get('driver')
         
         if kwargs.get('driver').lower() == 'sql server':
             __database = odbc_mssql_database(self)
@@ -898,8 +898,8 @@ CREATE TABLE """ + self.name + """
         
         sql_command = "SELECT * FROM %s"
         
-        print self.name
-        print self.attributes
+        #print self.name
+        #print self.attributes
         content_lod = self.db_object.dictresult(sql_command % self.name)
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
         return content_lod
@@ -1030,8 +1030,8 @@ CREATE TABLE """ + self.name + """
     def select(self, distinct=False, join=[], column_list=[], where='', listresult=False):
         ''' SELECT order in SQL with transformation of output to python data types. '''
         
-        print self.name
-        print self.attributes
+        #print self.name
+        #print self.attributes
         
         if distinct == False:
             distinct = ''

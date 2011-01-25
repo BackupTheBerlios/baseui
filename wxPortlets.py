@@ -322,7 +322,7 @@ class FormTable(DatabaseTableBase):
     
     def on_search(self, event=None):
         widget_object = event.GetEventObject()
-        print widget_object.GetValue()
+        #print widget_object.GetValue()
         
         
     def on_export(self, event=None):
@@ -456,7 +456,7 @@ class SearchFrame(wx.Frame):
         
     def on_search(self, event=None):
         widget_object = event.GetEventObject()
-        print widget_object.GetValue()
+        #print widget_object.GetValue()
         
         
     def on_ok(self, event=None):
@@ -640,8 +640,15 @@ class FormFrame(wx.Frame):
             referenced_column_name = dic.get('referenced_column_name')
             widget_object = dic.get('widget_object')
             column_name = dic.get('column_name')
+            fill_distinct = dic.get('fill_distinct')
             on_populate = dic.get('on_populate')
             
+            if fill_distinct == True:
+                result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
+                for item in result:
+                    widget_object.Append(item)
+                # print column_name, result
+                
             if on_populate <> None:
                 on_populate(dic)
                 
