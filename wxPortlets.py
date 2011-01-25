@@ -320,6 +320,11 @@ class FormTable(DatabaseTableBase):
         print "print"
         
     
+    def on_search(self, event=None):
+        widget_object = event.GetEventObject()
+        print widget_object.GetValue()
+        
+        
     def on_export(self, event=None):
         print "export"
         
@@ -370,8 +375,9 @@ class FormTable(DatabaseTableBase):
         
         #if search == True:
         self.toolbar_parent.AddSeparator() 
-        entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
-        self.toolbar_parent.AddControl(entry_search) 
+        self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
+        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.toolbar_parent.AddControl(self.entry_search) 
         
         #if preferences == True or help == True:
         self.toolbar_parent.AddSeparator()
@@ -448,6 +454,11 @@ class SearchFrame(wx.Frame):
         self.error_dialog = Dialogs.Error(self)
         
         
+    def on_search(self, event=None):
+        widget_object = event.GetEventObject()
+        print widget_object.GetValue()
+        
+        
     def on_ok(self, event=None):
         self.edit()
         
@@ -455,6 +466,7 @@ class SearchFrame(wx.Frame):
     def on_close(self, event=None):
         del(self.toolbar_standard)
         self.Destroy()
+                
         
         
     def create_toolbar(self, dataset=True, report=True, help=True):
@@ -465,8 +477,9 @@ class SearchFrame(wx.Frame):
         
         self.toolbar_standard.AddSeparator()
         
-        entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY)
-        self.toolbar_standard.AddControl(entry_search) 
+        self.entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY)
+        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.toolbar_standard.AddControl(self.entry_search) 
         
         self.toolbar_standard.AddSeparator()
         
