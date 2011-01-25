@@ -106,9 +106,9 @@ class SQLtoPythonTransformer(object):
 def write_transform(content, engine):
     if content == None:
         new_content = 'NULL'
-    elif content == False and engine == 'sqlite':
+    elif content == False and (engine == 'sqlite' or engine == 'odbc'):
         new_content = 0
-    elif content == True and engine == 'sqlite':
+    elif content == True and (engine == 'sqlite' or engine == 'odbc'):
         new_content = 1
     elif type(content) == str or type(content) == unicode:
         new_content = "'%s'" % content.rstrip().replace("'", "''")

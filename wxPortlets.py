@@ -646,8 +646,9 @@ class FormFrame(wx.Frame):
             if fill_distinct == True:
                 result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
                 for item in result:
+                    if item == None:
+                        continue
                     widget_object.Append(item)
-                # print column_name, result
                 
             if on_populate <> None:
                 on_populate(dic)
