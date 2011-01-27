@@ -411,14 +411,14 @@ class postgresql_database(generic_database):
 class mssql_database(generic_database):
     data_types = {
         'boolean': 'BIT',
-        'string': 'VARCHAR(%(length)s)',
+        'string': 'VARCHAR',
         'text': 'TEXT',
         # 'password': 'VARCHAR(%(length)s)',
         'blob': 'IMAGE',
         # 'upload': 'VARCHAR(%(length)s)',
         'integer': 'INT',
         'double': 'FLOAT',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
+        'decimal': 'NUMERIC',
         'date': 'DATETIME',
         'time': 'CHAR(8)',
         'datetime': 'DATETIME',
@@ -677,13 +677,13 @@ class odbc_mssql_database(odbc_generic_database):
     # This works for msSQL, not for others!
     data_types = {
         'bool':     'BIT',
-        'char':     'CHAR(%(character_maximum_length)s',
-        'varchar':  'VARCHAR(%(character_maximum_length)s)',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
         'text':     'TEXT',
         'integer':  'INT',
         'bigint':   'BIGINT',
         'float':    'FLOAT',
-        'numeric':  'NUMERIC(%(numeric_precision)s,%(numeric_scale)s)',
+        'numeric':  'NUMERIC',
         'date':     'DATETIME',
         'time':     'CHAR(8)',
         'datetime': 'DATETIME',
@@ -896,15 +896,9 @@ CREATE TABLE """ + self.name + """
     def get_content(self):
         ''' Fetches all rows and gives them back as list of dictionarys. '''
         
-        sql_command = "SELECT * FROM %s"
-        
-        #print self.name
-        #print self.attributes
-        content_lod = self.db_object.dictresult(sql_command % self.name)
-        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
-        return content_lod
-
-
+        return self.select()
+    
+    
     def check_content(self, pk_column='', content_lod=[], \
                       check_exclude=[], duplicates_check=[], \
                       add=True, drop=False, update=True):
@@ -1059,11 +1053,11 @@ CREATE TABLE """ + self.name + """
         try:
             if listresult == False:
                 content_lod = self.db_object.dictresult(sql_command)
-                content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)    
+                content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command)
-                # return content_lod       
+                # return content_lod
         except:
             raise
         return content_lod
@@ -1301,7 +1295,7 @@ class odbc_excel_table(odbc_generic_table):
         sql_command = "SELECT * FROM [%s]"
         
         content_lod = self.db_object.dictresult(sql_command % self.name)
-        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
+        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object)
         
         
         
@@ -1331,7 +1325,11 @@ class column:
         column_layout += attributes_dic['column_name'] + " "
         
         if attributes_dic.has_key('data_type'):
-            column_layout += attributes_dic['data_type']
+            data_type_list = self.db_object.data_types.keys()
+            if attributes_dic['data_type'] in data_type_list:
+                column_layout += self.db_object.data_types[attributes_dic['data_type']]
+            else:
+                column_layout += attributes_dic['data_type']
             
         if attributes_dic.has_key('character_maximum_length'):
             column_layout += " (" + str(attributes_dic['character_maximum_length']) + ")"
@@ -1381,6 +1379,7 @@ class column:
         column_layout = self.get_attribute_layout(attributes_dic)
         # Does not work for msSQL, check out if it works for other DBs!
         # sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
+        # Note: Seems to work fine for PostgreSQL
         sql_command = 'ALTER TABLE %s ADD %s' % (self.table_object.name, column_layout)
 
         try:

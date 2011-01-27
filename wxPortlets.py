@@ -223,17 +223,17 @@ class SubTable(DatabaseTableBase):
         
     def on_add_clicked(self, event=None):
         self.new()
-        print 'add'
+        #print 'add'
     
     
     def on_edit_clicked(self, event=None):
         self.edit()
-        print 'edit'
+        #print 'edit'
     
     
     def on_delete_clicked(self, event=None):
         self.delete()
-        print 'delete'
+        #print 'delete'
         
         
     def populate_portlet(self):

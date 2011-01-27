@@ -119,9 +119,13 @@ def write_transform(content, engine):
     return new_content
     
 
-def normalize_content(attributes_lod, content_lod, encoding=None):
+def normalize_content(attributes_lod, content_lod, db_object=None):
     ''' This converts database dependent things to clear python types. '''
     
+    if db_object <> None:
+        encoding = db_object.encoding
+        # print db_object, encoding
+        
     if attributes_lod == None:
         return content_lod
     
@@ -137,6 +141,8 @@ def normalize_content(attributes_lod, content_lod, encoding=None):
                             content_dic[column_name] = transform_bool(content)
                         if data_type.lower() == 'datetime':
                             content_dic[column_name] = transform_timestamp(content)
+                        if data_type.lower() == 'date':
+                            content_dic[column_name] = transform_date(content)
                         if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:
                             content_dic[column_name] = transform_string(content, encoding)
     return content_lod
@@ -152,7 +158,17 @@ def transform_string(content, encoding=None):
             pass
     return content
                           
-                                
+
+def transform_date(content, strformat='%d.%m.%Y'):
+    if type(content) == datetime.datetime or \
+       type(content) == datetime.date:
+        try:
+            content = content.strftime(strformat)
+        except Exception, inst:
+            print inst
+    return content
+
+
 def transform_timestamp(content, strformat='%d.%m.%y %H:%M:%S'):
     if type(content) == datetime.datetime:
         try:

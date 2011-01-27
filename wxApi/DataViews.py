@@ -581,18 +581,18 @@ class Form(wx.Panel):
             
             # Make usdate from german date
             # TODO: Whats' this date-shit here?
-            if data_type == 'date':
-                if widget_content <> '':
-                    try:
-                        day, month, year = widget_content.split('.')
-                    except:
-                        raise
-                    
-                    day = int(day)
-                    month = int(month)
-                    year = int(year)
-                    widget_content = '%04i-%02i-%02i' % (year, month, day)
-                    self.content_dict[column_name] = widget_content
+#            if data_type == 'date':
+#                if widget_content <> '':
+#                    try:
+#                        day, month, year = widget_content.split('.')
+#                    except:
+#                        raise
+#                    
+#                    day = int(day)
+#                    month = int(month)
+#                    year = int(year)
+#                    widget_content = '%04i-%02i-%02i' % (year, month, day)
+#                    self.content_dict[column_name] = widget_content
         return self.content_dict
     
     
