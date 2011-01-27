@@ -272,20 +272,17 @@ class generic_database(object):
 
 class sqlite_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'CHAR(%(length)s)',
-        'text': 'TEXT',
-        # 'password': 'CHAR(%(length)s)',
-        'blob': 'BLOB',
-        # 'upload': 'CHAR(%(length)s)',
-        'integer': 'INTEGER',
-        'double': 'DOUBLE',
-        'decimal': 'DOUBLE',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'CHAR',
+        'text':     'TEXT',
+        'integer':  'INTEGER',
+        'float':    'DOUBLE',
+        'numeric':  'DOUBLE',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        # 'id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
-        # 'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob': 'BLOB',
         }
         
     def __init__(self, base_object, engine='sqlite'):
@@ -317,20 +314,17 @@ class sqlite_database(generic_database):
         
 class postgresql_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
+        'bool': 'BOOL',
+        'char': 'CHAR',
+        'varchar': 'VARCHAR',
         'text': 'TEXT',
-        # 'password': 'VARCHAR(%(length)s)',
-        'blob': 'BYTEA',
-        # 'upload': 'VARCHAR(%(length)s)',
         'integer': 'INTEGER',
-        'double': 'FLOAT8',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
+        'float': 'FLOAT8',
+        'numeric': 'NUMERIC',
         'date': 'DATE',
         'time': 'TIME',
         'datetime': 'TIMESTAMP',
-        # 'id': 'SERIAL PRIMARY KEY',
-        # 'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob': 'BYTEA',
         }
     
     encodings = {'utf8':    'utf-8',
@@ -410,22 +404,17 @@ class postgresql_database(generic_database):
         
 class mssql_database(generic_database):
     data_types = {
-        'boolean': 'BIT',
-        'string': 'VARCHAR',
+        'bool': 'BIT',
+        'char': 'CHAR',
+        'varchar': 'VARCHAR',
         'text': 'TEXT',
-        # 'password': 'VARCHAR(%(length)s)',
-        'blob': 'IMAGE',
-        # 'upload': 'VARCHAR(%(length)s)',
         'integer': 'INT',
-        'double': 'FLOAT',
-        'decimal': 'NUMERIC',
+        'float': 'FLOAT',
+        'numeric': 'NUMERIC',
         'date': 'DATETIME',
         'time': 'CHAR(8)',
         'datetime': 'DATETIME',
-        # 'id': 'INT IDENTITY PRIMARY KEY',
-        # 'reference': 'INT, CONSTRAINT %(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        # 'reference FK': ', CONSTRAINT FK_%(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        # 'reference TFK': ' CONSTRAINT FK_%(foreign_table)s_PK FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s',
+        'blob': 'IMAGE',
         }
         
     def __init__(self, base_object, engine='mssql'):
@@ -445,20 +434,17 @@ class mssql_database(generic_database):
                     
 class mysql_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
-        'text': 'LONGTEXT',
-        # 'password': 'VARCHAR(%(length)s)',
-        'blob': 'LONGBLOB',
-        # 'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INT',
-        'double': 'DOUBLE',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'TIME',
+        'boolean':  'BOOL',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'LONGTEXT',
+        'integer':  'INT',
+        'float':    'DOUBLE',
+        'numeric':  'NUMERIC',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'DATETIME',
-        # 'id': 'INT AUTO_INCREMENT NOT NULL',
-        # 'reference': 'INT, INDEX %(field_name)s__idx (%(field_name)s), FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob':     'LONGBLOB',
         }
         
     def __init__(self, base_object, engine='mysql'):
@@ -515,20 +501,17 @@ class mysql_database(generic_database):
     
 class oracle_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR2(%(length)s)',
+        'bool': 'CHAR(1)',
+        'char': 'CHAR2',
+        'varchar': 'VARCHAR2',
         'text': 'CLOB',
-        #'password': 'VARCHAR2(%(length)s)',
-        'blob': 'CLOB',
-        #'upload': 'VARCHAR2(%(length)s)',
         'integer': 'INT',
-        'double': 'FLOAT',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
+        'float': 'FLOAT',
+        'numeric': 'NUMERIC',
         'date': 'DATE',
         'time': 'CHAR(8)',
         'datetime': 'DATE',
-        #'id': 'NUMBER PRIMARY KEY',
-        #'reference': 'NUMBER, CONSTRAINT %(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob': 'CLOB',
         }
         
     def __init__(self, base_object, engine='oracle'):
@@ -541,20 +524,17 @@ class oracle_database(generic_database):
         
 class firebird_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
-        'text': 'BLOB SUB_TYPE 1',
-        #'password': 'VARCHAR(%(length)s)',
-        'blob': 'BLOB SUB_TYPE 0',
-        #'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INTEGER',
-        'double': 'DOUBLE PRECISION',
-        'decimal': 'DECIMAL(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'BLOB SUB_TYPE 1',
+        'integer':  'INTEGER',
+        'float':    'DOUBLE PRECISION',
+        'numeric':  'DECIMAL(%(precision)s,%(scale)s)',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        #'id': 'INTEGER PRIMARY KEY',
-        #'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob':     'BLOB SUB_TYPE 0',
         }
         
     def __init__(self, base_object, engine='mysql'):
@@ -567,22 +547,17 @@ class firebird_database(generic_database):
         
 class informix_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
+        'bool': 'CHAR(1)',
+        'char': 'CHAR',
+        'varchar': 'VARCHAR',
         'text': 'BLOB SUB_TYPE 1',
-        #'password': 'VARCHAR(%(length)s)',
-        'blob': 'BLOB SUB_TYPE 0',
-        #'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INTEGER',
-        'double': 'FLOAT',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'CHAR(8)',
+        'integer':  'INTEGER',
+        'float':    'FLOAT',
+        'numeric':  'NUMERIC(%(precision)s,%(scale)s)',
+        'date':     'DATE',
+        'time':     'CHAR(8)',
         'datetime': 'DATETIME',
-        #'id': 'SERIAL',
-        #'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        #'reference FK': 'REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s CONSTRAINT FK_%(table_name)s_%(field_name)s',
-        #'reference TFK': 'FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s CONSTRAINT TFK_%(table_name)s_%(field_name)s',
+        'blob': 'BLOB SUB_TYPE 0',
         }
         
     def __init__(self, base_object, engine='mysql'):
@@ -594,22 +569,17 @@ class informix_database(generic_database):
         
 class db2_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
-        'text': 'CLOB',
-        #'password': 'VARCHAR(%(length)s)',
-        'blob': 'BLOB',
-        #'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INT',
-        'double': 'DOUBLE',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'CLOB',
+        'integer':  'INT',
+        'float':    'DOUBLE',
+        'numeric':  'NUMERIC',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        #'id': 'INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL',
-        #'reference': 'INT, FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        #'reference FK': ', CONSTRAINT FK_%(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        #'reference TFK': ' CONSTRAINT FK_%(foreign_table)s_PK FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s',
+        'blob':     'BLOB',
         }
         
     def __init__(self, base_object, engine='mysql'):
