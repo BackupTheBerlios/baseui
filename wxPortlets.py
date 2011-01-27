@@ -12,6 +12,7 @@ from wxApi import Panels, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
 from wxApi.res import IconSet16
 from dbApi import SQLdb, Tools as dbTools
+from config import *
 
 from pprint import pprint
 
@@ -197,11 +198,19 @@ class DatabaseTableBase(object):
             foreign_key = content_dic[column_name]
             if foreign_key in [None, 'NULL']:
                 continue
-            #referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
+            
             substitute_lod = referenced_table_object.select(column_list=populate_from, where='%s = %i' % (referenced_column_name, foreign_key))
             if mask == None:
-                mask = '%(' +'%s' % populate_from[0] + ')s'
-            content_dic[column_name] = mask % substitute_lod[0]
+                mask = u'%(' +'%s' % populate_from[0] + u')s'
+            else:
+                mask = u'%s' % mask
+                
+            substitute_dict = substitute_lod[0]
+            for key in substitute_dict:
+                content = str(substitute_dict[key]) 
+                substitute_dict[key] = '%s' % str(content)
+                
+            content_dic[column_name] = str(mask) % substitute_dict
 
             
     
