@@ -209,11 +209,11 @@ class Login(res.Portlets.Login):
     def populate(self, content_lod):
         """ content_lod = \
             [
-                {'user': 'Mustermann, Max', 'password': '123456'}
+                {'username': 'Mustermann, Max', 'password': '123456'}
             ] """
         
         for content in content_lod:
-            user_list.append(content.get('user'))
+            user_list.append(content.get('username'))
             
             
 

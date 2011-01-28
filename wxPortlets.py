@@ -18,11 +18,13 @@ from pprint import pprint
 
 
 class DatabaseTableBase(object):
-    def __init__(self, db_table, form=None, portlet_parent=None):
+    def __init__(self, db_table, form=None, portlet_parent=None, editable=True):
         self.db_table = db_table
         self.db_object = db_table.db_object
         self.form = form
         self.portlet_parent = portlet_parent
+        self.editable = editable
+        
         self.toolbar_parent = None
         self.parent_form = None
         
@@ -36,7 +38,8 @@ class DatabaseTableBase(object):
     # Callbacks ---------------------------------------------------------------
     def on_row_activate(self, content_dic=None):
         self.primary_key = content_dic[self.primary_key_column]
-        self.edit()
+        if self.editable == True:
+            self.edit()
 
 
     def on_cursor_changed(self, content_dic=None):
@@ -216,7 +219,7 @@ class DatabaseTableBase(object):
     
 class SubTable(DatabaseTableBase):
     def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None, editable=True):
-        DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
+        DatabaseTableBase.__init__(self, db_table, form, portlet_parent, editable)
         
         self.editable = editable
         self.parent_form = parent_form

@@ -13,15 +13,19 @@ from dbApi import SQLdb, Tools as dbTools
 
 
 class Database(Panels.Database):
-    def __init__(self, parent, ini_path, ini_section, autosave=False):
+    def __init__(self, parent, ini_path, ini_section, autosave=False, db_table_users_class=None):
         Panels.Database.__init__(self, parent)
         self.ErrorDialog = Dialogs.Error(self)
         
         self.ini_file = iniFile(ini_path)
         self.ini_section = ini_section
         self.autosave = autosave
+        self.db_table_users_class = db_table_users_class
         
         # Get the database settings -------------------------------------------
+        self.connect_functions_list = []
+        self.disconnect_functions_list = []
+        
         self.database = None
         self.initialize()
         
@@ -54,11 +58,41 @@ class Database(Panels.Database):
         self.on_disconnect = self.disconnect
         
     
+    def add_connect_function(self, function):
+        self.connect_functions_list.append(function)
+        
+        
+    def add_disconnect_function(self, function):
+        self.disconnect_functions_list.append(function)
+        
+        
     def get_database(self):
         return self.database
         
+    
+    def get_connection(self):
+        return self.database.__dict__.get('connection')
         
+    
+    def set_connected(self):
+        ''' This sets buttons and every other thing connected. '''
+        
+        super(Database, self).set_connected()
+        for function in self.connect_functions_list:    
+            function()
+                
+                
+    def set_disconnected(self):
+        ''' Sets all buttons and other things to disconnected. '''
+        
+        super(Database, self).set_disconnected()
+        for function in self.disconnect_functions_list:
+            function()
+            
+            
     def connect(self):
+        ''' Trys to connect the database with given parameters. '''
+        
         try:
             self.section_dict = self.get_content()
             self.database = SQLdb.database(self.section_dict.get('engine'))
@@ -74,12 +108,14 @@ class Database(Panels.Database):
             if self.autosave == True:
                 self.save_settings()
         except Exception, inst:
-            self.set_disconnected()
+            self.set_disconnected()                
             self.ErrorDialog.show(message='Datenbank konnte nicht verbunden werden.', instance=inst)
         return self.database
+            
+                
+    def disconnect(self):
+        ''' Disconnects the database and closes the connection. '''
         
-        
-    def disconnect(self):        
         if self.database.connection <> None:
             self.database.close()
         self.set_disconnected()
@@ -92,7 +128,7 @@ class Database(Panels.Database):
         
        
 class DatabaseLogin(wx.Panel):
-    def __init__(self, parent, image_path, ini_path, ini_section, autosave=True):
+    def __init__(self, parent, image_path, ini_path, ini_section, autosave=True, db_table_users_class=None):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
@@ -100,6 +136,7 @@ class DatabaseLogin(wx.Panel):
         self.ini_path = ini_path
         self.ini_section = ini_section
         self.autosave = autosave
+        self.db_table_users_class = db_table_users_class
         
         self.on_connect = None
         self.on_disconnect = None
@@ -114,7 +151,8 @@ class DatabaseLogin(wx.Panel):
         self.portlet_database = Database(parent=self, 
                                          ini_path=self.ini_path, 
                                          ini_section=self.ini_section,
-                                         autosave=self.autosave)
+                                         autosave=self.autosave,
+                                         db_table_users_class=self.db_table_users_class)
         self.portlet_database.Hide()
         self.portlet_login = Panels.Login(parent=self)
         
@@ -148,6 +186,12 @@ class DatabaseLogin(wx.Panel):
         
         bottom_panel.SetSizer(bottom_sizer)
         
+        self.portlet_database.add_connect_function(self.set_connected)
+        self.portlet_database.add_disconnect_function(self.set_disconnected)
+        
+        self.portlet_login.combobox_user.Bind(wx.EVT_TEXT, self.on_login_changed)
+        self.portlet_login.entry_password.Bind(wx.EVT_TEXT, self.on_login_changed)
+        
         
     def on_togglebutton_preferences_toggled(self, event):
         selection = event.GetSelection()
@@ -163,19 +207,61 @@ class DatabaseLogin(wx.Panel):
         self.Layout()
         
         
+    def on_login_changed(self, event=None):
+        userdata = self.get_userdata()
+        password = self.portlet_login.entry_password.GetValue()
+        
+        if userdata == None:
+            self.button_ok.Enable(False)
+            return
+        
+        if password == userdata.get('password'):
+            self.button_ok.Enable(True)
+        else:
+            self.button_ok.Enable(False)
+        
+        
     # Actions -----------------------------------------------------------------
     def get_database(self):
         self.database = self.portlet_database.get_database()
         return self.database
         
+    
+    def get_userdata(self):
+        text = self.portlet_login.combobox_user.GetValue()
+        selection = self.portlet_login.combobox_user.FindString(text)
+        return self.portlet_login.combobox_user.GetClientData(selection)
+        
+        
+    def get_connection(self):
+        return self.portlet_database.get_connection()
+        
+    
+    def set_connected(self):
+        self.db_table_users = self.db_table_users_class(self.get_database())
+        result = self.db_table_users.select()
+        for dict in result:
+            self.portlet_login.combobox_user.Append(dict.get('username'), dict)
+            
+        self.portlet_login.combobox_user.Enable(True)
+        self.portlet_login.entry_password.Enable(True)
+        self.on_login_changed()
+        #self.button_ok.Enable(True)
+        
+    
+    def set_disconnected(self):
+        self.portlet_login.combobox_user.Enable(False)
+        self.portlet_login.entry_password.Enable(False)
+        self.button_ok.Enable(False)
+        
         
     def connect(self):
         self.database = self.portlet_database.connect()
 
-
+    
     def disconnect(self):        
         self.database = self.portlet_database.disconnect()
-        
+
         
         
 class PreferencesDialog(wx.Frame):
