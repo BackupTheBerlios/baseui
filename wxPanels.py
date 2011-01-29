@@ -210,12 +210,17 @@ class DatabaseLogin(wx.Panel):
     def on_login_changed(self, event=None):
         userdata = self.get_userdata()
         password = self.portlet_login.entry_password.GetValue()
+        choises = self.portlet_login.combobox_user.GetStrings()
         
         if userdata == None:
-            self.button_ok.Enable(False)
+            if choises == []:
+                self.button_ok.Enable(True)
+            else:
+                self.button_ok.Enable(False)
             return
         
-        if password == userdata.get('password'):
+        if password == userdata.get('password') or \
+           userdata.get('password') == None:
             self.button_ok.Enable(True)
         else:
             self.button_ok.Enable(False)
@@ -230,6 +235,8 @@ class DatabaseLogin(wx.Panel):
     def get_userdata(self):
         text = self.portlet_login.combobox_user.GetValue()
         selection = self.portlet_login.combobox_user.FindString(text)
+        if selection == -1:
+            return
         return self.portlet_login.combobox_user.GetClientData(selection)
         
         
@@ -240,13 +247,16 @@ class DatabaseLogin(wx.Panel):
     def set_connected(self):
         self.db_table_users = self.db_table_users_class(self.get_database())
         result = self.db_table_users.select()
+        self.portlet_login.combobox_user.Clear()
         for dict in result:
-            self.portlet_login.combobox_user.Append(dict.get('username'), dict)
+            choise = dict.get('username')
+            if choise == None:
+                choise = ''
+            self.portlet_login.combobox_user.Append(choise, dict)
             
         self.portlet_login.combobox_user.Enable(True)
         self.portlet_login.entry_password.Enable(True)
         self.on_login_changed()
-        #self.button_ok.Enable(True)
         
     
     def set_disconnected(self):
