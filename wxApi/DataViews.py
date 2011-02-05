@@ -483,6 +483,11 @@ class Form(wx.Panel):
             if widget_object == None:
                 continue
 
+            # FilePickerCtrl ---------------------------------------------------
+            if widget_object.__class__ == wx._controls.FilePickerCtrl:
+                if widget_content <> None:
+                    widget_object.SetPath(widget_content)
+                    
             # DatePickerCtrl ---------------------------------------------------
             if widget_object.__class__ ==  wx._controls.DatePickerCtrl:
                 if widget_content <> None:
@@ -572,13 +577,17 @@ class Form(wx.Panel):
                 self.content_dict[column_name] = widget_content
             if widget_object.__class__ == wx._controls.DatePickerCtrl:
                 widget_content = widget_object.GetValue()
-                
+            
                 # Not pretty, but works for MSsql over odbc.
                 year = widget_content.GetYear()
                 month = widget_content.GetMonth() + 1
                 day = widget_content.GetDay()
                 self.content_dict[column_name] = '%02i.%02i.%04i' % (day, month, year)
-            
+            if widget_object.__class__ == wx._controls.FilePickerCtrl:
+                widget_content = widget_object.GetTextCtrlValue()
+                self.content_dict[column_name] = widget_content
+                
+                #print 'filepickercontent:', widget_content
             # Make usdate from german date
             # TODO: Whats' this date-shit here?
 #            if data_type == 'date':
