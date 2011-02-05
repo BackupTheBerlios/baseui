@@ -32,6 +32,7 @@ class Tree(TreeListCtrl):
         self.number_of_columns = 0
         self.sort_column_number = None
         self.sort_ascending = None
+        self.sort_data_type = None
         
         self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id = wx.ID_ANY)
 
@@ -39,6 +40,13 @@ class Tree(TreeListCtrl):
     def OnCompareItems(self, a, b):
         a_data = self.GetItemText(a, self.sort_column_number).lower()
         b_data = self.GetItemText(b, self.sort_column_number).lower()
+        
+        # TODO: This sucks somewhat without the foggiest notion of the dateformat, which here is DD.MM.YYYY
+        if self.sort_data_type == 'date':
+            a_datelist = a_data.split('.')
+            b_datelist = b_data.split('.')
+            a_data = '%s.%s.%s' % (a_datelist[2], a_datelist[1], a_datelist[0])
+            b_data = '%s.%s.%s' % (b_datelist[2], b_datelist[1], b_datelist[0])
         
         if self.sort_ascending == True:
             result = cmp(a_data, b_data)
@@ -153,7 +161,11 @@ class Tree(TreeListCtrl):
         self.ID_LEFT = self.image_list.Add(IconSet16.getleft_16Bitmap())
         self.ID_UP = self.image_list.Add(IconSet16.getup_16Bitmap())
         self.ID_DOWN = self.image_list.Add(IconSet16.getdown_16Bitmap())
-        
+        self.ID_CHECKED = self.image_list.Add(IconSet16.getchecked_16Bitmap())
+        self.ID_NOTCHECKED = self.image_list.Add(IconSet16.getnotchecked_16Bitmap())
+        self.ID_FLAGGED = self.image_list.Add(IconSet16.getflagged_16Bitmap())
+        self.ID_NOTFLAGGED = self.image_list.Add(IconSet16.getnotflagged_16Bitmap())
+                
         self.SetImageList(self.image_list)
         
         # This makes table column-setup.
@@ -193,14 +205,23 @@ class Tree(TreeListCtrl):
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
                 column_name = definition_dict.get('column_name')
+                data_type = definition_dict.get('data_type')
                 content = content_dict.get(column_name)
                 
                 if content == None:
                     content = ''
                 
-                if type(content) <> unicode:
-                    content = str(content)
-                self.SetItemText(item, content, column_number)
+                if data_type == 'bool':
+                    # Boolean columns need images to go.
+                    if content == True:
+                        self.SetItemImage(item, self.ID_CHECKED, column_number)
+                    if content == False:
+                        self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
+                else:
+                    # For all other data types, just set text.
+                    if type(content) <> unicode:
+                        content = str(content)
+                    self.SetItemText(item, content, column_number)
                 
                 
     def build_store(self, row_parent, row_dict):
@@ -336,6 +357,11 @@ class Tree(TreeListCtrl):
         
         old_column_number = self.sort_column_number
         
+        for attributes_dic in self.definition_lod:
+            if attributes_dic.get('column_number') == column_number:
+                self.sort_data_type = attributes_dic.get('data_type')
+                break
+                
         if column_number <> None:
             self.sort_column_number = column_number
         if ascending <> None:
@@ -577,7 +603,11 @@ class Form(wx.Panel):
                 self.content_dict[column_name] = widget_content
             if widget_object.__class__ == wx._controls.DatePickerCtrl:
                 widget_content = widget_object.GetValue()
-            
+                
+                if widget_content.IsValid() == False:
+                    self.content_dict[column_name] = None
+                    continue
+
                 # Not pretty, but works for MSsql over odbc.
                 year = widget_content.GetYear()
                 month = widget_content.GetMonth() + 1

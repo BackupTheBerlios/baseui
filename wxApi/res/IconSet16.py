@@ -24,6 +24,18 @@ getcancel_16Image = cancel_16.GetImage
 getcancel_16Bitmap = cancel_16.GetBitmap
 
 #----------------------------------------------------------------------
+checked_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
+    "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMKFAdmxMAAAAC5"
+    "SURBVDjLY2CgEDAyMDAwyAQ2/CdV45P1DYwMDAwMLDCBYxNjEaYyMjEwMUEwMzMzAxMTM5xm"
+    "YmJi0Izrh6tlwnASAc1MTKhamIjVbLDBCCrHjN0AQpoZGBjgrsBqAEyz1S47rJphahgZGXEb"
+    "wMwMcZ7pVgsMzTcirjMwMjLidgHMRhjApZmREacXIM6+EHAORQG6ZpxeQI6qKyGXcGrGEwaI"
+    "eGZiYiZKM9ZYgBlEjGaUpIycPIcWAAAEtR+tFw3cjAAAAABJRU5ErkJggg==")
+getchecked_16Data = checked_16.GetData
+getchecked_16Image = checked_16.GetImage
+getchecked_16Bitmap = checked_16.GetBitmap
+
+#----------------------------------------------------------------------
 connect_creating_16 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACBUlEQVQ4jZWSO2hTURjHf+fc"
     "tCGpTTFIm/YODmIa6iClFAexdunig4L1UfCFCE4dhIqD4CTS1aGDBB3UJYM6iA+q+FgUwVcr"
@@ -473,6 +485,24 @@ getfilesave_16Image = filesave_16.GetImage
 getfilesave_16Bitmap = filesave_16.GetBitmap
 
 #----------------------------------------------------------------------
+flagged_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
+    "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMMAqXo1hcAAAHi"
+    "SURBVDjLzZLNaxNRFMXPu9NVFi2YXRlEQkwQi5Q2rRQULThQipuJUkFE7B9QqY1LYeiiVPED"
+    "JVtXEgTxYzAVF05RQa3WpASsBBupXUShURJJ0nnpNA3XjQxO22jBTc/ywfmd87gH+E+JrR5j"
+    "cZOtdA7FsoS/zQctEsL1EV1sC6DqBg/2BqF1BxAJtyOzWIA1t4SpmU/4ao6LvwJOXbrN0cNh"
+    "HOrYDSKCoiggUqAoCl5/zOPe83kkjLMeD/2Z3MxMpOBoZwCnj3VC1Q3eBIjFTR7sDbrmuqjj"
+    "ReUlhueH8TifRK1RAxGhvyuI6JEDiMVN9gCsVA5ad8BNfrvyDg+c+5AtNq5kLyP5JQkiBUSE"
+    "4337YKVy3gbFikQk3O7WTeQTKJZKsKXEqlPHtfdXQUQQQqCvYw+KFekF+Ft9yCwW3D+f8J/E"
+    "8rdlfC/8QKX8E2NdFyGEABFhNpuHv9XnBWg9IVhzS26DAXUAo8ELoJUWTBycxND+od8NCE9m"
+    "stB6QpsHoeoGT73KcLVaZtuucq0m2XFWeW3N4fX1OjcaDZ5OL/DGK3h0ZvwOP33zoan53MRd"
+    "/ue2Vd3g8zcf8rPZLFdtydOpBR69ZTZN3nLfY/FHbKU/o1SW2NXmgxbZixsjUYEdqV8sXNyP"
+    "TWcg+QAAAABJRU5ErkJggg==")
+getflagged_16Data = flagged_16.GetData
+getflagged_16Image = flagged_16.GetImage
+getflagged_16Bitmap = flagged_16.GetBitmap
+
+#----------------------------------------------------------------------
 help_16 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAABl0"
     "RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAM2SURBVDiNbZNbbFRlFIW/8//n"
@@ -525,6 +555,43 @@ left_16 = PyEmbeddedImage(
 getleft_16Data = left_16.GetData
 getleft_16Image = left_16.GetImage
 getleft_16Bitmap = left_16.GetBitmap
+
+#----------------------------------------------------------------------
+minus_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
+    "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMNFEgnUgcAAABE"
+    "SURBVDjLY2CgJThw4MB/QmoYidHs4ODASJKt6DZjEyPLydjkmegaYNjUseBQ95/YAGchNXYG"
+    "cSCSmw6onxLJidqBBQCEoT0AtzJV2AAAAABJRU5ErkJggg==")
+getminus_16Data = minus_16.GetData
+getminus_16Image = minus_16.GetImage
+getminus_16Bitmap = minus_16.GetBitmap
+
+#----------------------------------------------------------------------
+notchecked_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
+    "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMLFWl6xRcAAACC"
+    "SURBVDjL1dK9DYAgEAXgd+8Yww2cxsrWUeitnMQVHMY9tPAXFTxi5SWEBPheLuSAjyUAUFR+"
+    "yoVj7wUA3HYwtPV+SXJdClUHVYVzy04qyqY73l6T3zAZEuZiUp8DrDjagRUnAmw4GmDFiQAb"
+    "FokEWLGIxDvIxbdPzMXBKJ/H8181A1IPCymzLqOaAAAAAElFTkSuQmCC")
+getnotchecked_16Data = notchecked_16.GetData
+getnotchecked_16Image = notchecked_16.GetImage
+getnotchecked_16Bitmap = notchecked_16.GetBitmap
+
+#----------------------------------------------------------------------
+notflagged_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
+    "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMMK+daTnsAAAFn"
+    "SURBVDjLxZO/SwJxGMYf3+9NDg5uwg0i3BAFJeFQDQ0iBE0XtNhQ/0ARbkVwNLQW4ebWUBCE"
+    "QhgUKhSESBYmJBaCCDmG4V1aZvK2RZfaBQ494wuf5/0NDChbr2AoHOVEtoSa3oTTYUfAp2B7"
+    "ec72JwNZ1XjG54Hf68a44kK+/IRUroJ45gHV2KbtV4P59QirUwomh2UQCQghQQgBSZKQLlRx"
+    "eH6HfW3RxND3zP1gIQSmxzwI+kchqxp3VRAKR1k3DGwEJ3vCRAJEBCKBtcgpJIm+ZkIAkMiW"
+    "4Pe6LWEiwuzEEBLZkrmFmt7EuOKyhIkIEyNu1PSm2cDpsCNffrKEiQhXxUc4HXazQcCnIJWr"
+    "WMJEhHi6iIBP6T4IWdX4+OKG6/VnNow6Nxov/Pra5Fbrjdvtd+50Pjh5/cA/t2DSwuYen1ze"
+    "9oWXtg7Y8rZlVeOVnSM+yxRYf2lwMnvPq7uxvpkH/oX/1yfye61quCYxwQAAAABJRU5ErkJg"
+    "gg==")
+getnotflagged_16Data = notflagged_16.GetData
+getnotflagged_16Image = notflagged_16.GetImage
+getnotflagged_16Bitmap = notflagged_16.GetBitmap
 
 #----------------------------------------------------------------------
 ok_16 = PyEmbeddedImage(
@@ -593,6 +660,16 @@ ok_16 = PyEmbeddedImage(
 getok_16Data = ok_16.GetData
 getok_16Image = ok_16.GetImage
 getok_16Bitmap = ok_16.GetBitmap
+
+#----------------------------------------------------------------------
+plus_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
+    "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMNLRci2g8AAABT"
+    "SURBVDjLxVPJDQAgCAPjYIzOZvVvCJcaeXIVSiF6aaqKKIczxSLCJdQd2fK1RrbiI+iJU8IQ"
+    "5c0EMjzCZ3AdeJfKrIFTErmlvooO7iux+gv/bQFGx0H9h96FygAAAABJRU5ErkJggg==")
+getplus_16Data = plus_16.GetData
+getplus_16Image = plus_16.GetImage
+getplus_16Bitmap = plus_16.GetBitmap
 
 #----------------------------------------------------------------------
 preferences_16 = PyEmbeddedImage(
