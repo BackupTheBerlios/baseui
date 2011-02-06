@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version May  4 2010)
+## Python code generated with wxFormBuilder (version Sep  8 2010)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO "NOT" EDIT THIS FILE!
@@ -22,7 +22,7 @@ class Database ( wx.Panel ):
 		
 		frame_database = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Datenbank" ), wx.VERTICAL )
 		
-		sizer_content = wx.FlexGridSizer( 8, 2, 0, 0 )
+		sizer_content = wx.FlexGridSizer( 5, 2, 0, 0 )
 		sizer_content.AddGrowableCol( 1 )
 		sizer_content.SetFlexibleDirection( wx.BOTH )
 		sizer_content.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
@@ -321,13 +321,14 @@ class TableExport ( wx.Panel ):
 		self.m_staticText121.Wrap( -1 )
 		fgSizer61.Add( self.m_staticText121, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 		
-		self.filepicker_source1 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_DEFAULT_STYLE )
+		self.filepicker_source1 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_SAVE|wx.FLP_USE_TEXTCTRL )
 		fgSizer61.Add( self.filepicker_source1, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		fgSizer81.Add( fgSizer61, 1, wx.EXPAND, 5 )
 		
-		self.tree_target = wx.TreeCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.TR_DEFAULT_STYLE )
-		fgSizer81.Add( self.tree_target, 0, wx.ALL|wx.EXPAND, 5 )
+		checklist_exportChoices = [ u"nul" ];
+		self.checklist_export = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, checklist_exportChoices, 0 )
+		fgSizer81.Add( self.checklist_export, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		sbSizer5.Add( fgSizer81, 1, wx.EXPAND, 5 )
 		

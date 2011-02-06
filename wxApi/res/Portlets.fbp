@@ -2283,7 +2283,7 @@
                                                 <property name="permission">protected</property>
                                                 <property name="pos"></property>
                                                 <property name="size"></property>
-                                                <property name="style">wxFLP_DEFAULT_STYLE</property>
+                                                <property name="style">wxFLP_SAVE|wxFLP_USE_TEXTCTRL</property>
                                                 <property name="subclass"></property>
                                                 <property name="tooltip"></property>
                                                 <property name="validator_data_type"></property>
@@ -2323,12 +2323,13 @@
                                         </object>
                                     </object>
                                 </object>
-                                <object class="sizeritem" expanded="0">
+                                <object class="sizeritem" expanded="1">
                                     <property name="border">5</property>
                                     <property name="flag">wxALL|wxEXPAND</property>
                                     <property name="proportion">0</property>
-                                    <object class="wxTreeCtrl" expanded="0">
+                                    <object class="wxCheckListBox" expanded="1">
                                         <property name="bg"></property>
+                                        <property name="choices">&quot;nul&quot;</property>
                                         <property name="context_help"></property>
                                         <property name="context_menu">1</property>
                                         <property name="enabled">1</property>
@@ -2338,11 +2339,11 @@
                                         <property name="id">wxID_ANY</property>
                                         <property name="maximum_size"></property>
                                         <property name="minimum_size"></property>
-                                        <property name="name">tree_target</property>
+                                        <property name="name">checklist_export</property>
                                         <property name="permission">protected</property>
                                         <property name="pos"></property>
-                                        <property name="size">-1,-1</property>
-                                        <property name="style">wxTR_DEFAULT_STYLE</property>
+                                        <property name="size"></property>
+                                        <property name="style"></property>
                                         <property name="subclass"></property>
                                         <property name="tooltip"></property>
                                         <property name="validator_data_type"></property>
@@ -2353,6 +2354,9 @@
                                         <property name="window_name"></property>
                                         <property name="window_style"></property>
                                         <event name="OnChar"></event>
+                                        <event name="OnCheckListBox"></event>
+                                        <event name="OnCheckListBoxDClick"></event>
+                                        <event name="OnCheckListBoxToggled"></event>
                                         <event name="OnEnterWindow"></event>
                                         <event name="OnEraseBackground"></event>
                                         <event name="OnKeyDown"></event>
@@ -2374,27 +2378,6 @@
                                         <event name="OnRightUp"></event>
                                         <event name="OnSetFocus"></event>
                                         <event name="OnSize"></event>
-                                        <event name="OnTreeBeginDrag"></event>
-                                        <event name="OnTreeBeginLabelEdit"></event>
-                                        <event name="OnTreeBeginRDrag"></event>
-                                        <event name="OnTreeDeleteItem"></event>
-                                        <event name="OnTreeEndDrag"></event>
-                                        <event name="OnTreeEndLabelEdit"></event>
-                                        <event name="OnTreeGetInfo"></event>
-                                        <event name="OnTreeItemActivated"></event>
-                                        <event name="OnTreeItemCollapsed"></event>
-                                        <event name="OnTreeItemCollapsing"></event>
-                                        <event name="OnTreeItemExpanded"></event>
-                                        <event name="OnTreeItemExpanding"></event>
-                                        <event name="OnTreeItemGetTooltip"></event>
-                                        <event name="OnTreeItemMenu"></event>
-                                        <event name="OnTreeItemMiddleClick"></event>
-                                        <event name="OnTreeItemRightClick"></event>
-                                        <event name="OnTreeKeyDown"></event>
-                                        <event name="OnTreeSelChanged"></event>
-                                        <event name="OnTreeSelChanging"></event>
-                                        <event name="OnTreeSetInfo"></event>
-                                        <event name="OnTreeStateImageClick"></event>
                                         <event name="OnUpdateUI"></event>
                                     </object>
                                 </object>

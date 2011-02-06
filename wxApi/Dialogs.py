@@ -77,12 +77,12 @@ class FormTablePreferences(wx.Dialog):
         sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
         self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_panel2 = Panels.TableConfig(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.notebook.AddPage( self.m_panel2, u"Allgemein", True )
-        self.m_panel3 = Panels.TableImport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.notebook.AddPage( self.m_panel3, u"Import", False )
-        self.m_panel4 = Panels.TableExport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.notebook.AddPage( self.m_panel4, u"Export", False )
+        #self.m_panel2 = Panels.TableConfig(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        #self.notebook.AddPage( self.m_panel2, u"Allgemein", True )
+        #self.m_panel3 = Panels.TableImport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        #self.notebook.AddPage( self.m_panel3, u"Import", False )
+        self.panel_export = Panels.TableExport(self.notebook) #wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.notebook.AddPage( self.panel_export, u"Export", False )
 
         sizer_main.Add( self.notebook, 1, wx.ALL|wx.EXPAND, 5 )
 
@@ -91,14 +91,11 @@ class FormTablePreferences(wx.Dialog):
         sizer_bottom.SetFlexibleDirection( wx.BOTH )
         sizer_bottom.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-
         sizer_bottom.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
 
         self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
         sizer_bottom.Add( self.button_ok, 0, wx.ALL, 5 )
-
-        self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sizer_bottom.Add( self.button_cancel, 0, wx.ALL, 5 )
+        self.button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked)
 
         sizer_main.Add( sizer_bottom, 1, wx.EXPAND, 5 )
 
@@ -106,3 +103,9 @@ class FormTablePreferences(wx.Dialog):
         self.Layout()
 
         self.Centre( wx.BOTH )
+        
+        
+    def on_button_ok_clicked(self, event=None):
+        self.Destroy()
+
+

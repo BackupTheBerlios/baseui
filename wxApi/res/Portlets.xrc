@@ -499,7 +499,7 @@
 											<value></value>
 											<message>Select a file</message>
 											<wildcard>*.*</wildcard>
-											<style>wxFLP_DEFAULT_STYLE</style>
+											<style>wxFLP_SAVE|wxFLP_USE_TEXTCTRL</style>
 										</object>
 									</object>
 								</object>
@@ -508,8 +508,10 @@
 								<option>0</option>
 								<flag>wxALL|wxEXPAND</flag>
 								<border>5</border>
-								<object class="wxTreeCtrl" name="tree_target">
-									<style>wxTR_DEFAULT_STYLE</style>
+								<object class="wxCheckListBox" name="checklist_export">
+									<content>
+										<item>nul</item>
+									</content>
 								</object>
 							</object>
 						</object>
