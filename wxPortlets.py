@@ -551,6 +551,7 @@ class FormFrame(wx.Frame):
         # This lists are made to get portlets going.
         self.save_function_list = []
         self.delete_function_list = []
+        self.print_function_list = []
         
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
         if icon_path <> None:
@@ -609,14 +610,16 @@ class FormFrame(wx.Frame):
         
         
     def on_delete(self, event=None):
-        print 'delete formular'
+        #print 'delete formular'
         for function in self.delete_function_list:
             function(self.primary_key)
         
         
     def on_print(self, event=None):
-        print 'print formular'
-        
+        #TODO: It would be better if self would be given on_delete and on_save.
+        for function in self.print_function_list:
+            function(self)
+            
         
     def on_preferences(self, event=None):
         self.frame_preferences = Dialogs.FormTablePreferences(parent=self, title='Einstellungen')
@@ -725,6 +728,7 @@ class FormFrame(wx.Frame):
         self.delete_function_list.append(function)
         
         
-        
+    def add_print_function(self, function):
+        self.print_function_list.append(function)
         
         

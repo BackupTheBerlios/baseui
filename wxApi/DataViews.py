@@ -68,22 +68,31 @@ class Tree(TreeListCtrl):
             
 
     def on_cursor_changed(self, event=None):
+        row_content = self.get_selected_row_content()
         hit_column = self.HitTest(self.mouse_position)[2]
-        for column_dict in self.definition_lod:
-            column_number = column_dict.get('column_number')
-            data_type = column_dict.get('data_type')
-            editable = column_dict.get('editable')
+        
+        for definition_dict in self.definition_lod:
+            column_number = definition_dict.get('column_number')
+            data_type = definition_dict.get('data_type')
+            editable = definition_dict.get('editable')
             if column_number == hit_column:
                 if data_type == 'bool' and editable == True: 
-                    print 'NOGG', column_dict
+                    column_name = definition_dict.get('column_name')
+                    cell_content = row_content.get(column_name)
+                    item = self.GetSelection()
+                    if cell_content in ['', None, False]:
+                        self.SetItemImage(item, self.ID_CHECKED, column_number)
+                    else:
+                        self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
                     break
         
-        row_content = self.get_selected_row_content()
         if self.cursor_change_function <> None:
             self.cursor_change_function(row_content)
             
             
     def on_header_clicked(self, event=None):
+        self.get_content()
+        
         clicked_column = event.GetColumn()
         self.set_sort_column(column_number=clicked_column)
     
@@ -101,15 +110,22 @@ class Tree(TreeListCtrl):
         ''' Returns the content as list_of_dictionarys, just like the content_lod
             uses at populate. '''
             
-        content_lod = None
+        content_lod = []
+        item = self.GetRootItem()
+        while item.IsOk() <> False:
+            item = self.GetNext(item)
+            if item.IsOk():
+                content_lod.append(self.get_selected_row_content(item))
         return content_lod
 
 
-    def get_selected_row_content(self):
+    def get_selected_row_content(self, item=None):
         ''' Returns a dictionary which holds the row content like this:
                {'id': 1, 'name': 'Heinz Becker'} '''
-               
-        item = self.GetSelection()
+        
+        if item == None:     
+            item = self.GetSelection()
+            
         content_dict = {}
         for definition_dict in self.definition_lod:
             column_number = definition_dict.get('column_number')
@@ -117,25 +133,15 @@ class Tree(TreeListCtrl):
             data_type = definition_dict.get('data_type')
             editable = definition_dict.get('editable')
             
-#            if editable == True:
-#                if data_type == 'bool':
-#                    #print item
-#                    
-#                    if content_dict.has_key(column_name):
-#                        content = content_dict[column_name]
-#                    else:
-#                        content = False
-#                        
-#                    #print column_name, content, column_number
-#                    
-#                    if content == True:
-#                        self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
-#                        content = False
-#                    else:
-#                        self.SetItemImage(item, self.ID_CHECKED, column_number)
-#                        content = True
-#            else:
-            content = self.GetItemText(item, column_number)
+            # Check, it data_type is bool and get the value from the image_id.
+            if data_type == 'bool':
+                item_image = self.GetItemImage(item, column_number)
+                if item_image == self.ID_CHECKED:
+                    content = True
+                elif item_image == self.ID_NOTCHECKED:
+                    content = False
+            else:
+                content = self.GetItemText(item, column_number)
             content_dict[column_name] = content
         return content_dict
 
