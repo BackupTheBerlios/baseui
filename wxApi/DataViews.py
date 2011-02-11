@@ -26,6 +26,7 @@ class Tree(TreeListCtrl):
     
         self.Hide()
         self.row_activate_function = None
+        self.row_right_click_function = None
         self.cursor_change_function = None
         
         self.number_of_columns = 0
@@ -35,7 +36,8 @@ class Tree(TreeListCtrl):
         
         self.mouse_position = (0,0)
         
-        self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id = wx.ID_ANY)
+        self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id=wx.ID_ANY)
+        self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_row_right_clicked)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
         
         
@@ -60,6 +62,15 @@ class Tree(TreeListCtrl):
     def get_mouse_position(self, event=None):
         self.mouse_position = event.GetPosition()
         
+    
+    def on_row_right_clicked(self, event=None):
+        item = event.GetItem()
+        
+        row_content = self.get_selected_row_content(item)
+        if self.row_right_click_function <> None:
+            self.SelectItem(item)
+            self.row_right_click_function(row_content)
+            
         
     def on_row_activated(self, event=None):
         row_content = self.get_selected_row_content()
@@ -239,12 +250,12 @@ class Tree(TreeListCtrl):
                 
 
     def populate(self, content_lod=None):
-        ''' content_lod = [{'id': 1}] '''
+        ''' content_lod = [{'id': 1, #bg_colour, #fg_colour}] '''
         
         # Needed to update after first population.
         self.DeleteRoot()
-        
         self.root = self.AddRoot(text='Root')
+        
         for content_dict in content_lod:
             item = self.AppendItem(parent=self.root, text='')
             
@@ -256,10 +267,15 @@ class Tree(TreeListCtrl):
                 
                 content = content_dict.get(column_name)
                 
+                if content_dict.get('#bg_colour') <> None:
+                    self.SetItemBackgroundColour(item, content_dict.get('#bg_colour'))
+                if content_dict.get('#fg_colour') <> None:
+                    self.SetItemTextColour(item, content_dict.get('#fg_colour'))
+                    
                 if content == None:
                     content = ''
                 
-                #self.SetColumnEditable(column_number)
+                #TODO: self.SetColumnEditable(column_number)
                 if data_type == 'bool':
                     # Boolean columns need images to go.
                     if content == True:
@@ -274,12 +290,8 @@ class Tree(TreeListCtrl):
                     if type(content) <> unicode:
                         content = str(content)
                     self.SetItemText(item, content, column_number)
-                
+                                    
     
-    def OnCheckItem(self, event):
-        print 'checked', event
-        
-        
     def build_store(self, row_parent, row_dict):
         row_content = []
         # Read out definition_lod
@@ -495,8 +507,7 @@ class Form(wx.Panel):
         if self.definition_lod == None:
             return
 
-        # Iterate over the definition_lod --------------------------------
-        
+        # Iterate over the definition_lod
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
             dic = definition_row[1]
@@ -510,28 +521,11 @@ class Form(wx.Panel):
                         self.definition_lod[row].update(attributes_dic)
             
             widget_name = dic.get('widget_name')
-            # data_type = dic.get('data_type')
-
+            
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
                 widget_object = wx.xrc.XRCCTRL(self, widget_name)
-                # if widget_name.startswith('entry_'):                    
-                #     if data_type == 'date':
-                #         widget_object = Entrys.Calendar(entry=self.wTree.get_widget(widget_name))
-                #     else:
-                #         widget_object = Entrys.Simple(self.wTree.get_widget(widget_name))
-                #         widget_object.initialize(self.definition_lod[row])
-                # if widget_name.startswith('comboboxentry_'):
-                #     widget_object = Entrys.Combobox(self.wTree.get_widget(widget_name))
-                # if widget_name.startswith('checkbutton_'):
-                #     widget_object = self.wTree.get_widget(widget_name)
-                # if widget_name.startswith('textview_'):
-                #     widget_object = Widgets.TextView(self.wTree.get_widget(widget_name))
-                
                 self.definition_lod[row]['widget_object'] = widget_object
-            
-            #print self.portlets_lod
-            #pprint (self.definition_lod)
             
 
     def populate(self, content_dict=None):
@@ -611,7 +605,12 @@ class Form(wx.Panel):
                     widget_content = 0
                 widget_object.SetValue(int(widget_content))
 
-
+            # FilePickerCtrl ---------------------------------------------------
+            if widget_object.__class__ == wx._controls.ColourPickerCtrl:
+                if widget_content <> None:
+                    widget_object.SetColour(widget_content)
+                    
+    
     def clear(self):
         pass
 
@@ -641,6 +640,7 @@ class Form(wx.Panel):
                     self.content_dict[column_name] = widget_content
                 else:
                     self.content_dict[column_name] = None
+            
             if widget_object.__class__ == wx._controls.ComboBox:
                 # If this widget has a foreign relation, get client data. Else get Value.
                 if dic.get('referenced_column_name') <> None:
@@ -655,9 +655,11 @@ class Form(wx.Panel):
                     self.content_dict[column_name] = widget_content
                 else:
                     self.content_dict[column_name] = None
+            
             if widget_object.__class__ == wx._controls.CheckBox:
                 widget_content = widget_object.GetValue()
                 self.content_dict[column_name] = widget_content
+            
             if widget_object.__class__ == wx._controls.DatePickerCtrl:
                 widget_content = widget_object.GetValue()
                 
@@ -670,11 +672,19 @@ class Form(wx.Panel):
                 month = widget_content.GetMonth() + 1
                 day = widget_content.GetDay()
                 self.content_dict[column_name] = '%02i.%02i.%04i' % (day, month, year)
+            
             if widget_object.__class__ == wx._controls.FilePickerCtrl:
                 widget_content = widget_object.GetTextCtrlValue()
                 self.content_dict[column_name] = widget_content
+            
+            if widget_object.__class__ == wx._controls.ColourPickerCtrl:
+                colour = widget_object.GetColour()
+                r, g, b = colour.Get()
+                colour_str = '#%02x%02x%02x' % (r, g, b)
+                self.content_dict[column_name] = colour_str
                 
-                #print 'filepickercontent:', widget_content
+                                
+                                #print 'filepickercontent:', widget_content
             # Make usdate from german date
             # TODO: Whats' this date-shit here?
 #            if data_type == 'date':

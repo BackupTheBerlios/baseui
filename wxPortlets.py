@@ -34,6 +34,10 @@ class DatabaseTableBase(object):
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
         
+        self.row_right_click_function = None
+        #TODO: This is gay, please subclass the Table (or what do I fear?
+        #self.Table = DataViews.Tree(self.portlet_parent)
+        
         
     # Callbacks ---------------------------------------------------------------
     def on_row_activate(self, content_dic=None):
@@ -130,12 +134,17 @@ class DatabaseTableBase(object):
 #                # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
 #                self.content_lod = []
 #        else:
+
+        #TODO: Gay again, subclassing would help immensely!
+        #self.Table = DataViews.Tree(self.portlet_parent)
+        
         if self.filter == None:
             self.content_lod = self.db_table.get_content()
         elif self.filter == False:
             return
         else:
             self.content_lod = self.db_table.select(where=self.filter)
+        
         # Before populating, check if there are any substitutions from referenced tables
         self.check_column_substitutions()
         
@@ -152,6 +161,9 @@ class DatabaseTableBase(object):
                 
     def populate_portlet(self):
         self.Table = DataViews.Tree(self.portlet_parent)
+        # TODO: Gaylord, would never ever be nesseccary if subclassed!
+        self.Table.row_right_click_function = self.row_right_click_function
+        
         sizer = self.portlet_parent.GetSizer()
         sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
         
@@ -195,6 +207,16 @@ class DatabaseTableBase(object):
         
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
         ''' Substitute foreign keys with content from the foreign tables. '''
+        
+        #TODO: This is bullshit, because it steals the foreign keys from the dict!
+        # Make it work, so that the content of the content_lod will not be changed.
+        # This is only possible, if the following code moved nearly entirely to the
+        # populate function!
+        # 
+        # Another note on this:
+        # it prevents from making multiple 'populate_from' definitions work, because
+        # this replaces the foreign_key on its first execution and thus, a second call
+        # on the same foreign_key_column is not possible.
         
         for content_dic in self.content_lod:
             substitute_dic = {}
@@ -562,7 +584,7 @@ class FormFrame(wx.Frame):
         self.primary_key = None
         if self.remote_parent.primary_key <> None:
             self.primary_key = self.remote_parent.primary_key
-        
+            
         self.aui_manager = wx.aui.AuiManager(self)
         
         self.create_toolbar()

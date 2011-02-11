@@ -1312,6 +1312,9 @@ class column:
             if attributes_dic['is_primary_key'] == True:
                 column_layout += " PRIMARY KEY"
                 
+        if attributes_dic.has_key('referenced_table_object'):
+            attributes_dic['referenced_table_name'] = attributes_dic.get('referenced_table_object').name
+            
         if attributes_dic.has_key('referenced_table_name'):
             if attributes_dic.has_key('referenced_column_name'):
                 column_layout += " REFERENCES %(referenced_table_name)s (%(referenced_column_name)s)" % attributes_dic
