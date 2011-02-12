@@ -117,34 +117,19 @@ class DatabaseTableBase(object):
             
     
     def populate(self, content_lod=None):
-#        if self.parent_form <> None: 
-#            if self.parent_form.primary_key <> None:
-#                # This populates a referenced table (on a parent form)
-#                attributes_lod = self.db_table.attributes
-#                primary_key_column = self.primary_key_column
-#                referenced_table_name = self.parent_form.db_table.name
-#                
-#                self.foreign_key_column_name = \
-#                    self.db_table.get_foreign_key_column_name(attributes_lod, 
-#                                                              primary_key_column, 
-#                                                              referenced_table_name)
-#                    
-#                self.content_lod = self.db_table.select(where='%s = %i' % (self.foreign_key_column_name, self.parent_form.primary_key))
-#            else:
-#                # This clears the table if parent form has no primary_key (f.e. if a new dataset is created!
-#                self.content_lod = []
-#        else:
-
         #TODO: Gay again, subclassing would help immensely!
         #self.Table = DataViews.Tree(self.portlet_parent)
         
-        if self.filter == None:
-            self.content_lod = self.db_table.get_content()
-        elif self.filter == False:
-            return
+        if content_lod == None:
+            if self.filter == None:
+                self.content_lod = self.db_table.get_content()
+            elif self.filter == False:
+                return
+            else:
+                self.content_lod = self.db_table.select(where=self.filter)
         else:
-            self.content_lod = self.db_table.select(where=self.filter)
-        
+            self.content_lod = content_lod
+            
         # Before populating, check if there are any substitutions from referenced tables
         self.check_column_substitutions()
         
@@ -217,6 +202,11 @@ class DatabaseTableBase(object):
         # it prevents from making multiple 'populate_from' definitions work, because
         # this replaces the foreign_key on its first execution and thus, a second call
         # on the same foreign_key_column is not possible.
+        #
+        # This should be solved like that:
+        # in the database table definition should be defined, which columns from the foreign
+        # table are used (like it does now). Then, this framework should create new columns
+        # to show them!
         
         for content_dic in self.content_lod:
             substitute_dic = {}
@@ -502,7 +492,6 @@ class SearchFrame(wx.Frame):
         self.Destroy()
                 
         
-        
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
         
@@ -511,22 +500,17 @@ class SearchFrame(wx.Frame):
         
         self.toolbar_standard.AddSeparator()
         
-        self.entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY)
-        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
+        #self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
         self.toolbar_standard.AddControl(self.entry_search) 
-        
-        self.toolbar_standard.AddSeparator()
-        
-        self.toolbar_standard.AddTool(wx.ID_ANY, "Drucken", IconSet16.getprint_16Bitmap())
-        
+
     
     def populate_table(self):
         self.table = DatabaseTableBase(self.db_table, portlet_parent=self.panel)
+        self.table.edit = self.edit
         
         self.table.initialize(self.definition)
         self.table.populate_portlet()
-        
-        self.table.edit = self.edit
         
         
     def edit(self):
@@ -537,7 +521,7 @@ class SearchFrame(wx.Frame):
         
     def populate(self):
         pass
-        
+
         
         
 class FormFrame(wx.Frame):
@@ -622,19 +606,32 @@ class FormFrame(wx.Frame):
                 self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
             else:
                 self.primary_key = self.db_table.insert(key_column=pk_column, content=form_content)
+        
+            for function in self.save_function_list:
+                function(self.primary_key)
+                
+            self.remote_parent.populate()
+            self.on_close()
         except Exception, inst:
             self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
-        
-        self.remote_parent.populate()
-        for function in self.save_function_list:
-            function(self.primary_key)
-        self.on_close()
-        
+                
         
     def on_delete(self, event=None):
-        #print 'delete formular'
-        for function in self.delete_function_list:
-            function(self.primary_key)
+        dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
+                                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        answer = dialog.ShowModal()
+        if answer == wx.ID_YES:
+            pk_column = self.db_table.get_primary_key_columns()[0]
+            try:
+                self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
+                
+                for function in self.delete_function_list:
+                    function(self.primary_key)
+            
+                self.remote_parent.populate()
+                self.on_close()
+            except Exception, inst:
+                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!')
         
         
     def on_print(self, event=None):

@@ -596,6 +596,8 @@ class Form(wx.Panel):
                     widget_object.SetValue(widget_content.rstrip())
                 else:
                     widget_object.SetValue('')
+                    
+            # Checkbox --------------------------------------------------------
             if widget_object.__class__ ==  wx._controls.CheckBox:
                 if widget_content == '1' or \
                    widget_content == 'Y' or \
@@ -605,6 +607,16 @@ class Form(wx.Panel):
                     widget_content = 0
                 widget_object.SetValue(int(widget_content))
 
+            # Radiobutton ------------------------------------------------------
+            if widget_object.__class__ == wx._controls.RadioButton:
+                if widget_content == '1' or \
+                   widget_content == 'Y' or \
+                   widget_content == True:
+                    widget_content = 1
+                else:
+                    widget_content = 0
+                widget_object.SetValue(int(widget_content))
+                
             # FilePickerCtrl ---------------------------------------------------
             if widget_object.__class__ == wx._controls.ColourPickerCtrl:
                 if widget_content <> None:
@@ -634,6 +646,7 @@ class Form(wx.Panel):
                column_name == None:
                 continue
             
+            # Textctrl ---------------------------------------------------------
             if widget_object.__class__ ==  wx._controls.TextCtrl:
                 widget_content = widget_object.GetValue()
                 if widget_content <> '':
@@ -641,6 +654,7 @@ class Form(wx.Panel):
                 else:
                     self.content_dict[column_name] = None
             
+            # Combobox ---------------------------------------------------------
             if widget_object.__class__ == wx._controls.ComboBox:
                 # If this widget has a foreign relation, get client data. Else get Value.
                 if dic.get('referenced_column_name') <> None:
@@ -656,10 +670,17 @@ class Form(wx.Panel):
                 else:
                     self.content_dict[column_name] = None
             
+            # Checkbox ---------------------------------------------------------
             if widget_object.__class__ == wx._controls.CheckBox:
                 widget_content = widget_object.GetValue()
                 self.content_dict[column_name] = widget_content
             
+            # Radiobutton ------------------------------------------------------
+            if widget_object.__class__ == wx._controls.RadioButton:
+                widget_content = widget_object.GetValue()
+                self.content_dict[column_name] = widget_content
+                
+            # Datepicker -------------------------------------------------------
             if widget_object.__class__ == wx._controls.DatePickerCtrl:
                 widget_content = widget_object.GetValue()
                 
@@ -673,10 +694,12 @@ class Form(wx.Panel):
                 day = widget_content.GetDay()
                 self.content_dict[column_name] = '%02i.%02i.%04i' % (day, month, year)
             
+            # Filepicker -------------------------------------------------------
             if widget_object.__class__ == wx._controls.FilePickerCtrl:
                 widget_content = widget_object.GetTextCtrlValue()
                 self.content_dict[column_name] = widget_content
             
+            # Colourpicker -----------------------------------------------------
             if widget_object.__class__ == wx._controls.ColourPickerCtrl:
                 colour = widget_object.GetColour()
                 r, g, b = colour.Get()
