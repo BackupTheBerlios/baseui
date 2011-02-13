@@ -390,18 +390,18 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
+        #if search == True:
+        self.toolbar_parent.AddSeparator() 
+        self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
+        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.toolbar_parent.AddControl(self.entry_search) 
+        
         #if filter == True:
         self.toolbar_parent.AddSeparator()
         combobox_filter = wx.ComboBox(
             parent=self.toolbar_parent, id=-1, choices=['<alle>'],
             size=(150,-1), style=wx.CB_DROPDOWN)
         self.toolbar_parent.AddControl(combobox_filter)
-        
-        #if search == True:
-        self.toolbar_parent.AddSeparator() 
-        self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
-        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
-        self.toolbar_parent.AddControl(self.entry_search) 
         
         #if preferences == True or help == True:
         self.toolbar_parent.AddSeparator()
@@ -478,9 +478,8 @@ class SearchFrame(wx.Frame):
         self.error_dialog = Dialogs.Error(self)
         
         
-    def on_search(self, event=None):
-        widget_object = event.GetEventObject()
-        #print widget_object.GetValue()
+#    def on_search(self, event=None):
+#        widget_object = event.GetEventObject()
         
         
     def on_ok(self, event=None):
@@ -488,6 +487,7 @@ class SearchFrame(wx.Frame):
         
         
     def on_close(self, event=None):
+        print 'closed SearchFrame!'
         del(self.toolbar_standard)
         self.Destroy()
                 
@@ -502,7 +502,7 @@ class SearchFrame(wx.Frame):
         
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
         #self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
-        self.toolbar_standard.AddControl(self.entry_search) 
+        self.toolbar_standard.AddControl(self.entry_search)
 
     
     def populate_table(self):
