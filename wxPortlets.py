@@ -393,6 +393,7 @@ class FormTable(DatabaseTableBase):
         #if search == True:
         self.toolbar_parent.AddSeparator() 
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
+        self.entry_search.SetDescriptiveText('Volltextsuche')
         self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
         self.toolbar_parent.AddControl(self.entry_search) 
         
@@ -428,7 +429,7 @@ class FormTable(DatabaseTableBase):
     
 
 # Form frames ------------------------------------------------------------------
-class SearchFrame(wx.Frame):
+class SearchFrame(wx.Dialog):
     ID_OK = 101
     
     def __init__(self, db_table,
@@ -445,7 +446,8 @@ class SearchFrame(wx.Frame):
         self.title = title
         self.remote_parent = remote_parent
         
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(640, 480))
+        wx.Dialog.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        #wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480))
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -471,7 +473,6 @@ class SearchFrame(wx.Frame):
                                  Center().Layer(1).CloseButton(False))
         self.populate_table()
         self.aui_manager.Update()
-        self.Show()
         
         self.db_object = self.db_table.db_object
         
@@ -487,7 +488,6 @@ class SearchFrame(wx.Frame):
         
         
     def on_close(self, event=None):
-        print 'closed SearchFrame!'
         del(self.toolbar_standard)
         self.Destroy()
                 
@@ -501,7 +501,8 @@ class SearchFrame(wx.Frame):
         self.toolbar_standard.AddSeparator()
         
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
-        #self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.entry_search.SetDescriptiveText('Volltextsuche')
+        
         self.toolbar_standard.AddControl(self.entry_search)
 
     
@@ -521,7 +522,7 @@ class SearchFrame(wx.Frame):
         
     def populate(self):
         pass
-
+    
         
         
 class FormFrame(wx.Frame):
@@ -749,5 +750,6 @@ class FormFrame(wx.Frame):
         
     def add_print_function(self, function):
         self.print_function_list.append(function)
+        
         
         
