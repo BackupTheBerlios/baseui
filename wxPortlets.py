@@ -318,6 +318,9 @@ class FormTable(DatabaseTableBase):
         
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
         
+        toplevel_frame = self.portlet_parent.GetTopLevelParent()
+        
+        self.frame_preferences = FormTablePreferences(parent=toplevel_frame, title='Einstellungen', remote_parent=self)
         self.toolbar_parent = toolbar_parent
         self.help_path = help_path
         
@@ -354,8 +357,7 @@ class FormTable(DatabaseTableBase):
         
         
     def on_preferences(self, event=None):
-        toplevel_frame = self.portlet_parent.GetTopLevelParent()
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, title='Einstellungen')
+        #self.frame_preferences = FormTablePreferences(parent=toplevel_frame, title='Einstellungen', remote_parent=self)
         self.frame_preferences.ShowModal()
         
         
@@ -428,6 +430,45 @@ class FormTable(DatabaseTableBase):
         
     
 
+class FormTablePreferences(Dialogs.FormTablePreferences):
+    def __init__(self, parent, title, remote_parent):
+        Dialogs.FormTablePreferences.__init__(self, parent, title)
+        
+        self.remote_parent = remote_parent
+        
+        self.panel_export.button_export.Bind(wx.EVT_BUTTON, self.on_export)
+        
+        
+    def on_export(self, event=None):
+        content_lod = self.remote_parent.content_lod
+        definition_lod = self.remote_parent.definition_lod
+        filepath = self.panel_export.filepicker_export.GetPath()
+        
+        import csv
+        
+        column_list = content_lod[0].keys() #[]
+#        for definition_dict in definition_lod:
+#            column_name = definition_dict.get('column_name')
+#            column_label = definition_dict.get('column_label')
+#            # column_list.append(column_name)
+            
+        csv_writer = csv.DictWriter(open(filepath, 'wb'), fieldnames=column_list, delimiter=';')
+        
+        column_dict = {}
+        for column_name in column_list:
+            column_label = column_name
+            for definition_dict in definition_lod:
+                if definition_dict.get('column_name') == column_name:
+                    column_label = definition_dict.get('column_label')
+                    
+            column_dict[column_name] = column_label
+        csv_writer.writerow(column_dict)
+        
+        for content_dict in content_lod:
+            csv_writer.writerow(content_dict)
+        
+        
+        
 # Form frames ------------------------------------------------------------------
 class SearchFrame(wx.Dialog):
     ID_OK = 101
@@ -642,7 +683,7 @@ class FormFrame(wx.Frame):
             
         
     def on_preferences(self, event=None):
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=self, title='Einstellungen')
+        self.frame_preferences = FormTablePreferences(parent=self, title='Einstellungen')
         self.frame_preferences.ShowModal()
         
         

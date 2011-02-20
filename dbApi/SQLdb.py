@@ -76,10 +76,7 @@ def delegate_object(from_object, into_object):
             into_object.__setattr__(argument, from_object.__getattribute__(argument))
             
             
-            
-# Databases --------------------------------------------------------------------
-#class connector(object):
-    
+
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
@@ -196,6 +193,8 @@ class generic_database(object):
             Be careful, because the content is untransformed and thus, comes
             a little different from database to database! '''
         
+        sql_command = str(sql_command)
+        
         try:
             if self.debug: print sql_command
             self.cursor.execute(sql_command)
@@ -259,8 +258,8 @@ class generic_database(object):
                 column_dict = {}
                 for column_name in column_list:
                     column_dict[column_name] = column_name
-                    
                 csv_writer.writerow(column_dict)
+                
                 for content_dict in content_lod:
                     csv_writer.writerow(content_dict)
                     

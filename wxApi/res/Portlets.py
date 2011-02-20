@@ -321,14 +321,16 @@ class TableExport ( wx.Panel ):
 		self.m_staticText121.Wrap( -1 )
 		fgSizer61.Add( self.m_staticText121, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 		
-		self.filepicker_source1 = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_SAVE|wx.FLP_USE_TEXTCTRL )
-		fgSizer61.Add( self.filepicker_source1, 0, wx.ALL|wx.EXPAND, 5 )
+		self.filepicker_export = wx.FilePickerCtrl( self, wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.DefaultSize, wx.FLP_SAVE|wx.FLP_USE_TEXTCTRL )
+		fgSizer61.Add( self.filepicker_export, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		
+		fgSizer61.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+		
+		self.button_export = wx.Button( self, wx.ID_ANY, u"Export", wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer61.Add( self.button_export, 0, wx.ALL|wx.ALIGN_RIGHT, 5 )
 		
 		fgSizer81.Add( fgSizer61, 1, wx.EXPAND, 5 )
-		
-		checklist_exportChoices = [ u"nul" ];
-		self.checklist_export = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, checklist_exportChoices, 0 )
-		fgSizer81.Add( self.checklist_export, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		sbSizer5.Add( fgSizer81, 1, wx.EXPAND, 5 )
 		
