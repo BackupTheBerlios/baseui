@@ -668,6 +668,74 @@ getok_16Image = ok_16.GetImage
 getok_16Bitmap = ok_16.GetBitmap
 
 #----------------------------------------------------------------------
+pdf_16 = PyEmbeddedImage(
+    "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"
+    "AAAAAElFTkSuQmCC")
+getpdf_16Data = pdf_16.GetData
+getpdf_16Image = pdf_16.GetImage
+getpdf_16Bitmap = pdf_16.GetBitmap
+
+#----------------------------------------------------------------------
 plus_16 = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
     "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sCBRMNLRci2g8AAABT"
@@ -721,6 +789,26 @@ right_16 = PyEmbeddedImage(
 getright_16Data = right_16.GetData
 getright_16Image = right_16.GetImage
 getright_16Bitmap = right_16.GetBitmap
+
+#----------------------------------------------------------------------
+spreadsheet_16 = PyEmbeddedImage(
+    "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAA"
+    "CXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QQWFA0J2YhE+gAAAk1JREFUOMuVkt9LU2EY"
+    "xz9nm2561vxV4FmKlXEIUiGRLIoKlBEUeCGZFIHdSH9FY111GzTQm1KDCq0LQ3LQhRQUaHc5"
+    "zWyUDPRITVtbS885O+/pYj/s1y58rr4v7/P9vN/3fV5peHj4yfr6ei+7q8vBYHAcgFAoZO+2"
+    "QqGQXSC5CiISieSVhKZp+P0KAJqmoSj+vF5jYGDgjyhFgKZpSFIOIEm59c7eWsm7FAGKX8Er"
+    "ewGIxWL09PQAEI1GaWltQbIl5qPzpQGGbpAhg4QEQCqVIi9Jf0+Rj1ca4HG7kb1eCq/j81UV"
+    "/PiqdnRJwLau50/MtX6MPGf17h22FhaJpzO5JrmCybZWvG3t/0ng8SDLMgD26D0+zc3RdOUi"
+    "ZZ0qwiGRFQLDFEgOD03Ppnh0vONl/+zb/iJA13UANh6MUbOyTMONPrLpJMn4KqYQGJaNs6oW"
+    "UwisThXn0uqZEfXw7SLA7XYjyzKJyDT7r57nRzxWNJpC8KH+EJuGC1NkMSQL77F61KeTff8k"
+    "sDe/YRlb6NaOWVLK2dPhJvy1C8PUUWu9CMvk6OhDj+PvBGZ1Dc59DeCrQRcWuiVwqpU0N6ep"
+    "z65xsnEvX1IpfCvvyXg828UEgUAgN43BQd7dH+Pg9V7qDhzBdrmoPl2HqHAQ7JB4/DlNY3yR"
+    "9skJKlV1XAqHw1OJROLC77OtnZlBfvMa89wJyhqq8Zy10Q1BZsNkekrQM/uKClV9cW1hIVDq"
+    "fzDS3X1JX1q66U4mVefPTLltg5Blw6Uoywe7um6dGhqaAPgF9PUj6TDrLfkAAAAASUVORK5C"
+    "YII=")
+getspreadsheet_16Data = spreadsheet_16.GetData
+getspreadsheet_16Image = spreadsheet_16.GetImage
+getspreadsheet_16Bitmap = spreadsheet_16.GetBitmap
 
 #----------------------------------------------------------------------
 start_16 = PyEmbeddedImage(

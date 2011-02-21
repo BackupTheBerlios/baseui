@@ -299,8 +299,8 @@ class FormTable(DatabaseTableBase):
     ID_DELETE = 103
     
     ID_PRINT = 201
-    
-    ID_PREFERENCES = 401
+    ID_EXPORT_TABLE = 202
+    #ID_PREFERENCES = 401
     ID_HELP = 402
     
     
@@ -392,6 +392,9 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
+        self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
+        
         #if search == True:
         self.toolbar_parent.AddSeparator() 
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
@@ -407,15 +410,15 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.AddControl(combobox_filter)
         
         #if preferences == True or help == True:
-        self.toolbar_parent.AddSeparator()
+        #self.toolbar_parent.AddSeparator()
         
         #if preferences == True:
-        self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+        #self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        #self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
         
-        if self.help_path <> None:
-            self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
+        #if self.help_path <> None:
+        #    self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
+        #    self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         self.toolbar_parent.Realize()
     
@@ -683,7 +686,7 @@ class FormFrame(wx.Frame):
             
         
     def on_preferences(self, event=None):
-        self.frame_preferences = FormTablePreferences(parent=self, title='Einstellungen')
+        self.frame_preferences = FormTablePreferences(parent=self, title='Einstellungen', remote_parent=self)
         self.frame_preferences.ShowModal()
         
         
@@ -767,13 +770,13 @@ class FormFrame(wx.Frame):
             self.toolbar_standard.EnableTool(self.ID_DELETE, False)
             self.toolbar_standard.EnableTool(self.ID_PRINT,  False)
             
-        self.toolbar_standard.AddSeparator()
-        self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+        #self.toolbar_standard.AddSeparator()
+        #self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
         
-        if self.help_path <> None:
-            self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
-            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
+        #if self.help_path <> None:
+        #    self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
+        #    self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         
     def get_widget(self, widget_name):
@@ -783,7 +786,7 @@ class FormFrame(wx.Frame):
     
     def add_save_function(self, function):
         self.save_function_list.append(function)
-
+        
     
     def add_delete_function(self, function):
         self.delete_function_list.append(function)
