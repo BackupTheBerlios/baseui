@@ -299,8 +299,8 @@ class FormTable(DatabaseTableBase):
     ID_DELETE = 103
     
     ID_PRINT = 201
-    
-    ID_PREFERENCES = 401
+    ID_EXPORT_TABLE = 202
+    #ID_PREFERENCES = 401
     ID_HELP = 402
     
     
@@ -318,6 +318,9 @@ class FormTable(DatabaseTableBase):
         
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
         
+        toplevel_frame = self.portlet_parent.GetTopLevelParent()
+        
+        self.frame_preferences = FormTablePreferences(parent=toplevel_frame, title='Einstellungen', remote_parent=self)
         self.toolbar_parent = toolbar_parent
         self.help_path = help_path
         
@@ -354,8 +357,7 @@ class FormTable(DatabaseTableBase):
         
         
     def on_preferences(self, event=None):
-        toplevel_frame = self.portlet_parent.GetTopLevelParent()
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=toplevel_frame, title='Einstellungen')
+        #self.frame_preferences = FormTablePreferences(parent=toplevel_frame, title='Einstellungen', remote_parent=self)
         self.frame_preferences.ShowModal()
         
         
@@ -390,9 +392,13 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap())
         self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
+        self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap())
+        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
+        
         #if search == True:
         self.toolbar_parent.AddSeparator() 
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
+        self.entry_search.SetDescriptiveText('Volltextsuche')
         self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
         self.toolbar_parent.AddControl(self.entry_search) 
         
@@ -404,15 +410,15 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.AddControl(combobox_filter)
         
         #if preferences == True or help == True:
-        self.toolbar_parent.AddSeparator()
+        #self.toolbar_parent.AddSeparator()
         
         #if preferences == True:
-        self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+        #self.toolbar_parent.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        #self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
         
-        if self.help_path <> None:
-            self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
+        #if self.help_path <> None:
+        #    self.toolbar_parent.AddLabelTool(self.ID_HELP, label="Hilfe", bitmap=IconSet16.gethelp_16Bitmap())
+        #    self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         self.toolbar_parent.Realize()
     
@@ -427,8 +433,47 @@ class FormTable(DatabaseTableBase):
         
     
 
+class FormTablePreferences(Dialogs.FormTablePreferences):
+    def __init__(self, parent, title, remote_parent):
+        Dialogs.FormTablePreferences.__init__(self, parent, title)
+        
+        self.remote_parent = remote_parent
+        
+        self.panel_export.button_export.Bind(wx.EVT_BUTTON, self.on_export)
+        
+        
+    def on_export(self, event=None):
+        content_lod = self.remote_parent.content_lod
+        definition_lod = self.remote_parent.definition_lod
+        filepath = self.panel_export.filepicker_export.GetPath()
+        
+        import csv
+        
+        column_list = content_lod[0].keys() #[]
+#        for definition_dict in definition_lod:
+#            column_name = definition_dict.get('column_name')
+#            column_label = definition_dict.get('column_label')
+#            # column_list.append(column_name)
+            
+        csv_writer = csv.DictWriter(open(filepath, 'wb'), fieldnames=column_list, delimiter=';')
+        
+        column_dict = {}
+        for column_name in column_list:
+            column_label = column_name
+            for definition_dict in definition_lod:
+                if definition_dict.get('column_name') == column_name:
+                    column_label = definition_dict.get('column_label')
+                    
+            column_dict[column_name] = column_label
+        csv_writer.writerow(column_dict)
+        
+        for content_dict in content_lod:
+            csv_writer.writerow(content_dict)
+        
+        
+        
 # Form frames ------------------------------------------------------------------
-class SearchFrame(wx.Frame):
+class SearchFrame(wx.Dialog):
     ID_OK = 101
     
     def __init__(self, db_table,
@@ -445,7 +490,8 @@ class SearchFrame(wx.Frame):
         self.title = title
         self.remote_parent = remote_parent
         
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(640, 480))
+        wx.Dialog.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        #wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480))
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -471,7 +517,6 @@ class SearchFrame(wx.Frame):
                                  Center().Layer(1).CloseButton(False))
         self.populate_table()
         self.aui_manager.Update()
-        self.Show()
         
         self.db_object = self.db_table.db_object
         
@@ -487,7 +532,6 @@ class SearchFrame(wx.Frame):
         
         
     def on_close(self, event=None):
-        print 'closed SearchFrame!'
         del(self.toolbar_standard)
         self.Destroy()
                 
@@ -501,7 +545,8 @@ class SearchFrame(wx.Frame):
         self.toolbar_standard.AddSeparator()
         
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_standard, id=wx.ID_ANY, style=wx.TE_PROCESS_ENTER)
-        #self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.entry_search.SetDescriptiveText('Volltextsuche')
+        
         self.toolbar_standard.AddControl(self.entry_search)
 
     
@@ -521,7 +566,7 @@ class SearchFrame(wx.Frame):
         
     def populate(self):
         pass
-
+    
         
         
 class FormFrame(wx.Frame):
@@ -641,7 +686,7 @@ class FormFrame(wx.Frame):
             
         
     def on_preferences(self, event=None):
-        self.frame_preferences = Dialogs.FormTablePreferences(parent=self, title='Einstellungen')
+        self.frame_preferences = FormTablePreferences(parent=self, title='Einstellungen', remote_parent=self)
         self.frame_preferences.ShowModal()
         
         
@@ -725,13 +770,13 @@ class FormFrame(wx.Frame):
             self.toolbar_standard.EnableTool(self.ID_DELETE, False)
             self.toolbar_standard.EnableTool(self.ID_PRINT,  False)
             
-        self.toolbar_standard.AddSeparator()
-        self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+        #self.toolbar_standard.AddSeparator()
+        #self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
         
-        if self.help_path <> None:
-            self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
-            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
+        #if self.help_path <> None:
+        #    self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
+        #    self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
         
         
     def get_widget(self, widget_name):
@@ -741,7 +786,7 @@ class FormFrame(wx.Frame):
     
     def add_save_function(self, function):
         self.save_function_list.append(function)
-
+        
     
     def add_delete_function(self, function):
         self.delete_function_list.append(function)
@@ -749,5 +794,6 @@ class FormFrame(wx.Frame):
         
     def add_print_function(self, function):
         self.print_function_list.append(function)
+        
         
         
