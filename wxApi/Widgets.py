@@ -4,33 +4,8 @@
 # BaseUI.wxApi.Widgets
 # by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
+
 import wx
-
-
-class DatePicker():
-    ''' This will be a widget for Date picking! '''
-    
-    def __init__(togglebutton=None, entry=None):
-        ''' togglebutton = togglebutton widget, that drops down the calendar. 
-            entry = entry widget, that contains the date. '''
-        
-        self.togglebutton = togglebutton
-        self.entry = entry
-        
-        if self.togglebutton <> None:
-            self.togglebutton.Bind(wx.EVT_TOGGLEBUTTON, self.on_toggled)
-        
-        
-    def on_toggled(self):
-        print 'toggled!'
-        
-        
-    def create(self, parent):
-        ''' Please never call, if there are already togglebutton end entry there! '''
-        
-        self.togglebutton = -1
-        self.entry = -1
-
 
 
 class TrayIcon(wx.TaskBarIcon):
