@@ -30,6 +30,11 @@ class DatabaseTableBase(object):
         
         self.primary_key = None
         self.filter = None
+        self.search_columns = []
+        self.search_string = ''
+        
+        self.delete_function_list = []
+        self.selected_row_content = None
         
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
@@ -47,6 +52,7 @@ class DatabaseTableBase(object):
 
 
     def on_cursor_changed(self, content_dic=None):
+        self.selected_row_content = content_dic
         self.primary_key = content_dic[self.primary_key_column]
         
         
@@ -83,7 +89,14 @@ class DatabaseTableBase(object):
                 self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
                 self.populate()
                 
+            for delete_function in self.delete_function_list:
+                delete_function(self.primary_key)
                 
+    
+    def add_delete_function(self, delete_function):
+        self.delete_function_list.append(delete_function)
+        
+              
     def initialize(self, definition_lod=None):
         ''' Initializes a treeview as table or tree. The definition_lod
             will be merged with the attributes_lod, thus the attributes_lod
@@ -116,17 +129,35 @@ class DatabaseTableBase(object):
             self.primary_key_column = result['column_name']
             
     
+    def build_where_clause(self):
+        if self.filter <> None:
+            clause = self.filter
+            if self.search_columns <> []:
+                clause += ' AND ('
+        else:
+            clause = ''
+        for column in self.search_columns:
+            clause += column + " LIKE '%" + self.search_string + "%' OR "
+        if self.search_columns <> []:
+            clause = clause[:len(clause)-4]
+        if self.filter <> None and self.search_columns <> []:
+            clause += ')'
+        return clause
+    
+        
     def populate(self, content_lod=None):
         #TODO: Gay again, subclassing would help immensely!
         #self.Table = DataViews.Tree(self.portlet_parent)
+        #print 'populating!'
         
         if content_lod == None:
-            if self.filter == None:
+            if self.filter == None and self.search_string == None:
                 self.content_lod = self.db_table.get_content()
             elif self.filter == False:
                 return
             else:
-                self.content_lod = self.db_table.select(where=self.filter)
+                clause = self.build_where_clause()
+                self.content_lod = self.db_table.select(where=clause)
         else:
             self.content_lod = content_lod
             
@@ -168,11 +199,21 @@ class DatabaseTableBase(object):
     def add_filter(self, filter_name=None, filter_function=None):
         self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
 
-
+        
     def set_filter(self, filter_name=None):
         pass
         
         
+    def set_search_columns(self, search_columns):
+        self.search_columns = search_columns
+        
+
+    def set_search_string(self, search_string):
+        self.search_string = search_string #str(self.entry_search.GetValue())
+        # print self.search_string, self.search_columns
+        self.populate()
+        
+
     def check_column_substitutions(self):
         ''' Search for one to one relationships in that table and if any there,
             call the do_column_substitutions function and replace them with content. ''' 
@@ -220,12 +261,13 @@ class DatabaseTableBase(object):
             else:
                 mask = u'%s' % mask
                 
-            substitute_dict = substitute_lod[0]
-            for key in substitute_dict:
-                content = str(substitute_dict[key]) 
-                substitute_dict[key] = '%s' % str(content)
+            if substitute_lod <> []:
+                substitute_dict = substitute_lod[0]
+                for key in substitute_dict:
+                    content = str(substitute_dict[key]) 
+                    substitute_dict[key] = '%s' % str(content)            
                 
-            content_dic[column_name] = str(mask) % substitute_dict
+                content_dic[column_name] = str(mask) % substitute_dict
 
             
     
@@ -348,8 +390,7 @@ class FormTable(DatabaseTableBase):
         
     
     def on_search(self, event=None):
-        widget_object = event.GetEventObject()
-        #print widget_object.GetValue()
+        self.set_search_string(self.entry_search.GetValue())
         
         
     def on_export(self, event=None):
@@ -399,7 +440,7 @@ class FormTable(DatabaseTableBase):
         self.toolbar_parent.AddSeparator() 
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
         self.entry_search.SetDescriptiveText('Volltextsuche')
-        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.entry_search.Bind(wx.EVT_TEXT_ENTER, self.on_search)
         self.toolbar_parent.AddControl(self.entry_search) 
         
         #if filter == True:
