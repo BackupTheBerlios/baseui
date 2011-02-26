@@ -9,7 +9,6 @@ import os
 import wx, wx.xrc
 
 from wx.gizmos import TreeListCtrl
-from Widgets import DatePicker
 from res import IconSet16
 
 from pprint import pprint
