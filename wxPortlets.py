@@ -18,18 +18,31 @@ from pprint import pprint
 
 
 class DatabaseTableBase(object):
-    def __init__(self, db_table, form=None, portlet_parent=None, editable=True):
+    def __init__(self, db_table, form=None, portlet_parent=None, editable=True, permissions={}):
         self.db_table = db_table
         self.db_object = db_table.db_object
         self.form = form
         self.portlet_parent = portlet_parent
         self.editable = editable
         
+        if permissions <> None:
+            self.permissions = permissions.get('table')
+            self.form_permissions = permissions.get('form')
+        else:
+            self.permissions = {}
+            self.form_permissions = {}
+        
         self.toolbar_parent = None
         self.parent_form = None
         
         self.primary_key = None
         self.filter = None
+        self.search_columns = []
+        self.search_string = ''
+        self.deleted_filter = ''
+        
+        self.delete_function_list = []
+        self.selected_row_content = None
         
         self.ErrorDialog = Dialogs.Error(parent=self.portlet_parent)
         self.HelpDialog = Dialogs.Help(parent=self.portlet_parent)
@@ -47,6 +60,7 @@ class DatabaseTableBase(object):
 
 
     def on_cursor_changed(self, content_dic=None):
+        self.selected_row_content = content_dic
         self.primary_key = content_dic[self.primary_key_column]
         
         
@@ -58,7 +72,7 @@ class DatabaseTableBase(object):
         
         try:
             self.primary_key = None
-            form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
+            form_instance = self.form(parent=self.portlet_parent, remote_parent=self, permissions=self.form_permissions)
             form_instance.populate()
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
@@ -69,7 +83,8 @@ class DatabaseTableBase(object):
             print 'no form defined!'
             return
 
-        form_instance = self.form(parent=self.portlet_parent, remote_parent=self)
+        print self.form
+        form_instance = self.form(parent=self.portlet_parent, remote_parent=self, permissions=self.form_permissions)
         form_instance.populate()
 
 
@@ -83,7 +98,14 @@ class DatabaseTableBase(object):
                 self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
                 self.populate()
                 
+            for delete_function in self.delete_function_list:
+                delete_function(self.primary_key)
                 
+    
+    def add_delete_function(self, delete_function):
+        self.delete_function_list.append(delete_function)
+        
+              
     def initialize(self, definition_lod=None):
         ''' Initializes a treeview as table or tree. The definition_lod
             will be merged with the attributes_lod, thus the attributes_lod
@@ -116,17 +138,40 @@ class DatabaseTableBase(object):
             self.primary_key_column = result['column_name']
             
     
+    def build_where_clause(self):
+        if self.filter <> None:
+            clause = self.filter
+            if self.search_columns <> []:
+                clause += ' AND ('
+        else:
+            clause = ''
+        for column in self.search_columns:
+            clause += column + " LIKE '%" + self.search_string + "%' OR "
+        if self.search_columns <> []:
+            clause = clause[:len(clause)-4]
+        if self.filter <> None and self.search_columns <> []:
+            clause += ')'
+        if self.deleted_filter <> '':
+            if clause <> '':
+                clause = '(%s) AND %s' % (clause, self.deleted_filter)
+            else:
+                clause = self.deleted_filter
+        return clause
+    
+        
     def populate(self, content_lod=None):
         #TODO: Gay again, subclassing would help immensely!
         #self.Table = DataViews.Tree(self.portlet_parent)
+        #print 'populating!'
         
         if content_lod == None:
-            if self.filter == None:
+            if self.filter == None and self.search_string == None:
                 self.content_lod = self.db_table.get_content()
             elif self.filter == False:
                 return
             else:
-                self.content_lod = self.db_table.select(where=self.filter)
+                clause = self.build_where_clause()
+                self.content_lod = self.db_table.select(where=clause)
         else:
             self.content_lod = content_lod
             
@@ -168,11 +213,21 @@ class DatabaseTableBase(object):
     def add_filter(self, filter_name=None, filter_function=None):
         self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
 
-
+        
     def set_filter(self, filter_name=None):
         pass
         
         
+    def set_search_columns(self, search_columns):
+        self.search_columns = search_columns
+        
+
+    def set_search_string(self, search_string):
+        self.search_string = search_string #str(self.entry_search.GetValue())
+        # print self.search_string, self.search_columns
+        self.populate()
+        
+
     def check_column_substitutions(self):
         ''' Search for one to one relationships in that table and if any there,
             call the do_column_substitutions function and replace them with content. ''' 
@@ -220,22 +275,25 @@ class DatabaseTableBase(object):
             else:
                 mask = u'%s' % mask
                 
-            substitute_dict = substitute_lod[0]
-            for key in substitute_dict:
-                content = str(substitute_dict[key]) 
-                substitute_dict[key] = '%s' % str(content)
+            if substitute_lod <> []:
+                substitute_dict = substitute_lod[0]
+                for key in substitute_dict:
+                    content = str(substitute_dict[key]) 
+                    substitute_dict[key] = '%s' % str(content)            
                 
-            content_dic[column_name] = str(mask) % substitute_dict
+                content_dic[column_name] = str(mask) % substitute_dict
 
             
     
 class SubTable(DatabaseTableBase):
-    def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None, editable=True):
-        DatabaseTableBase.__init__(self, db_table, form, portlet_parent, editable)
+    def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None, editable=True, permissions={}):
+        DatabaseTableBase.__init__(self, db_table, form, portlet_parent, editable, permissions)
         
         self.editable = editable
         self.parent_form = parent_form
+        self.permissions = permissions
         
+        #print 'subtable_perms:', self.permissions
         self.sizer = wx.FlexGridSizer(1, 4, 0, 0)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
@@ -264,18 +322,23 @@ class SubTable(DatabaseTableBase):
         super(SubTable, self).populate_portlet()
         self.sizer_buttons = wx.BoxSizer( wx.VERTICAL )
         
-        self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
-        self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5 )
-        self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
-        
-        if self.editable == True:
+        if self.permissions == None:
+            self.permissions = {}
+            
+        if self.permissions.get('new') <> False:
+            self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
+            self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5 )
+            self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
+            
+        if self.editable == True and self.permissions.get('edit') <> False:
             self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
             self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5 )
             self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
         
-        self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5 )
-        self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
+        if self.permissions.get('delete') <> False:
+            self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
+            self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5 )
+            self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
         
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
         self.portlet_parent.Layout()
@@ -284,9 +347,11 @@ class SubTable(DatabaseTableBase):
             if self.parent_form.primary_key <> None:
                 self.populate()
             else:
-                self.button_add.Enable(False)
-                self.button_delete.Enable(False)
-                if self.editable == True:
+                if self.permissions.get('new') <> False:
+                    self.button_add.Enable(False)
+                if self.permissions.get('delete') <> False:
+                    self.button_delete.Enable(False)
+                if self.editable == True and self.permissions.get('edit') <> False:
                     self.button_edit.Enable(False)
         else:
             self.populate()
@@ -306,7 +371,7 @@ class FormTable(DatabaseTableBase):
     
     def __init__(self, db_table, form=None, \
                  toolbar_parent=None, portlet_parent=None, \
-                 help_path=None):
+                 help_path=None, permissions={}):
         
         ''' db_object is the current opened database object.
             toolbar_parent is an aui toolbar, which has to be populated from here.
@@ -316,14 +381,15 @@ class FormTable(DatabaseTableBase):
             db_table is an instance of a sql_table.
             help_path is the path to the helpfile opened if help pressed. '''
         
-        DatabaseTableBase.__init__(self, db_table, form, portlet_parent)
+        DatabaseTableBase.__init__(self, db_table, form, portlet_parent, permissions=permissions)
         
         toplevel_frame = self.portlet_parent.GetTopLevelParent()
-        
         self.frame_preferences = FormTablePreferences(parent=toplevel_frame, title='Einstellungen', remote_parent=self)
+        
         self.toolbar_parent = toolbar_parent
         self.help_path = help_path
         
+        #print 'wxPermi:', permissions #, form
         # TODO: remove this sheenanigan asap!
         self.parent_form = None
         
@@ -348,8 +414,7 @@ class FormTable(DatabaseTableBase):
         
     
     def on_search(self, event=None):
-        widget_object = event.GetEventObject()
-        #print widget_object.GetValue()
+        self.set_search_string(self.entry_search.GetValue())
         
         
     def on_export(self, event=None):
@@ -377,29 +442,43 @@ class FormTable(DatabaseTableBase):
     def populate_toolbar(self):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
+        if self.permissions == None:
+            self.permissions = {}
+        
         if self.form <> None:
-            self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
-    
-            self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
-    
-            self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap())
-            self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete, id=self.ID_DELETE)
-    
+            if self.permissions.get('new') <> False:
+                self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap(), 'Neu')
+                self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
+                
+            if self.permissions.get('edit') <> False:    
+                self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap(), 'Bearbeiten')
+                self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
+
+            if self.permissions.get('delete') <> False:    
+                self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap(), u'Löschen')
+                self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete, id=self.ID_DELETE)
+        
+        if (self.permissions.get('new') or \
+            self.permissions.get('edit') or \
+            self.permissions.get('delete')) <> False:
             self.toolbar_parent.AddSeparator()
         
-        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        if self.permissions.get('print') <> False:
+            self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap(), 'Drucken')
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
-        self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap())
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
+        if self.permissions.get('export') <> False:
+            self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap(), 'Tabelle exportieren')
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
         
         #if search == True:
-        self.toolbar_parent.AddSeparator() 
+        if (self.permissions.get('print') or \
+            self.permissions.get('export')) <> False:
+            self.toolbar_parent.AddSeparator() 
+        
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
         self.entry_search.SetDescriptiveText('Volltextsuche')
-        self.entry_search.Bind(wx.EVT_TEXT, self.on_search)
+        self.entry_search.Bind(wx.EVT_TEXT_ENTER, self.on_search)
         self.toolbar_parent.AddControl(self.entry_search) 
         
         #if filter == True:
@@ -407,6 +486,7 @@ class FormTable(DatabaseTableBase):
         combobox_filter = wx.ComboBox(
             parent=self.toolbar_parent, id=-1, choices=['<alle>'],
             size=(150,-1), style=wx.CB_DROPDOWN)
+        combobox_filter.SetToolTip(wx.ToolTip('Filter'))
         self.toolbar_parent.AddControl(combobox_filter)
         
         #if preferences == True or help == True:
@@ -583,7 +663,8 @@ class FormFrame(wx.Frame):
                        xrc_path=None,
                        panel_name=None,
                        help_path=None,
-                       remote_parent=None):
+                       remote_parent=None,
+                       permissions={}):
         
         ''' db_table is the the table in which this Form writes the data. The remote_parent
             is triggered on save and close, so that the parent widget can be updated. parent
@@ -598,6 +679,9 @@ class FormFrame(wx.Frame):
         self.xrc_path = xrc_path
         self.help_path = help_path
         self.remote_parent = remote_parent
+        self.permissions = permissions
+        
+        #print 'form:', self.permissions
         
         # This lists are made to get portlets going.
         self.save_function_list = []
@@ -709,7 +793,7 @@ class FormFrame(wx.Frame):
             content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))
             content_dict = content_lod[0]
             self.form.populate(content_dict)
-            
+        
         # This populates the dropdown of comboboxes.
         definition_lod = self.form.definition_lod
         for dic in definition_lod:
@@ -722,6 +806,11 @@ class FormFrame(wx.Frame):
             fill_distinct = dic.get('fill_distinct')
             on_populate = dic.get('on_populate')
             
+            enable_list = self.permissions.get('enable')
+            if type(enable_list) == list:
+                if column_name not in enable_list:
+                    widget_object.Enable(False)
+                    
             if fill_distinct == True:
                 result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
                 for item in result:
@@ -756,14 +845,20 @@ class FormFrame(wx.Frame):
     def create_toolbar(self, dataset=True, report=True, help=True):
         self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
         
-        self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap())
-        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
+        if self.permissions == None:
+            self.permissions = {}
+            
+        if self.permissions.get('save') <> False:
+            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap())
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
         
-        self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap())
-        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
+        if self.permissions.get('delete') <> False:
+            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap())
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
         
-        self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap())
-        self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        if self.permissions.get('print') <> False:
+            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap())
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         # If no primary key is there, just deactivate delete and print!
         if self.primary_key == None:
