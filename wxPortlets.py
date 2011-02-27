@@ -102,7 +102,7 @@ class DatabaseTableBase(object):
                         delete_function(self.primary_key)
                     self.populate()
                 except Exception, inst:
-                    add_text = inst[0]
+                    add_text = str(inst[0])
                     self.ErrorDialog.show(title='Fehler', instance=inst, message=u'Fehler beim Löschen des Datensatzes!\n' + add_text)
 
                 
@@ -766,7 +766,7 @@ class FormFrame(wx.Frame):
                 self.remote_parent.populate()
                 self.on_close()
             except Exception, inst:
-                add_text = inst[0]
+                add_text = str(inst[0])
                 self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!\n' + add_text)
         
         
