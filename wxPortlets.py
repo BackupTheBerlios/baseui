@@ -24,6 +24,7 @@ class DatabaseTableBase(object):
         self.form = form
         self.portlet_parent = portlet_parent
         self.editable = editable
+        
         if permissions <> None:
             self.permissions = permissions.get('table')
             self.form_permissions = permissions.get('form')
@@ -38,6 +39,7 @@ class DatabaseTableBase(object):
         self.filter = None
         self.search_columns = []
         self.search_string = ''
+        self.deleted_filter = ''
         
         self.delete_function_list = []
         self.selected_row_content = None
@@ -149,6 +151,11 @@ class DatabaseTableBase(object):
             clause = clause[:len(clause)-4]
         if self.filter <> None and self.search_columns <> []:
             clause += ')'
+        if self.deleted_filter <> '':
+            if clause <> '':
+                clause = '(%s) AND %s' % (clause, self.deleted_filter)
+            else:
+                clause = self.deleted_filter
         return clause
     
         
@@ -340,9 +347,11 @@ class SubTable(DatabaseTableBase):
             if self.parent_form.primary_key <> None:
                 self.populate()
             else:
-                self.button_add.Enable(False)
-                self.button_delete.Enable(False)
-                if self.editable == True:
+                if self.permissions.get('new') <> False:
+                    self.button_add.Enable(False)
+                if self.permissions.get('delete') <> False:
+                    self.button_delete.Enable(False)
+                if self.editable == True and self.permissions.get('edit') <> False:
                     self.button_edit.Enable(False)
         else:
             self.populate()
@@ -441,7 +450,6 @@ class FormTable(DatabaseTableBase):
                 self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap(), 'Neu')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
                 
-                
             if self.permissions.get('edit') <> False:    
                 self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap(), 'Bearbeiten')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
@@ -449,17 +457,25 @@ class FormTable(DatabaseTableBase):
             if self.permissions.get('delete') <> False:    
                 self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap(), u'Löschen')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete, id=self.ID_DELETE)
-    
+        
+        if (self.permissions.get('new') or \
+            self.permissions.get('edit') or \
+            self.permissions.get('delete')) <> False:
             self.toolbar_parent.AddSeparator()
         
-        self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap(), 'Drucken')
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        if self.permissions.get('print') <> False:
+            self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap(), 'Drucken')
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
-        self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap(), 'Tabelle exportieren')
-        self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
+        if self.permissions.get('export') <> False:
+            self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap(), 'Tabelle exportieren')
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
         
         #if search == True:
-        self.toolbar_parent.AddSeparator() 
+        if (self.permissions.get('print') or \
+            self.permissions.get('export')) <> False:
+            self.toolbar_parent.AddSeparator() 
+        
         self.entry_search = wx.SearchCtrl(parent=self.toolbar_parent, id=-1)
         self.entry_search.SetDescriptiveText('Volltextsuche')
         self.entry_search.Bind(wx.EVT_TEXT_ENTER, self.on_search)

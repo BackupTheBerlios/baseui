@@ -70,9 +70,15 @@ def get_engines():
 def delegate_object(from_object, into_object):
     ''' This delegates all attributes from_object to into_object. '''
     
+    into_arguments = dir(into_object)
+    
     arguments = dir(from_object)
+    
+    #print into_arguments
+    #print '... ', arguments
+    #
     for argument in arguments:
-        if not argument.startswith('__'):
+        if not argument.startswith('__') and argument not in into_arguments:
             into_object.__setattr__(argument, from_object.__getattribute__(argument))
             
             
@@ -826,6 +832,8 @@ CREATE TABLE """ + self.name + """
             '''
         
         self.attributes = attributes_lod
+        #self.base_object.attributes = attributes_lod
+        #print 'base object of', self.name, 'is', self.base_object
         delegate_object(self, self.base_object)
         
         not_in_database_lod = []
@@ -1107,7 +1115,7 @@ CREATE TABLE """ + self.name + """
         return
 
 
-    def delete(self, where=None):
+    def delete(self, where):
         sql_command = 'DELETE FROM %s WHERE %s' % (self.name, where)
         try:
             self.db_object.execute(sql_command)
