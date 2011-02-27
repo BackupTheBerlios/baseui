@@ -1321,6 +1321,12 @@ class column:
                 
         if attributes_dic.has_key('referenced_table_object'):
             attributes_dic['referenced_table_name'] = attributes_dic.get('referenced_table_object').name
+            referenced_table_object = attributes_dic.get('referenced_table_object')
+            pk_columns = referenced_table_object.get_primary_key_columns()
+            #print referenced_table_object.name, pk_columns
+            attributes_dic['referenced_column_name'] = pk_columns[0]
+            #print attributes_dic
+            
             
         if attributes_dic.has_key('referenced_table_name'):
             if attributes_dic.has_key('referenced_column_name'):
@@ -1334,6 +1340,7 @@ class column:
                 referenced_table.check_attributes(referenced_table_attributes, add=True)
                 
         column_layout = column_layout.rstrip()
+        #print column_layout
         return column_layout
 
 
