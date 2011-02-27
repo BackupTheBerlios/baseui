@@ -28,9 +28,11 @@ class DatabaseTableBase(object):
         if permissions <> None:
             self.permissions = permissions.get('table')
             self.form_permissions = permissions.get('form')
+            self.userdata = permissions.get('userdata')
         else:
             self.permissions = {}
             self.form_permissions = {}
+            self.userdata = {}
         
         self.toolbar_parent = None
         self.parent_form = None
@@ -96,13 +98,13 @@ class DatabaseTableBase(object):
                 pk_column = self.db_table.get_primary_key_columns()[0]
                 try:
                     self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
+                    for delete_function in self.delete_function_list:
+                        delete_function(self.primary_key)
+                    self.populate()
                 except Exception, inst:
                     add_text = inst[0]
                     self.ErrorDialog.show(title='Fehler', instance=inst, message=u'Fehler beim Löschen des Datensatzes!\n' + add_text)
-                self.populate()
-                
-            for delete_function in self.delete_function_list:
-                delete_function(self.primary_key)
+
                 
     
     def add_delete_function(self, delete_function):
@@ -242,6 +244,7 @@ class DatabaseTableBase(object):
                     column_name = column_dic['column_name']
                     if column_dic.has_key('referenced_table_object'):
                         referenced_table_object = column_dic['referenced_table_object']
+                        column_dic['referenced_column_name'] = column_dic.get('referenced_table_object').get_primary_key_columns()[0]
                         if column_dic.has_key('referenced_column_name'):
                             referenced_column_name = column_dic['referenced_column_name']                                        
                             mask = column_dic.get('mask')
@@ -763,7 +766,8 @@ class FormFrame(wx.Frame):
                 self.remote_parent.populate()
                 self.on_close()
             except Exception, inst:
-                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!')
+                add_text = inst[0]
+                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!\n' + add_text)
         
         
     def on_print(self, event=None):
