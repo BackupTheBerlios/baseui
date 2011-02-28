@@ -8,21 +8,23 @@
 import os
 import wx, wx.xrc
 
-from wx.gizmos import TreeListCtrl
+#from wx.gizmos import TreeListCtrl
+from wx.lib.agw.hypertreelist import HyperTreeList
 from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
 
 
-class Tree(TreeListCtrl):
+class Tree(HyperTreeList):
     ''' This is a framework for the famous wxTreeControl. It builds tables
         from JSON-Definitions to make database-tables easy to draw. '''
 
     def __init__(self, parent=None):
-        TreeListCtrl.__init__(self, parent=parent, 
-                                    style=(wx.TR_HIDE_ROOT | wx.TR_FULL_ROW_HIGHLIGHT))    
+        HyperTreeList.__init__(self, parent=parent, 
+                                     agwStyle=(wx.TR_NO_LINES | wx.TR_HIDE_ROOT | wx.TR_FULL_ROW_HIGHLIGHT | wx.TR_NO_BUTTONS))    
     
+        
         self.Hide()
         self.row_activate_function = None
         self.row_right_click_function = None
@@ -256,7 +258,7 @@ class Tree(TreeListCtrl):
         self.root = self.AddRoot(text='Root')
         
         for content_dict in content_lod:
-            item = self.AppendItem(parent=self.root, text='')
+            item = self.AppendItem(self.root, text='')
             
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
@@ -276,6 +278,7 @@ class Tree(TreeListCtrl):
                 
                 #TODO: self.SetColumnEditable(column_number)
                 if data_type == 'bool':
+                    continue
                     # Boolean columns need images to go.
                     if content == True:
                         self.SetItemImage(item, self.ID_CHECKED, column_number)
@@ -288,6 +291,7 @@ class Tree(TreeListCtrl):
                     # For all other data types, just set text.
                     if type(content) <> unicode:
                         content = str(content)
+                    print content
                     self.SetItemText(item, content, column_number)
                                     
     
