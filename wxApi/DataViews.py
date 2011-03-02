@@ -9,19 +9,19 @@ import os
 import wx, wx.xrc
 
 #from wx.gizmos import TreeListCtrl
-from wx.lib.agw.hypertreelist import HyperTreeList
+from wx.lib.agw import hypertreelist
 from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
 
 
-class Tree(HyperTreeList):
+class Tree(hypertreelist.HyperTreeList):
     ''' This is a framework for the famous wxTreeControl. It builds tables
         from JSON-Definitions to make database-tables easy to draw. '''
 
     def __init__(self, parent=None):
-        HyperTreeList.__init__(self, parent=parent, 
+        hypertreelist.HyperTreeList.__init__(self, parent=parent, id=wx.ID_ANY,
                                      agwStyle=(wx.TR_NO_LINES | wx.TR_HIDE_ROOT | wx.TR_FULL_ROW_HIGHLIGHT | wx.TR_NO_BUTTONS))    
     
         
@@ -35,11 +35,12 @@ class Tree(HyperTreeList):
         self.sort_ascending = None
         self.sort_data_type = None
         
-        self.mouse_position = (0,0)
+        #print parent
+        #self.mouse_position = (0,0)
         
         self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id=wx.ID_ANY)
         self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_row_right_clicked)
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
+        #self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
         
         
     def OnCompareItems(self, a, b):
@@ -61,6 +62,7 @@ class Tree(HyperTreeList):
     
     
     def get_mouse_position(self, event=None):
+        print 'mouse_pos:', self.mouse_position
         self.mouse_position = event.GetPosition()
         
     
@@ -81,7 +83,7 @@ class Tree(HyperTreeList):
 
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
-        hit_column = self.HitTest(self.mouse_position)[2]
+        hit_column = 0 #self.HitTest(self.mouse_position)[2]
         
         for definition_dict in self.definition_lod:
             column_number = definition_dict.get('column_number')
@@ -183,7 +185,8 @@ class Tree(HyperTreeList):
                                'sortable': True,
                                'resizeable': True,
                                'reorderable': True,
-                               'width': 175}]
+                               'width': 175,
+                               'dateformat': '%d.%m.%Y}]
 
            attributes_lod = [{'column_name': 'id'
 
@@ -220,15 +223,15 @@ class Tree(HyperTreeList):
         self.ID_NOTCHECKED = self.image_list.Add(IconSet16.getnotchecked_16Bitmap())
         self.ID_FLAGGED = self.image_list.Add(IconSet16.getflagged_16Bitmap())
         self.ID_NOTFLAGGED = self.image_list.Add(IconSet16.getnotflagged_16Bitmap())
-                
+        
         self.SetImageList(self.image_list)
         
         #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         
-        # This makes table column-setup.
         column_number = 0
         for column_dict in self.definition_lod:
+
             column_label = column_dict.get('column_label')
             if column_label == None:
                 column_label = column_dict.get('column_name')
@@ -236,8 +239,14 @@ class Tree(HyperTreeList):
             visible = column_dict.get('visible')
             if visible <> False:
                 visible = True
-            
-            self.AddColumn(text=column_label, shown=visible)
+                self.AddColumn(text=column_label)
+                column_dict['column_number'] = column_number
+            else:
+                continue
+                
+            #if column_number == 0 and visible == False:
+            #    print 'column 0 must be visible at Tree!'
+            #    visible = True
             
             sortable = column_dict.get('sortable')
             if sortable <> False:
@@ -245,9 +254,10 @@ class Tree(HyperTreeList):
             
             width = column_dict.get('width')
             if width <> None:
-                self.SetColumnWidth(column_number, width)    
-            column_number += 1
+                self.SetColumnWidth(column_number, width)   
+            column_number += 1 
         self.number_of_columns = column_number
+        #self.SetMainColumn(main_column)
                 
 
     def populate(self, content_lod=None):
@@ -262,6 +272,8 @@ class Tree(HyperTreeList):
             
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
+                if column_number == None:
+                    continue
                 column_name = definition_dict.get('column_name')
                 data_type = definition_dict.get('data_type')
                 editable = definition_dict.get('editable')
@@ -278,7 +290,7 @@ class Tree(HyperTreeList):
                 
                 #TODO: self.SetColumnEditable(column_number)
                 if data_type == 'bool':
-                    continue
+                    
                     # Boolean columns need images to go.
                     if content == True:
                         self.SetItemImage(item, self.ID_CHECKED, column_number)
@@ -291,7 +303,7 @@ class Tree(HyperTreeList):
                     # For all other data types, just set text.
                     if type(content) <> unicode:
                         content = str(content)
-                    print content
+                    #print content
                     self.SetItemText(item, content, column_number)
                                     
     
