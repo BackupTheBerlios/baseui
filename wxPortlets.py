@@ -64,6 +64,7 @@ class DatabaseTableBase(object):
     def on_cursor_changed(self, content_dic=None):
         self.selected_row_content = content_dic
         self.primary_key = content_dic[self.primary_key_column]
+        #print self.selected_row_content
         
         
     # Actions -----------------------------------------------------------------
@@ -203,8 +204,8 @@ class DatabaseTableBase(object):
         sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
         
         self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
-        #self.Table.set_row_activate_function(self.on_row_activate)
-        #self.Table.set_cursor_change_function(self.on_cursor_changed)
+        self.Table.set_row_activate_function(self.on_row_activate)
+        self.Table.set_cursor_change_function(self.on_cursor_changed)
         
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:
@@ -807,7 +808,9 @@ class FormFrame(wx.Frame):
             populate_from = dic.get('populate_from')
             mask = dic.get('mask')
             referenced_table_object = dic.get('referenced_table_object')
-            referenced_column_name = dic.get('referenced_column_name')
+            if referenced_table_object <> None:
+                referenced_column_name = referenced_table_object.get_primary_key_columns()[0]
+            #referenced_column_name = dic.get('referenced_column_name')
             widget_object = dic.get('widget_object')
             column_name = dic.get('column_name')
             fill_distinct = dic.get('fill_distinct')
@@ -832,10 +835,13 @@ class FormFrame(wx.Frame):
                 continue
             if mask == None:
                 mask = '%(' +'%s' % populate_from[0] + ')s'
-                
+            
+            if referenced_table_object == None:
+                continue
+            
             populate_from.append(referenced_column_name)
-            #referenced_table_object = SQLdb.table(self.db_object, referenced_table_name)
             result = referenced_table_object.select(column_list=populate_from)
+            
             item_list = []
             for item in result:
                 widget_object.Append(mask % item, item.get(referenced_column_name))

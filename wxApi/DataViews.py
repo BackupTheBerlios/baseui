@@ -139,24 +139,25 @@ class Tree(hypertreelist.HyperTreeList):
         
         if item == None:     
             item = self.GetSelection()
-            
-        content_dict = {}
-        for definition_dict in self.definition_lod:
-            column_number = definition_dict.get('column_number')
-            column_name = definition_dict.get('column_name')
-            data_type = definition_dict.get('data_type')
-            editable = definition_dict.get('editable')
-            
-            # Check, it data_type is bool and get the value from the image_id.
-            if data_type == 'bool':
-                item_image = self.GetItemImage(item, column_number)
-                if item_image == self.ID_CHECKED:
-                    content = True
-                elif item_image == self.ID_NOTCHECKED:
-                    content = False
-            else:
-                content = self.GetItemText(item, column_number)
-            content_dict[column_name] = content
+        
+        content_dict = item.GetData()    
+#        content_dict = {}
+#        for definition_dict in self.definition_lod:
+#            column_number = definition_dict.get('column_number')
+#            column_name = definition_dict.get('column_name')
+#            data_type = definition_dict.get('data_type')
+#            editable = definition_dict.get('editable')
+#            
+#            # Check, it data_type is bool and get the value from the image_id.
+#            if data_type == 'bool':
+#                item_image = self.GetItemImage(item, column_number)
+#                if item_image == self.ID_CHECKED:
+#                    content = True
+#                elif item_image == self.ID_NOTCHECKED:
+#                    content = False
+#            else:
+#                content = self.GetItemText(item, column_number)
+#            content_dict[column_name] = content
         return content_dict
 
 
@@ -269,17 +270,22 @@ class Tree(hypertreelist.HyperTreeList):
         
         for content_dict in content_lod:
             item = self.AppendItem(self.root, text='')
+            item.SetData(content_dict)
             
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
                 if column_number == None:
                     continue
+                
                 column_name = definition_dict.get('column_name')
                 data_type = definition_dict.get('data_type')
                 editable = definition_dict.get('editable')
-                
+                widget = definition_dict.get('widget')
                 content = content_dict.get(column_name)
                 
+                if widget <> None:
+                    self.SetItemWindow(item, widget, column_number)
+            
                 if content_dict.get('#bg_colour') <> None:
                     self.SetItemBackgroundColour(item, content_dict.get('#bg_colour'))
                 if content_dict.get('#fg_colour') <> None:
