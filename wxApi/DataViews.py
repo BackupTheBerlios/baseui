@@ -51,6 +51,10 @@ class Tree(TreeListCtrl):
             a_data = '%s.%s.%s' % (a_datelist[2], a_datelist[1], a_datelist[0])
             b_data = '%s.%s.%s' % (b_datelist[2], b_datelist[1], b_datelist[0])
         
+        if self.sort_data_type == 'bool':
+            a_data = self.GetItemImage(a, self.sort_column_number)
+            b_data = self.GetItemImage(b, self.sort_column_number)
+        
         if self.sort_ascending == True:
             result = cmp(a_data, b_data)
         else:
