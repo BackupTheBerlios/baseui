@@ -552,17 +552,18 @@ class firebird_database(generic_database):
         
 class informix_database(generic_database):
     data_types = {
-        'bool': 'CHAR(1)',
-        'char': 'CHAR',
-        'varchar': 'VARCHAR',
-        'text': 'BLOB SUB_TYPE 1',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'BLOB SUB_TYPE 1',
         'integer':  'INTEGER',
         'float':    'FLOAT',
         'numeric':  'NUMERIC(%(precision)s,%(scale)s)',
+        'money':    'FLOAT',
         'date':     'DATE',
         'time':     'CHAR(8)',
         'datetime': 'DATETIME',
-        'blob': 'BLOB SUB_TYPE 0',
+        'blob':     'BLOB SUB_TYPE 0',
         }
         
     def __init__(self, base_object, engine='mysql'):
@@ -581,6 +582,7 @@ class db2_database(generic_database):
         'integer':  'INT',
         'float':    'DOUBLE',
         'numeric':  'NUMERIC',
+        'money':    'DOUBLE',
         'date':     'DATE',
         'time':     'TIME',
         'datetime': 'TIMESTAMP',
