@@ -453,24 +453,24 @@ class FormTable(DatabaseTableBase):
         
         if self.form <> None:
             if self.permissions.get('new') <> False:
-                self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap(), 'Neu')
+                self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap(), 'neu')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
                 
             if self.permissions.get('edit') <> False:    
-                self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap(), 'Bearbeiten')
+                self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap(), 'bearbeiten')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
-
+                
             if self.permissions.get('delete') <> False:    
-                self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap(), u'Löschen')
+                self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap(), u'löschen')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete, id=self.ID_DELETE)
-        
+                
         if (self.permissions.get('new') or \
             self.permissions.get('edit') or \
             self.permissions.get('delete')) <> False:
             self.toolbar_parent.AddSeparator()
         
         if self.permissions.get('print') <> False:
-            self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap(), 'Drucken')
+            self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap(), 'drucken')
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         if self.permissions.get('export') <> False:
@@ -856,15 +856,15 @@ class FormFrame(wx.Frame):
             self.permissions = {}
             
         if self.permissions.get('save') <> False:
-            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap())
+            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap(), 'speichern')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
         
         if self.permissions.get('delete') <> False:
-            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap())
+            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap(), u'löschen')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
         
         if self.permissions.get('print') <> False:
-            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap())
+            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap(), u'drucken')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         # If no primary key is there, just deactivate delete and print!

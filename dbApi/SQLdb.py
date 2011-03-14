@@ -659,6 +659,7 @@ class odbc_mssql_database(odbc_generic_database):
         'bigint':   'BIGINT',
         'float':    'FLOAT',
         'numeric':  'NUMERIC',
+        'money':    'FLOAT',
         'date':     'DATETIME',
         'time':     'CHAR(8)',
         'datetime': 'DATETIME',
