@@ -183,7 +183,7 @@ class PreferencesDialog(wx.Frame):
         eine section in der .ini-Datei. Jedes Notebook-Tab enthält ein Formular, 
         welches alle Optionen der jeweiligen section enthält. '''
     
-    self.definition = None    
+    definition = None    
     
     def __init__(self, ini_filepath):
         ''' definition_lod = [{'section_name': 'printer',  'label': 'Drucker', 'panel_object': form(), 'icon_path': '/res/icon.ico'},
