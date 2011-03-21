@@ -3,8 +3,8 @@
 # contain all modules, which are accessed from outside of this module.
 # See Python tutorial (section packages) for more information.
 
-__all__ = ['Portlets']
-__version__ = '1.0'
-__year__ = '2010'
+#__all__ = ['Portlets']
+__version__ = '1.18'
+__year__ = '2011'
 __author__ = 'Mark Muzenhardt'
 __appname__ = 'BaseUI'

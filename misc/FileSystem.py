@@ -157,14 +157,14 @@ class rtfFile(Base):
     ''' Transforms a string into a suitable rtf-Text and helps to read rtf-Files
         as well as Template them. '''
 
-    def __init__(self, path='', filename='', encoding='cp1251'):
-        Base.__init__(self, path, filename)
+    def __init__(self, filepath='', encoding='cp1251'):
+        self.filepath = filepath
         self.encoding = encoding
         self.content = None
-
+        
         try:
             self.input_file = open(self.filepath, 'r')
-            self.content = input_file.read()
+            self.content = self.input_file.read()
             self.input_file.close()
         except:
             raise

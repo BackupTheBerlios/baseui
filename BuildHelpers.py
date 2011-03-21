@@ -224,11 +224,13 @@ def makeGTK(gtk_dir, pathname, build_dir, localized=False):
 def makeResources(pathname, build_dir):
     if sys.platform.startswith('win'):
         os.system('xcopy "' + pathname + '\\res\\*" "' + pathname + build_dir + 'res\\" /E /Y')
-        os.system('xcopy "' + pathname + '\\usr\\*" "' + pathname + build_dir + 'usr\\" /E /Y')
+        #usr is no ressource any longer, because database-config should not be uninstalled!
+        #os.system('xcopy "' + pathname + '\\usr\\*" "' + pathname + build_dir + 'usr\\" /E /Y')
         os.system('xcopy "' + pathname + '\\bin\\*" "' + pathname + build_dir + 'bin\\" /E /Y')
     if sys.platform.startswith('linux'):
         os.system('cp -R ' + pathname + '/res/*' + pathname + build_dir + 'res/')
-        os.system('cp -R ' + pathname + '/usr/*' + pathname + build_dir + 'usr/')
+        #same as above (under windows).
+        #os.system('cp -R ' + pathname + '/usr/*' + pathname + build_dir + 'usr/')
         os.system('cp -R ' + pathname + '/bin/*' + pathname + build_dir + 'bin/')
         
         

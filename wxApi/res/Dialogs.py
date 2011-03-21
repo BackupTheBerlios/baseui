@@ -20,7 +20,7 @@ class Error ( wx.Dialog ):
 		
 		self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 		
-		fgSizer4 = wx.FlexGridSizer( 2, 1, 0, 0 )
+		fgSizer4 = wx.FlexGridSizer( 4, 1, 0, 0 )
 		fgSizer4.AddGrowableCol( 0 )
 		fgSizer4.AddGrowableRow( 0 )
 		fgSizer4.SetFlexibleDirection( wx.BOTH )

@@ -124,8 +124,8 @@ class LookoutSidebar(wx.Panel):
         
         wx.Panel.__init__(self, parent, id=wx.ID_ANY, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.TAB_TRAVERSAL)
         self.content_lod = content_lod
-
-        self.sizer = wx.FlexGridSizer(2, 1, 0, 0)
+        
+        self.sizer = wx.FlexGridSizer(len(self.content_lod), 1, 0, 0)
         self.sizer.AddGrowableCol(0)
         self.SetSizer(self.sizer)
         

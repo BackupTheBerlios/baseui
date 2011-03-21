@@ -63,17 +63,33 @@ def filter_lod_for_key(lod, key):
     
 
 def date_to_str(date):
+    # FIXME: Bullshit which have to go to SQLdb!
     if date <> None:
-        if type(date) == datetime.date:
+        if type(date) == datetime.date or \
+           type(date) == datetime.datetime:
             year = date.year
             month = date.month
             day = date.day
+            
+            #print type(date)
+        #elif type(date) == datetime.datetime:
+        #    print dir(date)
         else:
-            year, month, day = date.split('-')
+            if ' ' in date:
+                date = date.split(' ')[0]
+            if '-' in date:
+                year, month, day = date.split('-')
+            elif '/' in date:
+                year, day, month = date.split('/')
+            elif '.' in date:
+                day, month, year = date.split('.')
+            
+            
             year = int(year)
             month = int(month)
             day = int(day)
         date = '%02i.%02i.%04i' % (day, month, year)
+        #print date
     else:
         date = ''
     return date

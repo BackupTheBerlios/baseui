@@ -10,37 +10,105 @@ import datetime
 from pprint import pprint
 
 
-def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
-    ''' Opposite of other '''
+class SQLtoPythonTransformer(object):    
+    def __init__(self, data_types):
+        self.py_data_types = {
+            'bool':     self.bool,
+            'char':     self.char,
+            'varchar':  self.varchar,
+            'text':     self.string,
+            'integer':  self.integer,
+            'bigint':   self.long,
+            'float':    self.float,
+            'numeric':  self.numeric,
+            'date':     self.date,
+            'time':     self.time,
+            'datetime': self.datetime,
+            'blob':     self.string,
+            }
+        self.db_data_types = data_types
+    
+    
+    def transform_dict(self, content_dict, attributes_dict):
+        pass
+    
+    
+    def transform_lod(self, content_lod, attributes_lod):
+        pass
+    
+    
+    def bool(self, value, attributes):
+        pass
+    
+    
+    def char(self, value, attributes):
+        pass
+    
+    
+    def varchar(self, value, attributes):
+        pass
+    
+    
+    def integer(self, value, attributes):
+        pass
+    
+    
+    def long(self, value, attributes):
+        pass
+    
+    
+    def float(self, value, attributes):
+        pass
+    
+    
+    def numeric(self, value, attributes):
+        pass
+    
+    
+    def date(self, value, attributes):
+        pass
+    
+    
+    def time(self, value, attributes):
+        pass
+    
+    
+    def datetime(self, value, attributes):
+        pass
 
-    if data_type == datetime.datetime:
-        sql_data_type = 'datetime'
-    elif data_type == datetime.date:
-        sql_data_type = 'date'
-    elif data_type == datetime.time:
-        sql_data_type = 'time'
-    elif data_type == str and length <= 255:
-        if mssql == True:
-            sql_data_type = 'nvarchar'
-        else:
-            sql_data_type = 'varchar'
-    elif data_type == int:
-        sql_data_type = 'int'
-    elif data_type == long:
-        sql_data_type = 'bigint'
-    elif data_type == bool:
-        sql_data_type = 'boolean'
-    elif data_type == float:
-        sql_data_type = 'float'
-    return sql_data_type
+
+
+#def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
+#    ''' Opposite of other '''
+#
+#    if data_type == datetime.datetime:
+#        sql_data_type = 'datetime'
+#    elif data_type == datetime.date:
+#        sql_data_type = 'date'
+#    elif data_type == datetime.time:
+#        sql_data_type = 'time'
+#    elif data_type == str and length <= 255:
+#        if mssql == True:
+#            sql_data_type = 'nvarchar'
+#        else:
+#            sql_data_type = 'varchar'
+#    elif data_type == int:
+#        sql_data_type = 'int'
+#    elif data_type == long:
+#        sql_data_type = 'bigint'
+#    elif data_type == bool:
+#        sql_data_type = 'boolean'
+#    elif data_type == float:
+#        sql_data_type = 'float'
+#    return sql_data_type
 
 
 def write_transform(content, engine):
     if content == None:
         new_content = 'NULL'
-    elif content == False and engine == 'sqlite':
+    elif content == False and (engine == 'sqlite' or engine == 'odbc'):
         new_content = 0
-    elif content == True and engine == 'sqlite':
+    elif content == True and (engine == 'sqlite' or engine == 'odbc'):
         new_content = 1
     elif type(content) == str or type(content) == unicode:
         new_content = "'%s'" % content.rstrip().replace("'", "''")
@@ -51,9 +119,13 @@ def write_transform(content, engine):
     return new_content
     
 
-def normalize_content(attributes_lod, content_lod, encoding=None):
+def normalize_content(attributes_lod, content_lod, db_object=None):
     ''' This converts database dependent things to clear python types. '''
     
+    if db_object <> None:
+        encoding = db_object.encoding
+        # print db_object, encoding
+        
     if attributes_lod == None:
         return content_lod
     
@@ -69,6 +141,8 @@ def normalize_content(attributes_lod, content_lod, encoding=None):
                             content_dic[column_name] = transform_bool(content)
                         if data_type.lower() == 'datetime':
                             content_dic[column_name] = transform_timestamp(content)
+                        if data_type.lower() == 'date':
+                            content_dic[column_name] = transform_date(content)
                         if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:
                             content_dic[column_name] = transform_string(content, encoding)
     return content_lod
@@ -84,7 +158,17 @@ def transform_string(content, encoding=None):
             pass
     return content
                           
-                                
+
+def transform_date(content, strformat='%d.%m.%Y'):
+    if type(content) == datetime.datetime or \
+       type(content) == datetime.date:
+        try:
+            content = content.strftime(strformat)
+        except Exception, inst:
+            print inst
+    return content
+
+
 def transform_timestamp(content, strformat='%d.%m.%y %H:%M:%S'):
     if type(content) == datetime.datetime:
         try:

@@ -8,6 +8,7 @@
 import Transformations 
    
 from copy import copy
+from pprint import pprint
 
 
 def get_engines():
@@ -66,14 +67,22 @@ def get_engines():
 
 
 
-def inherit_class(from_class, into_class):
-    arguments = dir(from_class)
+def delegate_object(from_object, into_object):
+    ''' This delegates all attributes from_object to into_object. '''
+    
+    into_arguments = dir(into_object)
+    
+    arguments = dir(from_object)
+    
+    #print into_arguments
+    #print '... ', arguments
+    #
     for argument in arguments:
-        if not argument.startswith('__'):
-            into_class.__setattr__(argument, from_class.__getattribute__(argument))
+        if not argument.startswith('__') and argument not in into_arguments:
+            into_object.__setattr__(argument, from_object.__getattribute__(argument))
             
-# Databases --------------------------------------------------------------------
             
+
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
@@ -99,13 +108,13 @@ class database(object):
         if self.engine == "odbc":
             __database = odbc_generic_database(self)
             
-        inherit_class(__database, self)
+        delegate_object(__database, self)
         
 
             
 class generic_database(object):
-    def __init__(self, main_class, engine='', debug=False):
-        self.main_class = main_class
+    def __init__(self, base_object, engine='', debug=False):
+        self.base_object = base_object
         self.engine = engine.lower()
         self.driver = None
         self.debug = debug
@@ -140,7 +149,7 @@ class generic_database(object):
     def set_arguments(self, **kwargs):
         self.name = kwargs.get('database')
         self.driver = kwargs.get('driver')
-        inherit_class(self, self.main_class)
+        delegate_object(self, self.base_object)
         
         
     def drop(self, database):
@@ -168,6 +177,7 @@ class generic_database(object):
             if self.debug: print sql_command
             self.cursor.execute(sql_command)
         except:
+            print sql_command
             raise
 
         tmp_result = self.cursor.fetchall()
@@ -189,10 +199,13 @@ class generic_database(object):
             Be careful, because the content is untransformed and thus, comes
             a little different from database to database! '''
         
+        sql_command = str(sql_command)
+        
         try:
             if self.debug: print sql_command
             self.cursor.execute(sql_command)
         except:
+            print sql_command
             raise
         
         lol_result = self.cursor.fetchall()
@@ -251,8 +264,8 @@ class generic_database(object):
                 column_dict = {}
                 for column_name in column_list:
                     column_dict[column_name] = column_name
-                    
                 csv_writer.writerow(column_dict)
+                
                 for content_dict in content_lod:
                     csv_writer.writerow(content_dict)
                     
@@ -264,24 +277,21 @@ class generic_database(object):
 
 class sqlite_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'CHAR(%(length)s)',
-        'text': 'TEXT',
-        # 'password': 'CHAR(%(length)s)',
-        'blob': 'BLOB',
-        # 'upload': 'CHAR(%(length)s)',
-        'integer': 'INTEGER',
-        'double': 'DOUBLE',
-        'decimal': 'DOUBLE',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'CHAR',
+        'text':     'TEXT',
+        'integer':  'INTEGER',
+        'float':    'DOUBLE',
+        'numeric':  'DOUBLE',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        # 'id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
-        # 'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob': 'BLOB',
         }
         
-    def __init__(self, main_class, engine='sqlite'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='sqlite'):
+        generic_database.__init__(self, base_object, engine)
         
         import sqlite3
         self.connector = sqlite3
@@ -290,7 +300,6 @@ class sqlite_database(generic_database):
     def connect(self, **kwargs):
         self.connection = self.connector.connect(kwargs['filepath'])
         self.cursor = self.connection.cursor()
-		
         self.set_arguments(**kwargs)
         return self.connection
         
@@ -310,28 +319,25 @@ class sqlite_database(generic_database):
         
 class postgresql_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
+        'bool': 'BOOL',
+        'char': 'CHAR',
+        'varchar': 'VARCHAR',
         'text': 'TEXT',
-        # 'password': 'VARCHAR(%(length)s)',
-        'blob': 'BYTEA',
-        # 'upload': 'VARCHAR(%(length)s)',
         'integer': 'INTEGER',
-        'double': 'FLOAT8',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
+        'float': 'FLOAT8',
+        'numeric': 'NUMERIC',
         'date': 'DATE',
         'time': 'TIME',
         'datetime': 'TIMESTAMP',
-        # 'id': 'SERIAL PRIMARY KEY',
-        # 'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob': 'BYTEA',
         }
     
     encodings = {'utf8':    'utf-8',
                  'win1252': 'cp1252',
                  'latin1':  'latin-1'}
     
-    def __init__(self, main_class, engine='psycopg2'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='psycopg2'):
+        generic_database.__init__(self, base_object, engine)
         
         if 'psycopg2' in self.engine:
             import psycopg2
@@ -342,14 +348,9 @@ class postgresql_database(generic_database):
         
             
     def connect(self, **kwargs):
-        self.connection = self.connector.connect(database="'%s'" % kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
-
+        super(postgresql_database, self).connect(**kwargs)
         if 'pscopg2' in self.engine:
             self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-            
-        self.cursor = self.connection.cursor()
-        self.encoding = self.get_encoding()
-        self.set_arguments(**kwargs)
         return self.connection
     
     
@@ -408,26 +409,21 @@ class postgresql_database(generic_database):
         
 class mssql_database(generic_database):
     data_types = {
-        'boolean': 'BIT',
-        'string': 'VARCHAR(%(length)s)',
+        'bool': 'BIT',
+        'char': 'CHAR',
+        'varchar': 'VARCHAR',
         'text': 'TEXT',
-        # 'password': 'VARCHAR(%(length)s)',
-        'blob': 'IMAGE',
-        # 'upload': 'VARCHAR(%(length)s)',
         'integer': 'INT',
-        'double': 'FLOAT',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
+        'float': 'FLOAT',
+        'numeric': 'NUMERIC',
         'date': 'DATETIME',
         'time': 'CHAR(8)',
         'datetime': 'DATETIME',
-        # 'id': 'INT IDENTITY PRIMARY KEY',
-        # 'reference': 'INT, CONSTRAINT %(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        # 'reference FK': ', CONSTRAINT FK_%(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        # 'reference TFK': ' CONSTRAINT FK_%(foreign_table)s_PK FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s',
+        'blob': 'IMAGE',
         }
         
-    def __init__(self, main_class, engine='mssql'):
-        generic_database.__init__(self, main_class, engine)
+    def __init__(self, base_object, engine='mssql'):
+        generic_database.__init__(self, base_object, engine)
         
         import pymssql
         self.connector = pymssql
@@ -443,24 +439,21 @@ class mssql_database(generic_database):
                     
 class mysql_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
-        'text': 'LONGTEXT',
-        # 'password': 'VARCHAR(%(length)s)',
-        'blob': 'LONGBLOB',
-        # 'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INT',
-        'double': 'DOUBLE',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'TIME',
+        'boolean':  'BOOL',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'LONGTEXT',
+        'integer':  'INT',
+        'float':    'DOUBLE',
+        'numeric':  'NUMERIC',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'DATETIME',
-        # 'id': 'INT AUTO_INCREMENT NOT NULL',
-        # 'reference': 'INT, INDEX %(field_name)s__idx (%(field_name)s), FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob':     'LONGBLOB',
         }
         
-    def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, engine)
+    def __init__(self, base_object, engine='mysql'):
+        generic_database.__init__(self, base_object, engine)
         
         import MySQLdb
         self.connector = MySQLdb
@@ -513,24 +506,21 @@ class mysql_database(generic_database):
     
 class oracle_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR2(%(length)s)',
+        'bool': 'CHAR(1)',
+        'char': 'CHAR2',
+        'varchar': 'VARCHAR2',
         'text': 'CLOB',
-        #'password': 'VARCHAR2(%(length)s)',
-        'blob': 'CLOB',
-        #'upload': 'VARCHAR2(%(length)s)',
         'integer': 'INT',
-        'double': 'FLOAT',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
+        'float': 'FLOAT',
+        'numeric': 'NUMERIC',
         'date': 'DATE',
         'time': 'CHAR(8)',
         'datetime': 'DATE',
-        #'id': 'NUMBER PRIMARY KEY',
-        #'reference': 'NUMBER, CONSTRAINT %(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob': 'CLOB',
         }
         
-    def __init__(self, main_class, engine='oracle'):
-        generic_database.__init__(self, engine)
+    def __init__(self, base_object, engine='oracle'):
+        generic_database.__init__(self, base_object, engine)
         
         import cx_Oracle
         self.connector = cx_Oracle
@@ -539,23 +529,20 @@ class oracle_database(generic_database):
         
 class firebird_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
-        'text': 'BLOB SUB_TYPE 1',
-        #'password': 'VARCHAR(%(length)s)',
-        'blob': 'BLOB SUB_TYPE 0',
-        #'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INTEGER',
-        'double': 'DOUBLE PRECISION',
-        'decimal': 'DECIMAL(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'BLOB SUB_TYPE 1',
+        'integer':  'INTEGER',
+        'float':    'DOUBLE PRECISION',
+        'numeric':  'DECIMAL(%(precision)s,%(scale)s)',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        #'id': 'INTEGER PRIMARY KEY',
-        #'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
+        'blob':     'BLOB SUB_TYPE 0',
         }
         
-    def __init__(self, main_class, engine='mysql'):
+    def __init__(self, base_object, engine='mysql'):
         generic_database.__init__(self, engine)
         
         # import MySQLdb
@@ -565,26 +552,21 @@ class firebird_database(generic_database):
         
 class informix_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
+        'bool': 'CHAR(1)',
+        'char': 'CHAR',
+        'varchar': 'VARCHAR',
         'text': 'BLOB SUB_TYPE 1',
-        #'password': 'VARCHAR(%(length)s)',
-        'blob': 'BLOB SUB_TYPE 0',
-        #'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INTEGER',
-        'double': 'FLOAT',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'CHAR(8)',
+        'integer':  'INTEGER',
+        'float':    'FLOAT',
+        'numeric':  'NUMERIC(%(precision)s,%(scale)s)',
+        'date':     'DATE',
+        'time':     'CHAR(8)',
         'datetime': 'DATETIME',
-        #'id': 'SERIAL',
-        #'reference': 'INTEGER REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        #'reference FK': 'REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s CONSTRAINT FK_%(table_name)s_%(field_name)s',
-        #'reference TFK': 'FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s CONSTRAINT TFK_%(table_name)s_%(field_name)s',
+        'blob': 'BLOB SUB_TYPE 0',
         }
         
-    def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, engine)
+    def __init__(self, base_object, engine='mysql'):
+        generic_database.__init__(self, base_object, engine)
         
         import informixdb
         self.connector = informixdb
@@ -592,26 +574,21 @@ class informix_database(generic_database):
         
 class db2_database(generic_database):
     data_types = {
-        'boolean': 'CHAR(1)',
-        'string': 'VARCHAR(%(length)s)',
-        'text': 'CLOB',
-        #'password': 'VARCHAR(%(length)s)',
-        'blob': 'BLOB',
-        #'upload': 'VARCHAR(%(length)s)',
-        'integer': 'INT',
-        'double': 'DOUBLE',
-        'decimal': 'NUMERIC(%(precision)s,%(scale)s)',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'CLOB',
+        'integer':  'INT',
+        'float':    'DOUBLE',
+        'numeric':  'NUMERIC',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        #'id': 'INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL',
-        #'reference': 'INT, FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        #'reference FK': ', CONSTRAINT FK_%(constraint_name)s FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_key)s ON DELETE %(on_delete_action)s',
-        #'reference TFK': ' CONSTRAINT FK_%(foreign_table)s_PK FOREIGN KEY (%(field_name)s) REFERENCES %(foreign_table)s (%(foreign_key)s) ON DELETE %(on_delete_action)s',
+        'blob':     'BLOB',
         }
         
-    def __init__(self, main_class, engine='mysql'):
-        generic_database.__init__(self, engine)
+    def __init__(self, base_object, engine='mysql'):
+        generic_database.__init__(self, base_object, engine)
         
         # import MySQLdb
         # self.connector = MySQLdb
@@ -619,11 +596,12 @@ class db2_database(generic_database):
     
     
 class odbc_generic_database(generic_database):
-    def __init__(self, main_class, engine='odbc'):
-        generic_database.__init__(self, engine)
+    def __init__(self, base_object, engine='odbc'):
+        generic_database.__init__(self, base_object, engine)
         
         import pyodbc
         self.connector = pyodbc
+        self.base_object = base_object
     
     
     def connect(self, **kwargs):
@@ -643,7 +621,16 @@ class odbc_generic_database(generic_database):
         connection_string = connection_string % kwargs
         self.connection = self.connector.connect(connection_string, autocommit=True)
         self.cursor = self.connection.cursor()
-        self.set_arguments(kwargs)
+        self.set_arguments(**kwargs)
+        #print 'ODBC driver is:', kwargs.get('driver')
+        
+        if kwargs.get('driver').lower() == 'sql server':
+            __database = odbc_mssql_database(self)
+        
+        # Write from selected odbc_class object to self, then write self to database object.
+        __super_base_object = self.base_object
+        delegate_object(__database, self)
+        delegate_object(self, __super_base_object)
         return self.connection
         
         
@@ -658,9 +645,33 @@ class odbc_generic_database(generic_database):
             for row in self.cursor.tables():
                 lof_table_names.append(row.table_name)
         return lof_table_names
+    
+    
+    
+class odbc_mssql_database(odbc_generic_database):
+    # This works for msSQL, not for others!
+    data_types = {
+        'bool':     'BIT',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'TEXT',
+        'integer':  'INT',
+        'bigint':   'BIGINT',
+        'float':    'FLOAT',
+        'numeric':  'NUMERIC',
+        'date':     'DATETIME',
+        'time':     'CHAR(8)',
+        'datetime': 'DATETIME',
+        'blob':     'IMAGE',
+        }
+    
+    def __init__(self, base_object):
+        # Write from generic_odbc instance to self to get the cursor etc.
+        delegate_object(base_object, self)
+        
+        
         
 # Database Tables --------------------------------------------------------------
-    
 class table(object):
     ''' This handles all table-related SQL orders. '''
 
@@ -673,32 +684,30 @@ class table(object):
         
         if 'pygresql' in engine or \
            'psycopg2' in engine:
-            __table = postgresql_table(db_object, table_name)
+            __table = postgresql_table(self, db_object, table_name)
         if engine == "mysql":
-            __table = mysql_table(db_object, table_name)
+            __table = mysql_table(self, db_object, table_name)
         if engine == "mssql":
-            __table = mssql_table(db_object, table_name)
+            __table = mssql_table(self, db_object, table_name)
         if engine == "oracle":
-            __table = oracle_table(db_object, table_name)
+            __table = oracle_table(self, db_object, table_name)
         if engine == "sqlite":
-            __table = sqlite_table(db_object, table_name)
+            __table = sqlite_table(self, db_object, table_name)
         if engine == "odbc":
-            __table = odbc_generic_table(db_object, table_name)
+            __table = odbc_generic_table(self, db_object, table_name)
             
-        inherit_class(__table, self)
+        delegate_object(__table, self)
 
 
 
 class generic_table(object):
-    def __init__(self, db_object, table_name):
+    def __init__(self, base_object, db_object, table_name):
+        self.base_object = base_object
         self.db_object = db_object
         self.db_cursor = db_object.cursor
         self.name = table_name
         
         self.primary_key_list = []
-        
-        print 'generic table:', self.name
-        print db_object.data_types
         
         
     def create(self, attributes_lod = None):
@@ -757,6 +766,23 @@ CREATE TABLE """ + self.name + """
         ''' Gets the table attributes and gives them back as list of dictionarys.
             See function 'create' for key description. '''
 
+        # alternative approach:
+#        alt_app = self.select(column_list=['column_name', 
+#                                           'data_type', 
+#                                           'character_maximum_length'
+#                                           'numeric_precision',
+#                                           'numeric_scale',
+#                                           'is_nullable'], 
+#                              where='table_name = %s' % self.name)
+#                    
+#        print 'Getting alternative attributes:'
+#        print '... ' + alt_app
+        
+#        for attribute in alt_app:
+#            if attribute.get('column_name') in primary_key_columns_list:
+#                attribute['is_primary_key'] = True
+#                
+            
         column_name_list              = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         data_type_list                = self.db_object.listresult("SELECT data_type FROM information_schema.columns WHERE table_name = '" + self.name + "';")
         character_maximum_length_list = self.db_object.listresult("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = '" + self.name + "'")
@@ -766,7 +792,7 @@ CREATE TABLE """ + self.name + """
 
         # Create a list of primary key columns.
         primary_key_columns_list = self.get_primary_key_columns()
-
+        
         attributes_lod = []
         for iter in xrange(len(column_name_list)):
             attributes_dict = {}
@@ -796,35 +822,28 @@ CREATE TABLE """ + self.name + """
         return attributes_lod
 
 
-    def check_attributes(self, attributes_lod, action=None, add=False, drop=False, convert=False):
+    def check_attributes(self, attributes_lod, add=False, drop=False, convert=False):
         ''' Returns differences_lod, if attributes_lod differ from the real database table definition.
             See function 'create' for key description of attributes_lod.
 
-            action: A switch with following possible values:
-                analyze = just gives back differences, does nothing else.
-                add     = gives back differences and adds only columns that not exist.
-                cleanup = adds not existing columns and drops the columns which are not defined but in the database.
-                convert = convert already existing columns with minimum possible data loss.
-                replace = like before, but drops all columns in the database which are not in attributes_lod. 
-                
             add = If True, add not existing columns to the table.
             drop = If True, drop columns which are in the database but not in attributes_lod.
             convert = If True, try to convert the content with minimum possible data loss.
             '''
-
-        if action <> None:
-            print 'check_attributes action="%s" (Table %s) is deprecated...' % (action, self.name)
-            
+        
+        self.attributes = attributes_lod
+        #self.base_object.attributes = attributes_lod
+        #print 'base object of', self.name, 'is', self.base_object
+        delegate_object(self, self.base_object)
+        
         not_in_database_lod = []
         not_in_definition_lod = []
-
+        
         # First, look up if this table exists in database.
         table_list = self.db_object.get_tables()
         
         if self.name not in table_list:
-            if action == 'add' or add == True or \
-               action == 'convert' or \
-               action == 'replace':
+            if add == True:
                 try:
                     self.create(attributes_lod)
                 except:
@@ -833,13 +852,14 @@ CREATE TABLE """ + self.name + """
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
         for attributes_dic in attributes_lod:
+            #print attributes_dic
             column_name = attributes_dic['column_name']
             if column_name not in database_column_list:
                 not_in_database_lod.append(attributes_dic)                                  
         
                 
         # Is there any difference?
-        if action <> 'analyze' or add == True:
+        if add == True:
             if len(not_in_database_lod) > 0:
                 for attributes_dic in not_in_database_lod:
                     new_column = column(self, attributes_dic['column_name'])
@@ -853,17 +873,9 @@ CREATE TABLE """ + self.name + """
     def get_content(self):
         ''' Fetches all rows and gives them back as list of dictionarys. '''
         
-        # The [%s] is a workaround for excel over odbc.
-        if self.db_object.engine == 'odbc':
-            sql_command = "SELECT * FROM [%s]"
-        else:   
-            sql_command = "SELECT * FROM %s"
-        
-        content_lod = self.db_object.dictresult(sql_command % self.name)
-        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
-        return content_lod
-
-
+        return self.select()
+    
+    
     def check_content(self, pk_column='', content_lod=[], \
                       check_exclude=[], duplicates_check=[], \
                       add=True, drop=False, update=True):
@@ -986,36 +998,46 @@ CREATE TABLE """ + self.name + """
         konstrukt = ('referenced_table_name, referenced_column_name, column_name')
         
         
-    def select(self, distinct=False, column_list=[], where='', listresult=False):
+    def select(self, distinct=False, join=[], column_list=[], where='', listresult=False):
         ''' SELECT order in SQL with transformation of output to python data types. '''
+        
+        #print self.name
+        #print self.attributes
         
         if distinct == False:
             distinct = ''
         else:
             distinct = 'DISTINCT '
             
-        if column_list == []:
-            sql_command = 'SELECT %s* FROM %s' % (distinct, self.name)
+        if join == []:
+            from_str = self.name
         else:
-            column_list_str = str(column_list)
-            column_list_str = column_list_str[1:len(column_list_str) - 1]
-            column_list_str = column_list_str.replace("'", "")
-            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, self.name)
+            from_str = self.name
+            for table in join:
+                from_str += ', %s' % table
+                
+        if column_list == []:
+            sql_command = 'SELECT %s* FROM %s' % (distinct, from_str)
+        else:
+            column_list_str = ''
+            for column_name in column_list:
+                column_list_str += column_name + ', '
+            column_list_str = column_list_str[0:len(column_list_str)-2]
+            sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, from_str)
             
         if where <> '':
             sql_command += ' WHERE %s' % where
         
         try:
             if listresult == False:
-                content_lod = self.db_object.dictresult(sql_command)     
+                content_lod = self.db_object.dictresult(sql_command)
+                content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command)
-                # return content_lod       
+                # return content_lod
         except:
             raise
-            
-        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object.encoding)
         return content_lod
     
     
@@ -1036,6 +1058,7 @@ CREATE TABLE """ + self.name + """
             content_lod = content
             
         # Iterate the rows and insert it in the table.
+        actual_pk = None
         for content_dict in content_lod:
             if key_column <> '':
                 actual_pk = self.get_last_primary_key(primary_key_column=key_column) + 1
@@ -1062,7 +1085,7 @@ CREATE TABLE """ + self.name + """
                 self.db_object.execute(sql_command)
             except:
                 raise
-        return
+        return actual_pk
 
 
     def update(self, content_dict=None, column_list=None, where=''):
@@ -1093,7 +1116,7 @@ CREATE TABLE """ + self.name + """
         return
 
 
-    def delete(self, where=None):
+    def delete(self, where):
         sql_command = 'DELETE FROM %s WHERE %s' % (self.name, where)
         try:
             self.db_object.execute(sql_command)
@@ -1104,8 +1127,8 @@ CREATE TABLE """ + self.name + """
     
 
 class sqlite_table(generic_table):
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_attributes(self):
@@ -1139,8 +1162,8 @@ class sqlite_table(generic_table):
         
         
 class postgresql_table(generic_table):    
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_primary_key_columns(self):
@@ -1169,47 +1192,92 @@ WHERE
         
         
 class mysql_table(generic_table):
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
 
         
      
 class odbc_generic_table(generic_table):
-    def __init__(self, db_object, table_name):
-        generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        generic_table.__init__(self, base_object, db_object, table_name)
         
         
     def get_attributes(self):
         ''' Gets the table attributes and gives them back as list of dictionarys.
             See function 'create' for key description. '''
 
+        # Create a list of primary key columns.
+        primary_key_list = self.get_primary_key_columns()
+        
         attributes_lod = []
         for row in self.db_object.cursor.columns(table=self.name):
+            attributes_dict = {}
+            
             is_nullable = row[17]
             if is_nullable == 'YES':
                 is_nullable = True
             else:
                 is_nullable = False
                 
-            attributes_lod.append(\
-            {
-                'column_name':              row[3],
-                'data_type':                row[5],
-                'character_maximum_length': row[6],
-                'numeric_precision':        None, #FIXME: This numeric precision is to get.
-                'numeric_scale':            None, #FIXME: This numeric scale is to get.
-                'is_nullable':              is_nullable,
-            })
+            attributes_dict['column_name'] = row[3]  
+            attributes_dict['data_type'] = row[5] 
+            attributes_dict['character_maximum_length'] = row[6]
+            attributes_dict['numeric_precision'] = None, #FIXME: This numeric precision is to get.
+            attributes_dict['numeric_scale'] = None #FIXME: This numeric scale is to get.
+            attributes_dict['is_nullable'] = is_nullable
+            
+            if row[3] in primary_key_list:
+                attributes_dict['is_primary_key'] = True
+            
+            attributes_lod.append(attributes_dict)
         return attributes_lod
+    
+    
+    def get_primary_key_columns(self):
+        ''' Uses ODBC-driver function primaryKeys
+            primaryKeys(table, catalog=None, schema=None) --> Cursor
+
+            Creates a result set of column names that make up the primary key for a table by executing the SQLPrimaryKeys function.
+
+            Each row has the following columns:
+            
+            0: table_cat
+            1: table_schem
+            2: table_name
+            3: column_name
+            4: key_seq
+            5: pk_name '''
+
+        rows = self.db_object.cursor.primaryKeys(self.name)
+        pk_columns_list = []
+        for key in rows:
+            pk_columns_list.append(key[3])
+        return pk_columns_list   
            
         
 
+class odbc_mssql_table(odbc_generic_table):
+    def __init__(self, base_object, db_object, table_name):
+        odbc_generic_table.__init__(self, base_object, db_object, table_name)
+        
+        
+        
 class odbc_excel_table(odbc_generic_table):
-    def __init__(self, db_object, table_name):
-        odbc_generic_table.__init__(self, db_object, table_name)
+    def __init__(self, base_object, db_object, table_name):
+        odbc_generic_table.__init__(self, base_object, db_object, table_name)
+        
+        
+    def get_content(self):
+        ''' Fetches all rows and gives them back as list of dictionarys. '''
+        
+        sql_command = "SELECT * FROM [%s]"
+        
+        content_lod = self.db_object.dictresult(sql_command % self.name)
+        content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object)
+        
+        
         
 # Database Table Columns -------------------------------------------------------
-        
 class column:
     def __init__(self, table_object, column_name):
         ''' This initializes a database columns where:
@@ -1233,16 +1301,34 @@ class column:
 
         column_layout = ''
         column_layout += attributes_dic['column_name'] + " "
+        
         if attributes_dic.has_key('data_type'):
-            column_layout += attributes_dic['data_type']
+            data_type_list = self.db_object.data_types.keys()
+            if attributes_dic['data_type'] in data_type_list:
+                column_layout += self.db_object.data_types[attributes_dic['data_type']]
+            else:
+                column_layout += attributes_dic['data_type']
+            
         if attributes_dic.has_key('character_maximum_length'):
             column_layout += " (" + str(attributes_dic['character_maximum_length']) + ")"
+            
         if attributes_dic.has_key('is_nullable'):
             if attributes_dic['is_nullable'] == False:
                 column_layout += " NOT NULL"
+                
         if attributes_dic.has_key('is_primary_key'):
             if attributes_dic['is_primary_key'] == True:
                 column_layout += " PRIMARY KEY"
+                
+        if attributes_dic.has_key('referenced_table_object'):
+            attributes_dic['referenced_table_name'] = attributes_dic.get('referenced_table_object').name
+            referenced_table_object = attributes_dic.get('referenced_table_object')
+            pk_columns = referenced_table_object.get_primary_key_columns()
+            #print referenced_table_object.name, pk_columns
+            attributes_dic['referenced_column_name'] = pk_columns[0]
+            #print attributes_dic
+            
+            
         if attributes_dic.has_key('referenced_table_name'):
             if attributes_dic.has_key('referenced_column_name'):
                 column_layout += " REFERENCES %(referenced_table_name)s (%(referenced_column_name)s)" % attributes_dic
@@ -1253,7 +1339,9 @@ class column:
                 if attributes_dic.has_key('character_maximum_length'):
                     referenced_table_attributes[0]['character_maximum_length'] = attributes_dic['character_maximum_length']
                 referenced_table.check_attributes(referenced_table_attributes, add=True)
+                
         column_layout = column_layout.rstrip()
+        #print column_layout
         return column_layout
 
 
@@ -1279,6 +1367,7 @@ class column:
         column_layout = self.get_attribute_layout(attributes_dic)
         # Does not work for msSQL, check out if it works for other DBs!
         # sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
+        # Note: Seems to work fine for PostgreSQL
         sql_command = 'ALTER TABLE %s ADD %s' % (self.table_object.name, column_layout)
 
         try:
@@ -1301,16 +1390,18 @@ class column:
             raise
         return content
 
-# Database Table Rows ----------------------------------------------------------
 
+
+# Database Table Rows ----------------------------------------------------------
 class row:
     ''' This handles single table-rows. '''
     
     def __init__(self, table_object):
         pass
-    
+
+
+
 # Database Users ---------------------------------------------------------------
-    
 class user:
     ''' This handles all user-related SQL orders. '''
 
