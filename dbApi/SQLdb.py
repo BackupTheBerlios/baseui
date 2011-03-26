@@ -1022,9 +1022,10 @@ CREATE TABLE """ + self.name + """
         if column_list == []:
             sql_command = 'SELECT %s* FROM %s' % (distinct, from_str)
         else:
-            column_list_str = str(column_list)
-            column_list_str = column_list_str[1:len(column_list_str) - 1]
-            column_list_str = column_list_str.replace("'", "")
+            column_list_str = ''
+            for column_name in column_list:
+                column_list_str += column_name + ', '
+            column_list_str = column_list_str[0:len(column_list_str)-2]
             sql_command = 'SELECT %s%s FROM %s' % (distinct, column_list_str, from_str)
             
         if where <> '':

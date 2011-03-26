@@ -8,21 +8,23 @@
 import os
 import wx, wx.xrc
 
-from wx.gizmos import TreeListCtrl
+#from wx.gizmos import TreeListCtrl
+from wx.lib.agw import hypertreelist
 from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
 
 
-class Tree(TreeListCtrl):
+class Tree(hypertreelist.HyperTreeList):
     ''' This is a framework for the famous wxTreeControl. It builds tables
         from JSON-Definitions to make database-tables easy to draw. '''
 
     def __init__(self, parent=None):
-        TreeListCtrl.__init__(self, parent=parent, 
-                                    style=(wx.TR_HIDE_ROOT | wx.TR_FULL_ROW_HIGHLIGHT))    
+        hypertreelist.HyperTreeList.__init__(self, parent=parent, id=wx.ID_ANY,
+                                     agwStyle=(wx.TR_NO_LINES | wx.TR_HIDE_ROOT | wx.TR_FULL_ROW_HIGHLIGHT | wx.TR_NO_BUTTONS))    
     
+        
         self.Hide()
         self.row_activate_function = None
         self.row_right_click_function = None
@@ -33,11 +35,12 @@ class Tree(TreeListCtrl):
         self.sort_ascending = None
         self.sort_data_type = None
         
-        self.mouse_position = (0,0)
+        #print parent
+        #self.mouse_position = (0,0)
         
         self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id=wx.ID_ANY)
         self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_row_right_clicked)
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
+        #self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
         
         
     def OnCompareItems(self, a, b):
@@ -63,6 +66,7 @@ class Tree(TreeListCtrl):
     
     
     def get_mouse_position(self, event=None):
+        print 'mouse_pos:', self.mouse_position
         self.mouse_position = event.GetPosition()
         
     
@@ -83,7 +87,7 @@ class Tree(TreeListCtrl):
 
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
-        hit_column = self.HitTest(self.mouse_position)[2]
+        hit_column = 0 #self.HitTest(self.mouse_position)[2]
         
         for definition_dict in self.definition_lod:
             column_number = definition_dict.get('column_number')
@@ -139,53 +143,50 @@ class Tree(TreeListCtrl):
         
         if item == None:     
             item = self.GetSelection()
-            
-        content_dict = {}
-        for definition_dict in self.definition_lod:
-            column_number = definition_dict.get('column_number')
-            column_name = definition_dict.get('column_name')
-            data_type = definition_dict.get('data_type')
-            editable = definition_dict.get('editable')
-            
-            # Check, it data_type is bool and get the value from the image_id.
-            if data_type == 'bool':
-                item_image = self.GetItemImage(item, column_number)
-                if item_image == self.ID_CHECKED:
-                    content = True
-                elif item_image == self.ID_NOTCHECKED:
-                    content = False
-            else:
-                content = self.GetItemText(item, column_number)
-            content_dict[column_name] = content
+        
+        content_dict = item.GetData()    
+#        content_dict = {}
+#        for definition_dict in self.definition_lod:
+#            column_number = definition_dict.get('column_number')
+#            column_name = definition_dict.get('column_name')
+#            data_type = definition_dict.get('data_type')
+#            editable = definition_dict.get('editable')
+#            
+#            # Check, it data_type is bool and get the value from the image_id.
+#            if data_type == 'bool':
+#                item_image = self.GetItemImage(item, column_number)
+#                if item_image == self.ID_CHECKED:
+#                    content = True
+#                elif item_image == self.ID_NOTCHECKED:
+#                    content = False
+#            else:
+#                content = self.GetItemText(item, column_number)
+#            content_dict[column_name] = content
         return content_dict
 
 
     def clear(self):
-        ''' Just clears the whole content down to an empty tabel. '''
+        ''' Just clears the whole content down to an empty table. '''
         
         return
 
-
+    
     def initialize(self, definition_lod=None, attributes_lod=None):
         ''' Initializes a treeview as table or tree. The definition_lod
             will be merged with the attributes_lod, thus the attributes_lod
             can be already contained in the definition_lod if desired!
-
-            IMPORTANT: The definition_lod should never have not-continuing numbers!
-                       If this is the case, the function 'get_selected_row_content
-                       will not work properly!
-
+    
             definition_lod = [{'column_name': 'id',
 
                                'column_label': 'Primärschlüssel',
-                               'column_number': 0,
 
                                'visible': True,
                                'editable': True,
                                'sortable': True,
                                'resizeable': True,
                                'reorderable': True,
-                               'width': 175}]
+                               'width': 175,
+                               'dateformat': '%d.%m.%Y}]
 
            attributes_lod = [{'column_name': 'id'
 
@@ -222,15 +223,15 @@ class Tree(TreeListCtrl):
         self.ID_NOTCHECKED = self.image_list.Add(IconSet16.getnotchecked_16Bitmap())
         self.ID_FLAGGED = self.image_list.Add(IconSet16.getflagged_16Bitmap())
         self.ID_NOTFLAGGED = self.image_list.Add(IconSet16.getnotflagged_16Bitmap())
-                
+        
         self.SetImageList(self.image_list)
         
         #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         
-        # This makes table column-setup.
         column_number = 0
         for column_dict in self.definition_lod:
+
             column_label = column_dict.get('column_label')
             if column_label == None:
                 column_label = column_dict.get('column_name')
@@ -238,8 +239,14 @@ class Tree(TreeListCtrl):
             visible = column_dict.get('visible')
             if visible <> False:
                 visible = True
-            
-            self.AddColumn(text=column_label, shown=visible)
+                self.AddColumn(text=column_label)
+                column_dict['column_number'] = column_number
+            else:
+                continue
+                
+            #if column_number == 0 and visible == False:
+            #    print 'column 0 must be visible at Tree!'
+            #    visible = True
             
             sortable = column_dict.get('sortable')
             if sortable <> False:
@@ -247,9 +254,10 @@ class Tree(TreeListCtrl):
             
             width = column_dict.get('width')
             if width <> None:
-                self.SetColumnWidth(column_number, width)    
-            column_number += 1
+                self.SetColumnWidth(column_number, width)   
+            column_number += 1 
         self.number_of_columns = column_number
+        #self.SetMainColumn(main_column)
                 
 
     def populate(self, content_lod=None):
@@ -260,16 +268,23 @@ class Tree(TreeListCtrl):
         self.root = self.AddRoot(text='Root')
         
         for content_dict in content_lod:
-            item = self.AppendItem(parent=self.root, text='')
+            item = self.AppendItem(self.root, text='')
+            item.SetData(content_dict)
             
             for definition_dict in self.definition_lod: 
                 column_number = definition_dict.get('column_number')
+                if column_number == None:
+                    continue
+                
                 column_name = definition_dict.get('column_name')
                 data_type = definition_dict.get('data_type')
                 editable = definition_dict.get('editable')
-                
+                widget = definition_dict.get('widget')
                 content = content_dict.get(column_name)
                 
+                if widget <> None:
+                    self.SetItemWindow(item, widget, column_number)
+            
                 if content_dict.get('#bg_colour') <> None:
                     self.SetItemBackgroundColour(item, content_dict.get('#bg_colour'))
                 if content_dict.get('#fg_colour') <> None:
@@ -280,6 +295,7 @@ class Tree(TreeListCtrl):
                 
                 #TODO: self.SetColumnEditable(column_number)
                 if data_type == 'bool':
+                    
                     # Boolean columns need images to go.
                     if content == True:
                         self.SetItemImage(item, self.ID_CHECKED, column_number)
@@ -292,6 +308,7 @@ class Tree(TreeListCtrl):
                     # For all other data types, just set text.
                     if type(content) <> unicode:
                         content = str(content)
+                    #print content
                     self.SetItemText(item, content, column_number)
                                     
     
