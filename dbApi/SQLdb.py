@@ -628,6 +628,8 @@ class odbc_generic_database(generic_database):
         
         if kwargs.get('driver').lower() == 'sql server':
             __database = odbc_mssql_database(self)
+        else: #if '.mdb' in kwargs.get('driver').lower():
+            __database = odbc_mssql_database(self)
         
         # Write from selected odbc_class object to self, then write self to database object.
         __super_base_object = self.base_object
@@ -1034,7 +1036,11 @@ CREATE TABLE """ + self.name + """
         try:
             if listresult == False:
                 content_lod = self.db_object.dictresult(sql_command)
-                content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
+                has_attributes = dir(self)
+                if 'attributes' in has_attributes:
+                    content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
+                else:
+                    print has_attributes
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command)
@@ -1250,11 +1256,16 @@ class odbc_generic_table(generic_table):
             3: column_name
             4: key_seq
             5: pk_name '''
-
-        rows = self.db_object.cursor.primaryKeys(self.name)
+        
         pk_columns_list = []
-        for key in rows:
-            pk_columns_list.append(key[3])
+        try:
+            rows = self.db_object.cursor.primaryKeys(self.name)
+            
+            for key in rows:
+                pk_columns_list.append(key[3])
+        except Exception, inst:
+            print inst
+            
         return pk_columns_list   
            
         
