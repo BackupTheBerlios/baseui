@@ -162,24 +162,19 @@ class Tree(hypertreelist.HyperTreeList):
 
 
     def clear(self):
-        ''' Just clears the whole content down to an empty tabel. '''
+        ''' Just clears the whole content down to an empty table. '''
         
         return
 
-
+    
     def initialize(self, definition_lod=None, attributes_lod=None):
         ''' Initializes a treeview as table or tree. The definition_lod
             will be merged with the attributes_lod, thus the attributes_lod
             can be already contained in the definition_lod if desired!
-
-            IMPORTANT: The definition_lod should never have not-continuing numbers!
-                       If this is the case, the function 'get_selected_row_content
-                       will not work properly!
-
+    
             definition_lod = [{'column_name': 'id',
 
                                'column_label': 'Primärschlüssel',
-                               'column_number': 0,
 
                                'visible': True,
                                'editable': True,
