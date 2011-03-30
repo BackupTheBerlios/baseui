@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.wxPortlets module.
-# by Mark Muzenhardt, published under GPL license.
+# by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
 import wx, wx.aui
@@ -237,7 +237,7 @@ class DatabaseTableBase(object):
         ''' Search for one to one relationships in that table and if any there,
             call the do_column_substitutions function and replace them with content. ''' 
         
-        for column_dic in self.definition_lod:
+        for column_dic in self.definition_lod:    
             if column_dic.has_key('populate_from'):
                 populate_from = column_dic['populate_from']
                 if column_dic.has_key('column_name'):
@@ -249,8 +249,13 @@ class DatabaseTableBase(object):
                             referenced_column_name = column_dic['referenced_column_name']                                        
                             mask = column_dic.get('mask')
                             self.do_column_substitutions(column_name, populate_from, mask, referenced_table_object, referenced_column_name)
-        
-        
+            if column_dic.has_key('sort_from'):
+                print column_dic
+                print referenced_table_object.select()
+                print referenced_table_object.name
+            
+    
+    #def add_foreign_    
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
         ''' Substitute foreign keys with content from the foreign tables. '''
         
