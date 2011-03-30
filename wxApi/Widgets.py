@@ -7,7 +7,9 @@
 
 import wx
 
-    
+from Transformations import date_to_str
+
+
 class TrayIcon(wx.TaskBarIcon):
     def __init__(self, frame, icon):
         wx.TaskBarIcon.__init__(self)
@@ -63,7 +65,7 @@ class TrayIcon(wx.TaskBarIcon):
         
 
 def widget_populator(widget_object, widget_content):
-    print 'pop:', widget_object, widget_content
+    #print 'pop:', widget_object, widget_content
     
     # FilePickerCtrl ---------------------------------------------------
     if widget_object.__class__ == wx._controls.FilePickerCtrl:
@@ -138,14 +140,20 @@ def widget_getter(widget_object):
     # Combobox ---------------------------------------------------------
     if widget_object.__class__ == wx._controls.ComboBox:
         # If this widget has a foreign relation, get client data. Else get Value.
-        if dic.get('referenced_column_name') <> None:
-            client_data = None
-            selection = widget_object.GetSelection()
-            if selection <> -1:
+        #if dic.get('referenced_column_name') <> None:
+        # client_data = None
+        selection = widget_object.GetSelection()
+        widget_content = widget_object.GetValue()
+        
+        if selection <> -1:
+            try:
                 client_data = widget_object.GetClientData(selection)
-            widget_content = client_data
-        else:
-            widget_content = widget_object.GetValue()
+                widget_content = client_data
+            except Exception, inst:
+                pass
+        
+        #else:
+        #    widget_content = widget_object.GetValue()
         if widget_content == '':
             widget_content = None
     
@@ -163,6 +171,7 @@ def widget_getter(widget_object):
         
         if widget_content.IsValid() == False:
             widget_content = None
+            return widget_content
             
         # Not pretty, but works for MSsql over odbc.
         year = widget_content.GetYear()
@@ -179,24 +188,6 @@ def widget_getter(widget_object):
         colour = widget_object.GetColour()
         r, g, b = colour.Get()
         widget_content = '#%02x%02x%02x' % (r, g, b)
-        
-                        
-                        #print 'filepickercontent:', widget_content
-    # Make usdate from german date
-    # TODO: Whats' this date-shit here?
-#            if data_type == 'date':
-#                if widget_content <> '':
-#                    try:
-#                        day, month, year = widget_content.split('.')
-#                    except:
-#                        raise
-#                    
-#                    day = int(day)
-#                    month = int(month)
-#                    year = int(year)
-#                    widget_content = '%04i-%02i-%02i' % (year, month, day)
-#                    self.content_dict[column_name] = widget_content
-
     return widget_content
 
 
