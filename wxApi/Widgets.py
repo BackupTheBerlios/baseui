@@ -131,6 +131,8 @@ def widget_populator(widget_object, widget_content):
 
     
 def widget_getter(widget_object):
+    widget_content = None
+    
     # Textctrl ---------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.TextCtrl:
         widget_content = widget_object.GetValue()
