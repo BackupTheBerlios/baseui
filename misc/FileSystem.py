@@ -28,8 +28,29 @@ class iniFile(ConfigParser.RawConfigParser):
         ConfigParser.RawConfigParser.__init__(self)
         
         self._filepath = filepath
-
+        
+        
+    def get_option(self, section, option, default=''):
+        self.read(self._filepath)
+        
+        section_error = False
+        option_error = False
+        value = default
+        
+        try:
+            value = self.get(section, option)
+        except ConfigParser.NoSectionError:
+            section_error = True
+        except ConfigParser.NoOptionError:
+            option_error = True
+        finally:
+            if section_error == True:
+                self.add_section(section)
+            if section_error == True or option_error == True:
+                self.set(section, option, value)
+        return value
     
+        
     def get_section(self, section, option_dict):
         ''' section is simply the section as string,
             option_dict is a dict of defaults, f.e.:
@@ -59,6 +80,20 @@ class iniFile(ConfigParser.RawConfigParser):
         return section_dict
     
     
+    def save_lod(self, content_lod):
+        for content_dict in content_lod:
+            section = content_dict.get('section')
+            option = content_dict.get('option')
+            value = content_dict.get('value')
+            
+            self.set(section, option, value)
+        
+        try:
+            self.write(open(self._filepath, 'w'))
+        except:
+            raise
+            
+            
     def save_section(self, section, options_dict):
         for key in options_dict:
             self.set(section, key, options_dict[key])

@@ -9,7 +9,7 @@ import wx, wx.xrc
 
 # from wxApi import DataViews
 from misc.FileSystem import iniFile
-from wxApi.Widgets import widget_populator
+from wxApi.Widgets import widget_populator, widget_getter
 from pprint import pprint
 
 
@@ -20,7 +20,7 @@ class IniDialog(wx.Dialog):
     def __init__(self, parent, ini_path='', xrc_path='', xrc_panel=''):
         wx.Dialog.__init__ (self, parent, wx.ID_ANY, 'Einstellungen')
         
-        self.iniFile = iniFile(xrc_path)
+        self.iniFile = iniFile(ini_path)
         
         self.sizer = wx.FlexGridSizer( 2, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
@@ -61,16 +61,18 @@ class IniDialog(wx.Dialog):
     
 
     def on_ok(self, event=None):
-        print "Mkee"
+        #print "Mkee"
         self.Close()
         
     
     def on_apply(self, event=None):
         self.button_apply.Disable()
-        print "Mkee without closing the window!"
+        self.save()
+        #print "Mkee without closing the window!"
         
         
     def on_cancel(self, event=None):
+        self.save()
         self.Close()
         
     
@@ -89,19 +91,28 @@ class IniDialog(wx.Dialog):
     def populate(self):
         for definition_dict in self.definition_lod:
             widget_object = definition_dict.get('widget_object')
-            try:
-                section = definition_dict.get('section')
-                option = definition_dict.get('option')
-                value = self.iniFile.get(section, option)
-            except:
-                value = None
-                
-            widget_object = definition_dict.get('widget_object')
             
-            #if value <> None:
-            #print section, option, value, widget
+            section = definition_dict.get('section')
+            option = definition_dict.get('option')
+            default = definition_dict.get('default')
+            
+            value = self.iniFile.get_option(section, option, default)
+            widget_object = definition_dict.get('widget_object')
             widget_populator(widget_object, value)
-            #if widget_object.__class__ =
+        
                 
-    
+    def save(self):
+        for definition_dict in self.definition_lod:
+            value = widget_getter(definition_dict.get('widget_object'))
+            if value == None:
+                value = ''
+            if value == False:
+                value = 0
+            if value == True:
+                value = 1
+            definition_dict['value'] = value
+            
+            #print definition_dict
+        self.iniFile.save_lod(self.definition_lod)
+        pprint(self.definition_lod)
     
