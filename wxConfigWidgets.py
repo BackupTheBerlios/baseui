@@ -114,4 +114,5 @@ class IniDialog(wx.Dialog):
             
             #print definition_dict
         self.iniFile.save_lod(self.definition_lod)
+        pprint(self.definition_lod)
     

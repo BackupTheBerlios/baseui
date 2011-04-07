@@ -68,7 +68,7 @@ def widget_populator(widget_object, widget_content):
     #print 'pop:', widget_object, widget_content
     
     # FilePickerCtrl ---------------------------------------------------
-    if widget_object.__class__ == wx._controls.FilePickerCtrl:
+    if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
         if widget_content <> None:
             widget_object.SetPath(widget_content)
             
@@ -181,8 +181,8 @@ def widget_getter(widget_object):
         day = widget_content.GetDay()
         widget_content = '%02i.%02i.%04i' % (day, month, year)
     
-    # Filepicker -------------------------------------------------------
-    if widget_object.__class__ == wx._controls.FilePickerCtrl:
+    # Dir- and Filepicker ----------------------------------------------
+    if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
         widget_content = widget_object.GetTextCtrlValue()
         
     # Colourpicker -----------------------------------------------------
