@@ -131,9 +131,9 @@ class Tree(hypertreelist.HyperTreeList):
             
         content_lod = []
         item = self.GetRootItem()
-        while item.IsOk() <> False:
+        while item <> None:
             item = self.GetNext(item)
-            if item.IsOk():
+            if item <> None:
                 content_lod.append(self.get_selected_row_content(item))
         return content_lod
 
@@ -145,24 +145,7 @@ class Tree(hypertreelist.HyperTreeList):
         if item == None:     
             item = self.GetSelection()
         
-        content_dict = item.GetData()    
-#        content_dict = {}
-#        for definition_dict in self.definition_lod:
-#            column_number = definition_dict.get('column_number')
-#            column_name = definition_dict.get('column_name')
-#            data_type = definition_dict.get('data_type')
-#            editable = definition_dict.get('editable')
-#            
-#            # Check, it data_type is bool and get the value from the image_id.
-#            if data_type == 'bool':
-#                item_image = self.GetItemImage(item, column_number)
-#                if item_image == self.ID_CHECKED:
-#                    content = True
-#                elif item_image == self.ID_NOTCHECKED:
-#                    content = False
-#            else:
-#                content = self.GetItemText(item, column_number)
-#            content_dict[column_name] = content
+        content_dict = item.GetData()
         return content_dict
 
 
