@@ -40,8 +40,11 @@ class Tree(hypertreelist.HyperTreeList):
         #self.mouse_position = (0,0)
         
         self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id=wx.ID_ANY)
+        #self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_left_clicked)
         self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_row_right_clicked)
+        #self.Bind(wx.EVT_TR)
         #self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
+        #self.Hi
         
         
     def OnCompareItems(self, a, b):
@@ -66,11 +69,13 @@ class Tree(hypertreelist.HyperTreeList):
         return result
     
     
-    def get_mouse_position(self, event=None):
-        print 'mouse_pos:', self.mouse_position
-        self.mouse_position = event.GetPosition()
+#    def get_mouse_position(self, event=None):
+#        self.mouse_position = event.GetPosition()
+#        print 'mouse_pos:', self.mouse_position
         
     
+   # def on_row_left_clicked(self, event=None):
+        
     def on_row_right_clicked(self, event=None):
         item = event.GetItem()
         
@@ -85,10 +90,17 @@ class Tree(hypertreelist.HyperTreeList):
         if self.row_activate_function <> None:
             self.row_activate_function(row_content)
             
-
+    def on_image_clicked(self, event=None):
+        print 'image clicked!'
+        
+        
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
-        hit_column = 0 #self.HitTest(self.mouse_position)[2]
+        
+        # TODO: This method is ultra-crappy shit!
+        coords = self.ScreenToClient(wx.GetMousePosition())
+        coords = (coords[0], coords[1] - 20)
+        hit_column = self.HitTest(coords)[2]
         
         for definition_dict in self.definition_lod:
             column_number = definition_dict.get('column_number')
@@ -99,11 +111,16 @@ class Tree(hypertreelist.HyperTreeList):
                     column_name = definition_dict.get('column_name')
                     cell_content = row_content.get(column_name)
                     item = self.GetSelection()
+                    content_dict = item.GetData()
+                    
                     if cell_content in ['', None, False]:
                         self.SetItemImage(item, self.ID_CHECKED, column_number)
+                        content_dict.update({column_name: True})
                     else:
                         self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
-                    break
+                        content_dict.update({column_name: False})
+                    item.SetData(content_dict)
+                    # break
         
         if self.cursor_change_function <> None:
             self.cursor_change_function(row_content)
@@ -210,7 +227,7 @@ class Tree(hypertreelist.HyperTreeList):
         
         self.SetImageList(self.image_list)
         
-        #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
+        self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         
         column_number = 0
