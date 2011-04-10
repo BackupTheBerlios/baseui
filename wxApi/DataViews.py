@@ -296,15 +296,23 @@ class Tree(hypertreelist.HyperTreeList):
                 
                 #TODO: self.SetColumnEditable(column_number)
                 if data_type == 'bool':
-                    
+                    if content in [True, False]:
+                        widget = wx.CheckBox(self.GetMainWindow(), wx.ID_ANY)
+                        self.SetItemWindow(item, widget, column_number)
+                        if editable <> True:
+                            widget.Enable(0)
+                    #self.GetItemWindow()
                     # Boolean columns need images to go.
                     if content == True:
-                        self.SetItemImage(item, self.ID_CHECKED, column_number)
+                        #self.SetItemImage(item, self.ID_CHECKED, column_number)
+                        widget.SetValue(1)
                     elif content == False:
-                        self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
-                    else:
-                        if editable == True: #  and content == None:
-                            self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
+                        widget.SetValue(0)
+                        #self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
+                    
+                    #else:
+                        #if editable == True: #  and content == None:
+                            #self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
                 else:
                     # For all other data types, just set text.
                     if type(content) <> unicode:
