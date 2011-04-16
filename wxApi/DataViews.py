@@ -68,13 +68,6 @@ class Tree(hypertreelist.HyperTreeList):
             result = cmp(b_data, a_data)
         return result
     
-    
-#    def get_mouse_position(self, event=None):
-#        self.mouse_position = event.GetPosition()
-#        print 'mouse_pos:', self.mouse_position
-        
-    
-   # def on_row_left_clicked(self, event=None):
         
     def on_row_right_clicked(self, event=None):
         item = event.GetItem()
@@ -90,37 +83,28 @@ class Tree(hypertreelist.HyperTreeList):
         if self.row_activate_function <> None:
             self.row_activate_function(row_content)
             
-    def on_image_clicked(self, event=None):
-        print 'image clicked!'
+            
+    def on_checkbox_clicked(self, event=None):
+        # First, get the widget, then it's position in the table to get the item's data.
+        widget = event.GetEventObject()
+        pos = widget.GetPosition()
+        item, id, column = self.HitTest(pos)
+        content_dict = item.GetData()
         
+        # Then, populate the item's data with the widget value.
+        for definition_dict in self.definition_lod:
+            column_number = definition_dict.get('column_number')
+            
+            if column_number == column:
+                column_name = definition_dict.get('column_name')
+                content_dict[column_name] = widget.GetValue()
+                
+                item.SetData(content_dict)
+                break
+
         
     def on_cursor_changed(self, event=None):
         row_content = self.get_selected_row_content()
-        
-        # TODO: This method is ultra-crappy shit!
-        coords = self.ScreenToClient(wx.GetMousePosition())
-        coords = (coords[0], coords[1] - 20)
-        hit_column = self.HitTest(coords)[2]
-        
-        for definition_dict in self.definition_lod:
-            column_number = definition_dict.get('column_number')
-            data_type = definition_dict.get('data_type')
-            editable = definition_dict.get('editable')
-            if column_number == hit_column:
-                if data_type == 'bool' and editable == True: 
-                    column_name = definition_dict.get('column_name')
-                    cell_content = row_content.get(column_name)
-                    item = self.GetSelection()
-                    content_dict = item.GetData()
-                    
-                    if cell_content in ['', None, False]:
-                        self.SetItemImage(item, self.ID_CHECKED, column_number)
-                        content_dict.update({column_name: True})
-                    else:
-                        self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
-                        content_dict.update({column_name: False})
-                    item.SetData(content_dict)
-                    # break
         
         if self.cursor_change_function <> None:
             self.cursor_change_function(row_content)
@@ -220,14 +204,14 @@ class Tree(hypertreelist.HyperTreeList):
         self.ID_LEFT = self.image_list.Add(IconSet16.getleft_16Bitmap())
         self.ID_UP = self.image_list.Add(IconSet16.getup_16Bitmap())
         self.ID_DOWN = self.image_list.Add(IconSet16.getdown_16Bitmap())
-        self.ID_CHECKED = self.image_list.Add(IconSet16.getchecked_16Bitmap())
-        self.ID_NOTCHECKED = self.image_list.Add(IconSet16.getnotchecked_16Bitmap())
-        self.ID_FLAGGED = self.image_list.Add(IconSet16.getflagged_16Bitmap())
-        self.ID_NOTFLAGGED = self.image_list.Add(IconSet16.getnotflagged_16Bitmap())
+        #self.ID_CHECKED = self.image_list.Add(IconSet16.getchecked_16Bitmap())
+        #self.ID_NOTCHECKED = self.image_list.Add(IconSet16.getnotchecked_16Bitmap())
+        #self.ID_FLAGGED = self.image_list.Add(IconSet16.getflagged_16Bitmap())
+        #self.ID_NOTFLAGGED = self.image_list.Add(IconSet16.getnotflagged_16Bitmap())
         
         self.SetImageList(self.image_list)
         
-        self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
+        #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         
         column_number = 0
@@ -296,8 +280,10 @@ class Tree(hypertreelist.HyperTreeList):
                 
                 #TODO: self.SetColumnEditable(column_number)
                 if data_type == 'bool':
-                    if content in [True, False]:
+                    if content in [True, False] or editable == True:
                         widget = wx.CheckBox(self.GetMainWindow(), wx.ID_ANY)
+                        widget.Bind(wx.EVT_CHECKBOX, self.on_checkbox_clicked)
+                        
                         self.SetItemWindow(item, widget, column_number)
                         if editable <> True:
                             widget.Enable(0)
