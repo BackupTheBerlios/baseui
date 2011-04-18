@@ -183,6 +183,7 @@ class DatabaseTableBase(object):
             
         # Before populating, check if there are any substitutions from referenced tables
         self.check_column_substitutions()
+        # self.check_foreign_fields()
         
         # Check, if the Table object is still alive. If deleted, just go on.
         attr_list = dir(self.Table)
@@ -238,6 +239,19 @@ class DatabaseTableBase(object):
         ''' Search for one to one relationships in that table and if any there,
             call the do_column_substitutions function and replace them with content. ''' 
         
+        for column_dict in self.definition_lod:
+            if column_dict.has_key('get_columns'):
+                get_columns = column_dict['get_columns']
+                if column_dict.has_key('column_name'):
+                    column_name = column_dict['column_name']
+                    if column_dict.has_key('referenced_table_object'):
+                        referenced_table_object = column_dict['referenced_table_object']
+                        if column_dict.has_key('referenced_column_name'):
+                            referenced_column_name = column_dict['referenced_column_name']
+                            self.fill_foreign_columns(column_name, get_columns, referenced_table_object, referenced_column_name)
+                            
+                            
+                        
         for column_dic in self.definition_lod:    
             if column_dic.has_key('populate_from'):
                 populate_from = column_dic['populate_from']
@@ -256,7 +270,25 @@ class DatabaseTableBase(object):
                 print referenced_table_object.name
             
     
-    #def add_foreign_    
+    def fill_foreign_columns(self, column_name, get_columns, referenced_table_object, referenced_column_name):
+        for content_dict in self.content_lod:
+            foreign_key = content_dict[column_name]
+            if foreign_key in [None, 'NULL']:
+                continue
+            
+            foreign_content_dict = referenced_table_object.select(column_list=get_columns, where='%s = %i' % (referenced_column_name, foreign_key))[0]
+            #print foreign_content_dict
+            
+            new_foreign_content_dict = {}
+            for key in foreign_content_dict.keys():
+                new_key = '%s.%s' % (referenced_table_object.name, key)
+                new_foreign_content_dict[new_key] = foreign_content_dict[key]
+            content_dict.update(new_foreign_content_dict)
+            print content_dict
+            #content_dict
+            #return foreign_content_lod
+        
+    
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
         ''' Substitute foreign keys with content from the foreign tables. '''
         
