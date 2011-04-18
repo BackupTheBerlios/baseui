@@ -36,15 +36,8 @@ class Tree(hypertreelist.HyperTreeList):
         self.sort_ascending = None
         self.sort_data_type = None
         
-        #print parent
-        #self.mouse_position = (0,0)
-        
         self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id=wx.ID_ANY)
-        #self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.on_row_left_clicked)
         self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_row_right_clicked)
-        #self.Bind(wx.EVT_TR)
-        #self.Bind(wx.EVT_MOUSE_EVENTS, self.get_mouse_position)
-        #self.Hi
         
         
     def OnCompareItems(self, a, b):
@@ -59,8 +52,18 @@ class Tree(hypertreelist.HyperTreeList):
             b_data = '%s.%s.%s' % (b_datelist[2], b_datelist[1], b_datelist[0])
         
         if self.sort_data_type == 'bool':
-            a_data = self.GetItemImage(a, self.sort_column_number)
-            b_data = self.GetItemImage(b, self.sort_column_number)
+            a_widget = self.GetItemWindow(a, self.sort_column_number)
+            b_widget = self.GetItemWindow(b, self.sort_column_number)
+            
+            if a_widget <> None:
+                a_data = a_widget.GetValue()
+            else:
+                a_data = None
+                
+            if b_widget <> None:
+                b_data = b_widget.GetValue()
+            else:
+                b_data = None
         
         if self.sort_ascending == True:
             result = cmp(a_data, b_data)
@@ -204,15 +207,8 @@ class Tree(hypertreelist.HyperTreeList):
         self.ID_LEFT = self.image_list.Add(IconSet16.getleft_16Bitmap())
         self.ID_UP = self.image_list.Add(IconSet16.getup_16Bitmap())
         self.ID_DOWN = self.image_list.Add(IconSet16.getdown_16Bitmap())
-        #self.ID_CHECKED = self.image_list.Add(IconSet16.getchecked_16Bitmap())
-        #self.ID_NOTCHECKED = self.image_list.Add(IconSet16.getnotchecked_16Bitmap())
-        #self.ID_FLAGGED = self.image_list.Add(IconSet16.getflagged_16Bitmap())
-        #self.ID_NOTFLAGGED = self.image_list.Add(IconSet16.getnotflagged_16Bitmap())
         
         self.SetImageList(self.image_list)
-        
-        #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
-        #self.Bind(wx.EVT_ACTIVATE, self.on_image_clicked)
         
         column_number = 0
         for column_dict in self.definition_lod:
@@ -228,10 +224,6 @@ class Tree(hypertreelist.HyperTreeList):
                 column_dict['column_number'] = column_number
             else:
                 continue
-                
-            #if column_number == 0 and visible == False:
-            #    print 'column 0 must be visible at Tree!'
-            #    visible = True
             
             sortable = column_dict.get('sortable')
             if sortable <> False:
@@ -242,7 +234,6 @@ class Tree(hypertreelist.HyperTreeList):
                 self.SetColumnWidth(column_number, width)   
             column_number += 1 
         self.number_of_columns = column_number
-        #self.SetMainColumn(main_column)
                 
 
     def populate(self, content_lod=None):
@@ -287,104 +278,97 @@ class Tree(hypertreelist.HyperTreeList):
                         self.SetItemWindow(item, widget, column_number)
                         if editable <> True:
                             widget.Enable(0)
-                    #self.GetItemWindow()
-                    # Boolean columns need images to go.
+                            
+                    # Boolean columns need widgets to go.
                     if content == True:
-                        #self.SetItemImage(item, self.ID_CHECKED, column_number)
                         widget.SetValue(1)
                     elif content == False:
                         widget.SetValue(0)
-                        #self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
-                    
-                    #else:
-                        #if editable == True: #  and content == None:
-                            #self.SetItemImage(item, self.ID_NOTCHECKED, column_number)
                 else:
                     # For all other data types, just set text.
                     if type(content) <> unicode:
                         content = str(content)
-                    #print content
                     self.SetItemText(item, content, column_number)
                                     
     
-    def build_store(self, row_parent, row_dict):
-        row_content = []
-        # Read out definition_lod
-        for column_dict in self.definition_lod:
-            if column_dict.has_key('data_type'):
-                if row_dict.has_key(column_dict['column_name']):
-                    column_content = row_dict[column_dict['column_name']]
-                    
-                    if column_dict['data_type'] == "varchar" or \
-                       column_dict['data_type'] == "time" or \
-                       column_dict['data_type'] == "timestamp" or \
-                       column_dict['data_type'] == "text":
-                        if column_content <> None:
-                            column_content = str(column_content)
-                        else:
-                            column_content = ''
-                    if column_dict['data_type'] == "date":
-                        column_content = date_to_str(column_content)
-                    if column_dict['data_type'].startswith("int"):
-                        #TODO: Remove that 'NULL' crap after getting it into Transformations!
-                        if column_content not in [None, 'NULL']:
-                            column_content = int(column_content)
-                        else:
-                            column_content = 0
-                    if column_dict['data_type'] == "float":
-                        if column_content <> None:
-                            column_content = float(column_content)
-                        else:
-                            column_content = 0.0
-                    if column_dict['data_type'] == "bigint":
-                        if column_dict.has_key('referenced_column_name'):
-                            column_content = str(column_content)
-                        else:
-                            if column_content <> None:
-                                column_content = long(column_content)
-                            else:
-                                column_content = 0
-                    if column_dict['data_type'] == "bool":
-                        if column_content <> None:
-                            column_content = int(column_content)
-                        else:
-                            column_content = 0
-                    if column_dict['data_type'] == "#image":
-                        column_content = gtk.gdk.pixbuf_new_from_file(column_content)
-                    if column_dict['data_type'] == "#combobox":
-                        print 'column_content', column_content
-                else:
-                    if column_dict['data_type'] == "bool":
-                        column_content = False
-                    elif column_dict['data_type'].startswith("int") or \
-                         column_dict['data_type'] == "bigint":
-                        column_content = 0
-                    elif column_dict['data_type'] == "float":
-                        column_content = 0.0
-                    elif column_dict['data_type'] == "#image":
-                        column_content = gtk.gdk.pixbuf_new_from_file(PATH + "/res/empty_16.png")
-                    else:
-                        column_content = ""
-            else:
-                # This means, a column_dict has no key 'data_type'. It is not
-                # the worst idea to do absolutely nothing, isn't it?
-                pass
-
-            row_content += [column_content]
-
-
-        if row_dict.has_key('#child'):
-            row_parent = self.store.append(row_parent, row_content)
-            for node_dict in row_dict['#child']:
-                self.build_store(row_parent, node_dict)
-        else:
-            try:
-                if self.has_child_node == False:
-                    self.store.append(row_content)
-                else:
-                    self.store.append(row_parent, row_content)
-            except:
-                raise
+#    def build_store(self, row_parent, row_dict):
+#        row_content = []
+#        # Read out definition_lod
+#        for column_dict in self.definition_lod:
+#            if column_dict.has_key('data_type'):
+#                if row_dict.has_key(column_dict['column_name']):
+#                    column_content = row_dict[column_dict['column_name']]
+#                    
+#                    if column_dict['data_type'] == "varchar" or \
+#                       column_dict['data_type'] == "time" or \
+#                       column_dict['data_type'] == "timestamp" or \
+#                       column_dict['data_type'] == "text":
+#                        if column_content <> None:
+#                            column_content = str(column_content)
+#                        else:
+#                            column_content = ''
+#                    if column_dict['data_type'] == "date":
+#                        column_content = date_to_str(column_content)
+#                    if column_dict['data_type'].startswith("int"):
+#                        #TODO: Remove that 'NULL' crap after getting it into Transformations!
+#                        if column_content not in [None, 'NULL']:
+#                            column_content = int(column_content)
+#                        else:
+#                            column_content = 0
+#                    if column_dict['data_type'] == "float":
+#                        if column_content <> None:
+#                            column_content = float(column_content)
+#                        else:
+#                            column_content = 0.0
+#                    if column_dict['data_type'] == "bigint":
+#                        if column_dict.has_key('referenced_column_name'):
+#                            column_content = str(column_content)
+#                        else:
+#                            if column_content <> None:
+#                                column_content = long(column_content)
+#                            else:
+#                                column_content = 0
+#                    if column_dict['data_type'] == "bool":
+#                        if column_content <> None:
+#                            column_content = int(column_content)
+#                        else:
+#                            column_content = 0
+#                    if column_dict['data_type'] == "#image":
+#                        column_content = gtk.gdk.pixbuf_new_from_file(column_content)
+#                    if column_dict['data_type'] == "#combobox":
+#                        print 'column_content', column_content
+#                else:
+#                    if column_dict['data_type'] == "bool":
+#                        column_content = False
+#                    elif column_dict['data_type'].startswith("int") or \
+#                         column_dict['data_type'] == "bigint":
+#                        column_content = 0
+#                    elif column_dict['data_type'] == "float":
+#                        column_content = 0.0
+#                    elif column_dict['data_type'] == "#image":
+#                        column_content = gtk.gdk.pixbuf_new_from_file(PATH + "/res/empty_16.png")
+#                    else:
+#                        column_content = ""
+#            else:
+#                # This means, a column_dict has no key 'data_type'. It is not
+#                # the worst idea to do absolutely nothing, isn't it?
+#                pass
+#
+#            row_content += [column_content]
+#
+#
+#        if row_dict.has_key('#child'):
+#            row_parent = self.store.append(row_parent, row_content)
+#            for node_dict in row_dict['#child']:
+#                self.build_store(row_parent, node_dict)
+#        else:
+#            try:
+#                if self.has_child_node == False:
+#                    self.store.append(row_content)
+#                else:
+#                    self.store.append(row_parent, row_content)
+#            except:
+#                raise
 
 
     def build_definition(self, content_lod, column_list=None):
@@ -433,7 +417,6 @@ class Tree(hypertreelist.HyperTreeList):
     def set_cursor_change_function(self, cursor_change_function):
         self.cursor_change_function = cursor_change_function
         self.Bind(wx.EVT_TREE_SEL_CHANGED, self.on_cursor_changed,      id=wx.ID_ANY)
-        #self.Bind(wx.EVT_LEFT_DOWN, self.on_clicked_anywhere, id=wx.ID_ANY)
         
 
     def set_sort_column(self, column_name=None, column_label=None, column_number=None, ascending=None):
