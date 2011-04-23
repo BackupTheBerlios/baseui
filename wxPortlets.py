@@ -188,11 +188,23 @@ class DatabaseTableBase(object):
                 
                 
     def populate_portlet(self):
-        self.Table = DataViews.Tree(self.portlet_parent)
+        # Just creates a panel to draw the Table on, that buttons or else can be 
+        # attached near the Table!
+        self.main_panel = wx.Panel(self.portlet_parent)
+        sizer = self.portlet_parent.GetSizer()
+        sizer.Add(self.main_panel, 0, wx.ALL|wx.EXPAND)
+        
+        self.main_sizer = wx.FlexGridSizer(1, 1, 0, 0)
+        self.main_sizer.AddGrowableCol(0)
+        self.main_sizer.AddGrowableRow(0)
+        self.main_sizer.SetFlexibleDirection( wx.BOTH )
+        self.main_sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        self.main_panel.SetSizer(self.main_sizer)
+        
+        self.Table = DataViews.Tree(self.main_panel)
         self.Table.row_right_click_function = self.row_right_click_function
         
-        sizer = self.portlet_parent.GetSizer()
-        sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+        self.main_sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)        
         
         self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
         self.Table.set_row_activate_function(self.on_row_activate)
@@ -201,10 +213,9 @@ class DatabaseTableBase(object):
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:
             self.populate()
-            
-        self.Table.Show()
-        sizer.Layout()
-        return self.Table
+
+        self.Table.Show()       
+        return self.main_panel
         
         
     def add_filter(self, filter_name=None, filter_function=None):
