@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.dbApi.Tools module.
-# published under GPL license by Mark Muzenhardt.
+# published under LGPL license by Mark Muzenhardt.
 #===============================================================================
 
 import sys

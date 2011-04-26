@@ -2,7 +2,7 @@
 
 #===============================================================================
 # Commons DateTime module.
-# by Mark Muzenhardt, published under GPL-License.
+# by Mark Muzenhardt, published under LGPL-License.
 #===============================================================================
 
 import time

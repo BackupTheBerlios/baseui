@@ -2,7 +2,7 @@
 
 #===============================================================================
 # GTKapi DataViews module.
-# by Mark Muzenhardt, published under GPL-License.
+# by Mark Muzenhardt, published under LGPL-License.
 #===============================================================================
 
 import os

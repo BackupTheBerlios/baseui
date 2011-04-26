@@ -2,7 +2,7 @@
 
 #===============================================================================
 # Commons FileSystem module.
-# by Mark Muzenhardt, published under GPL-License.
+# by Mark Muzenhardt, published under LGPL-License.
 #===============================================================================
 
 import os, ConfigParser

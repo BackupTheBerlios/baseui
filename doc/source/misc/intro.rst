@@ -1,6 +1,5 @@
 Einführung
 ==========
-
 pyCommons bietet Module, um immer wieder benötigte Python-Algorithmen zu vereinfachen. 
 In vielen Applikationen werden folgende Module immer wieder benötigt:
 

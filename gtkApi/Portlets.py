@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.GTK Portlets module.
-# by Mark Muzenhardt, published under GPL-License.
+# by Mark Muzenhardt, published under LGPL-License.
 #
 # Portlets are pre-defined widget-groups for common things to do, but without
 # a window (or a container around it).
