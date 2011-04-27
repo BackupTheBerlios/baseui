@@ -274,9 +274,11 @@ def makeSphinx(pathname, build_dir):
     doc_config = imp.load_source('make', 'make.py')
     os.chdir(pathname)
 
-    os.system('xcopy "' + pathname + '\\doc\\build\\html" "' + pathname + build_dir + 'doc\\html\\" /E /Y')
-    os.system('xcopy "' + pathname + '\\doc\\build\\htmlhelp" "' + pathname + build_dir + 'doc\\htmlhelp\\" /E /Y')
-    os.system('xcopy "' + pathname + '\\doc\\build\\latex\*.pdf" "' + pathname + build_dir + 'doc\\" /E /Y')
+    # os.system('xcopy "' + pathname + '\\doc\\build\\html" "' + pathname + build_dir + 'doc\\html\\" /E /Y')
+    os.system('xcopy "' + pathname + '\\doc\\build\\htmlhelp" "' + pathname + build_dir + 'doc\\" /E /Y')
+    
+    # This is not needed any longer, because the pdf is copyed by make.py in the doc dir!
+    # os.system('xcopy "' + pathname + '\\doc\\build\\latex\*.pdf" "' + pathname + build_dir + 'doc\\" /E /Y')
 
 
 def makeAutorun():

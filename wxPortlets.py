@@ -88,8 +88,8 @@ class DatabaseTableBase(object):
         
         form_instance = self.form(parent=self.portlet_parent, remote_parent=self, permissions=self.form_permissions)
         form_instance.populate()
-
-
+        
+        
     def delete(self, *args, **kwargs):
         if self.primary_key <> None:
             dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
@@ -106,8 +106,7 @@ class DatabaseTableBase(object):
                     add_text = str(inst[0])
                     self.ErrorDialog.show(title='Fehler', instance=inst, message=u'Fehler beim Löschen des Datensatzes!\n' + add_text)
 
-                
-    
+        
     def add_delete_function(self, delete_function):
         self.delete_function_list.append(delete_function)
         
@@ -118,24 +117,21 @@ class DatabaseTableBase(object):
             can be already contained in the definition_lod if desired!
 
             definition_lod = [{'column_name': 'id',
-
                                'column_label': 'Primärschlüssel',
                                'column_number': 0,
-
                                'visible': True,
                                'editable': True,
                                'sortable': True,
                                'resizeable': True,
                                'reorderable': True}]
-
+                                
            attributes_lod = [{'column_name': 'id'
-
                               'data_type': 'bigint'
                               'character_maximum_length': = 20
                               'numeric_precision' = 2
                               'numeric_scale' = ?
                               'is_nullable' = True}]'''
-
+                                
         self.definition_lod = definition_lod
         self.attributes_lod = self.db_table.attributes
         
@@ -166,10 +162,6 @@ class DatabaseTableBase(object):
     
         
     def populate(self, content_lod=None):
-        #TODO: Gay again, subclassing would help immensely!
-        #self.Table = DataViews.Tree(self.portlet_parent)
-        #print 'populating!'
-        
         if content_lod == None:
             if self.filter == None and self.search_string == None:
                 self.content_lod = self.db_table.get_content()
@@ -186,7 +178,7 @@ class DatabaseTableBase(object):
         
         # Check, if the Table object is still alive. If deleted, just go on.
         attr_list = dir(self.Table)
-        if 'populate' in attr_list: #, type(attr_list)
+        if 'populate' in attr_list:
             self.Table.populate(self.content_lod)
         
         # Do callbacks for the population of higher-level widgets.
@@ -196,12 +188,23 @@ class DatabaseTableBase(object):
                 
                 
     def populate_portlet(self):
-        self.Table = DataViews.Tree(self.portlet_parent)
-        # TODO: Gaylord, would never ever be nesseccary if subclassed!
+        # Just creates a panel to draw the Table on, that buttons or else can be 
+        # attached near the Table!
+        self.main_panel = wx.Panel(self.portlet_parent)
+        sizer = self.portlet_parent.GetSizer()
+        sizer.Add(self.main_panel, 0, wx.ALL|wx.EXPAND)
+        
+        self.main_sizer = wx.FlexGridSizer(1, 1, 0, 0)
+        self.main_sizer.AddGrowableCol(0)
+        self.main_sizer.AddGrowableRow(0)
+        self.main_sizer.SetFlexibleDirection( wx.BOTH )
+        self.main_sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        self.main_panel.SetSizer(self.main_sizer)
+        
+        self.Table = DataViews.Tree(self.main_panel)
         self.Table.row_right_click_function = self.row_right_click_function
         
-        sizer = self.portlet_parent.GetSizer()
-        sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)
+        self.main_sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)        
         
         self.Table.initialize(definition_lod=self.definition_lod, attributes_lod=self.attributes_lod)
         self.Table.set_row_activate_function(self.on_row_activate)
@@ -210,10 +213,9 @@ class DatabaseTableBase(object):
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:
             self.populate()
-            
-        self.Table.Show()
-        sizer.Layout()
-        return self.Table
+
+        self.Table.Show()       
+        return self.main_panel
         
         
     def add_filter(self, filter_name=None, filter_function=None):
@@ -238,6 +240,18 @@ class DatabaseTableBase(object):
         ''' Search for one to one relationships in that table and if any there,
             call the do_column_substitutions function and replace them with content. ''' 
         
+        for column_dict in self.definition_lod:
+            if column_dict.has_key('get_columns'):
+                get_columns = column_dict['get_columns']
+                if column_dict.has_key('column_name'):
+                    column_name = column_dict['column_name']
+                    if column_dict.has_key('referenced_table_object'):
+                        referenced_table_object = column_dict['referenced_table_object']
+                        if column_dict.has_key('referenced_column_name'):
+                            referenced_column_name = column_dict['referenced_column_name']
+                            self.fill_foreign_columns(column_name, get_columns, referenced_table_object, referenced_column_name)
+                            
+                            
         for column_dic in self.definition_lod:    
             if column_dic.has_key('populate_from'):
                 populate_from = column_dic['populate_from']
@@ -256,7 +270,27 @@ class DatabaseTableBase(object):
                 print referenced_table_object.name
             
     
-    #def add_foreign_    
+    def fill_foreign_columns(self, column_name, get_columns, referenced_table_object, referenced_column_name):
+        for content_dict in self.content_lod:
+            foreign_key = content_dict[column_name]
+            if foreign_key in [None, 'NULL']:
+                continue
+            
+            foreign_content_dict = referenced_table_object.select(column_list=get_columns, where='%s = %i' % (referenced_column_name, foreign_key))[0]
+            foreign_attributes_lod = referenced_table_object.attributes
+            
+            new_foreign_content_dict = {}
+            for key in foreign_content_dict.keys():
+                new_key = '%s.%s' % (referenced_table_object.name, key)
+                new_foreign_content_dict[new_key] = foreign_content_dict[key]
+                for attributes_dict in foreign_attributes_lod:
+                    if attributes_dict.get('column_name') == key:
+                        attributes_dict['column_name'] = new_key
+                        self.attributes_lod.append(attributes_dict)
+            content_dict.update(new_foreign_content_dict)
+            # pprint(self.attributes_lod)
+        
+    
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
         ''' Substitute foreign keys with content from the foreign tables. '''
         

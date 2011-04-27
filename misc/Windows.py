@@ -2,7 +2,7 @@
 
 #===============================================================================
 # BaseUI.misc.Windows module.
-# published under GPL license by Mark Muzenhardt.
+# published under LGPL license by Mark Muzenhardt.
 #===============================================================================
 
 # For now, empty... but at least the drive serial getter comes here!
