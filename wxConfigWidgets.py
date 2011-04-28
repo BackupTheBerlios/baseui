@@ -13,6 +13,11 @@ from wxApi.Widgets import widget_populator, widget_getter
 from pprint import pprint
 
 
+class JsonTable():
+    pass
+    
+    
+    
 class IniDialog(wx.Dialog):
     ID_CANCEL = 101
     ID_OK = 102
