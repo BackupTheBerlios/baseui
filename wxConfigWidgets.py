@@ -19,6 +19,7 @@ class JsonTable(wx.Panel):
         self.form = form
         self.portlet_parent = portlet_parent
         self.parent_form = None
+        self.content_lod = []
         
         
     def initialize(self, definition_lod=None):
@@ -26,7 +27,7 @@ class JsonTable(wx.Panel):
     
     
     def populate(self, content_lod=None):
-        pass
+        self.Table.populate(self.content_lod)
     
     
     def populate_portlet(self):
