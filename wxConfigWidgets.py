@@ -14,10 +14,62 @@ from pprint import pprint
 
 
 class JsonTable(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, json_filepath, form=None, portlet_parent=None, editable=True, permissions={}):
+        self.json_filepath = json_filepath
+        self.form = form
+        self.portlet_parent = portlet_parent
+        self.parent_form = None
+        self.content_lod = []
         
-        DataViews.Tree.__init__(self, parent)
         
+    def initialize(self, definition_lod=None):
+        self.definition_lod = definition_lod
+    
+    
+    def populate(self, content_lod=None):
+        self.Table.populate(self.content_lod)
+    
+    
+    def populate_portlet(self):
+        # Just creates a panel to draw the Table on, that buttons or else can be 
+        # attached near the Table!
+        self.main_panel = wx.Panel(self.portlet_parent)
+        sizer = self.portlet_parent.GetSizer()
+        sizer.Add(self.main_panel, 0, wx.ALL|wx.EXPAND)
+        
+        self.main_sizer = wx.FlexGridSizer(1, 2, 0, 0)
+        self.main_sizer.AddGrowableCol(0)
+        self.main_sizer.AddGrowableRow(0)
+        self.main_sizer.SetFlexibleDirection( wx.BOTH )
+        self.main_sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        self.main_panel.SetSizer(self.main_sizer)
+        
+        self.Table = DataViews.Tree(self.main_panel)
+        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self.button_new = wx.Button(self.main_panel, wx.ID_ANY, u'Neu')
+        self.button_sizer.Add(self.button_new, 0, wx.ALL, 5)
+        
+        self.button_delete = wx.Button(self.main_panel, wx.ID_ANY, u'Löschen')
+        self.button_sizer.Add(self.button_delete, 0, wx.ALL, 5)
+        
+        
+        #self.button_import = wx.Button(self.main_panel, wx.ID_ANY, u'Import')
+        #self.button_import
+        #self.Table.row_right_click_function = self.row_right_click_function
+        
+        self.main_sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)        
+        self.main_sizer.Add(self.button_sizer)
+        self.Table.initialize(definition_lod=self.definition_lod) #, attributes_lod=self.attributes_lod)
+        #self.Table.set_row_activate_function(self.on_row_activate)
+        #self.Table.set_cursor_change_function(self.on_cursor_changed)
+        
+        # Just populate immideately if this is not a child-table of a form!
+        if self.parent_form == None:
+            self.populate()
+
+        self.Table.Show()       
+        return self.main_panel
         
         
     
