@@ -271,22 +271,9 @@ class DatabaseLogin(wx.Panel):
     
     def disconnect(self):        
         self.database = self.portlet_database.disconnect()
+        
+        
+        
 
-        
-        
-class PreferencesDialog(wx.Frame):
-    ''' Gesucht wird ein Dialog, der über ein einfaches LOD weitgehend definierbar
-        ist. Optionen sind immer über ein TabNotebook erreichbar, jedes davon ist 
-        eine section in der .ini-Datei. Jedes Notebook-Tab enthält ein Formular, 
-        welches alle Optionen der jeweiligen section enthält. '''
-    
-    definition = None    
-    
-    def __init__(self, ini_filepath):
-        ''' definition_lod = [{'section_name': 'printer',  'label': 'Drucker', 'panel_object': form(), 'icon_path': '/res/icon.ico'},
-                              {'section_name': 'template', 'label': 'Vorlage', 'panel_object': form(), 'icon_path': '/usr/chil.ico'}] '''
-                              
-        self.ini_filepath = ini_filepath
-        
         
     

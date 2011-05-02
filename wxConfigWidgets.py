@@ -7,15 +7,19 @@
 
 import wx, wx.xrc
 
-# from wxApi import DataViews
+from wxApi import DataViews
 from misc.FileSystem import iniFile
 from wxApi.Widgets import widget_populator, widget_getter
 from pprint import pprint
 
 
-class JsonTable():
-    pass
-    
+class JsonTable(wx.Panel):
+    def __init__(self, parent):
+        
+        DataViews.Tree.__init__(self, parent)
+        
+        
+        
     
     
 class IniDialog(wx.Dialog):
@@ -23,7 +27,7 @@ class IniDialog(wx.Dialog):
     ID_OK = 102
     
     def __init__(self, parent, ini_path='', xrc_path='', xrc_panel=''):
-        wx.Dialog.__init__ (self, parent, wx.ID_ANY, 'Einstellungen')
+        wx.Dialog.__init__ (self, parent, wx.ID_ANY, 'Einstellungen', size=(600,400))
         
         self.iniFile = iniFile(ini_path)
         
@@ -60,20 +64,18 @@ class IniDialog(wx.Dialog):
         bottom_panel.SetSizer(bottom_sizer)
         
         # Add that stuff to the Dialog ----------------------------------------
-        self.SetSizer( self.sizer )
-        self.SetInitialSize()
+        self.SetSizer(self.sizer)
         self.Layout()
     
 
     def on_ok(self, event=None):
-        #print "Mkee"
+        self.save()
         self.Close()
         
     
     def on_apply(self, event=None):
         self.button_apply.Disable()
         self.save()
-        #print "Mkee without closing the window!"
         
         
     def on_cancel(self, event=None):
@@ -117,7 +119,7 @@ class IniDialog(wx.Dialog):
                 value = 1
             definition_dict['value'] = value
             
-            #print definition_dict
         self.iniFile.save_lod(self.definition_lod)
-        #pprint(self.definition_lod)
-    
+
+
+
