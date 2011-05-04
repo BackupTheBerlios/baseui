@@ -21,6 +21,18 @@ class JsonTable(wx.Panel):
         self.parent_form = None
         self.content_lod = []
         
+    
+    def on_add_clicked(self, event):
+        print 'add'
+        
+        
+    def on_edit_clicked(self, event):
+        print 'edit'
+        
+        
+    def on_delete_clicked(self, event):
+        print 'delete'
+        
         
     def initialize(self, definition_lod=None):
         self.definition_lod = definition_lod
@@ -38,32 +50,31 @@ class JsonTable(wx.Panel):
         sizer = self.portlet_parent.GetSizer()
         sizer.Add(self.main_panel, 0, wx.ALL|wx.EXPAND)
         
-        self.main_sizer = wx.FlexGridSizer(1, 2, 0, 0)
-        self.main_sizer.AddGrowableCol(0)
-        self.main_sizer.AddGrowableRow(0)
-        self.main_sizer.SetFlexibleDirection( wx.BOTH )
-        self.main_sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        self.main_panel.SetSizer(self.main_sizer)
+        self.sizer_main = wx.FlexGridSizer(1, 2, 0, 0)
+        self.sizer_main.AddGrowableCol(0)
+        self.sizer_main.AddGrowableRow(0)
+        self.sizer_main.SetFlexibleDirection( wx.BOTH )
+        self.sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        self.main_panel.SetSizer(self.sizer_main)
         
         self.Table = DataViews.Tree(self.main_panel)
-        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.sizer_buttons = wx.BoxSizer(wx.VERTICAL)
         
-        self.button_new = wx.Button(self.main_panel, wx.ID_ANY, u'Neu')
-        self.button_sizer.Add(self.button_new, 0, wx.ALL, 5)
+        self.button_add = wx.Button(self.main_panel, wx.ID_ANY, u'Hinzufügen')
+        self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5)
+        self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
         
-        self.button_delete = wx.Button(self.main_panel, wx.ID_ANY, u'Löschen')
-        self.button_sizer.Add(self.button_delete, 0, wx.ALL, 5)
+        self.button_edit = wx.Button(self.main_panel, wx.ID_ANY, u'Bearbeiten')
+        self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5)
+        self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
         
+        self.button_delete = wx.Button(self.main_panel, wx.ID_ANY, u'Entfernen')
+        self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5)
+        self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
         
-        #self.button_import = wx.Button(self.main_panel, wx.ID_ANY, u'Import')
-        #self.button_import
-        #self.Table.row_right_click_function = self.row_right_click_function
-        
-        self.main_sizer.Add(self.Table, 0, wx.ALL|wx.EXPAND)        
-        self.main_sizer.Add(self.button_sizer)
+        self.sizer_main.Add(self.Table, 0, wx.ALL|wx.EXPAND)        
+        self.sizer_main.Add(self.sizer_buttons)
         self.Table.initialize(definition_lod=self.definition_lod) #, attributes_lod=self.attributes_lod)
-        #self.Table.set_row_activate_function(self.on_row_activate)
-        #self.Table.set_cursor_change_function(self.on_cursor_changed)
         
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:
@@ -71,8 +82,7 @@ class JsonTable(wx.Panel):
 
         self.Table.Show()       
         return self.main_panel
-        
-        
+    
     
     
 class IniDialog(wx.Dialog):
