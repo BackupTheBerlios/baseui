@@ -41,8 +41,8 @@ class Tree(hypertreelist.HyperTreeList):
         
         
     def OnCompareItems(self, a, b):
-        a_data = self.GetItemText(a, self.sort_column_number).lower()
-        b_data = self.GetItemText(b, self.sort_column_number).lower()
+        a_data = str(self.GetItemText(a, self.sort_column_number).lower())
+        b_data = str(self.GetItemText(b, self.sort_column_number).lower())
         
         # TODO: This sucks somewhat without the foggiest notion of the dateformat, which here is DD.MM.YYYY
         if self.sort_data_type == 'date':
@@ -289,6 +289,8 @@ class Tree(hypertreelist.HyperTreeList):
                     if type(content) <> unicode:
                         content = str(content)
                     self.SetItemText(item, content, column_number)
+                    
+        self.SortChildren(self.root)
 
 
     def build_definition(self, content_lod, column_list=None):

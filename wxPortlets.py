@@ -733,6 +733,7 @@ class FormFrame(wx.Frame):
         self.save_function_list = []
         self.delete_function_list = []
         self.print_function_list = []
+        self.populate_function_list = []
         
         wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
         if icon_path <> None:
@@ -892,6 +893,9 @@ class FormFrame(wx.Frame):
                     result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
                     result_dict = result[0]
                     widget_object.SetStringSelection(mask % result_dict)
+                    
+        for function in self.populate_function_list:
+            function(self)
     
     
     def create_toolbar(self, dataset=True, report=True, help=True):
@@ -941,6 +945,11 @@ class FormFrame(wx.Frame):
         
     def add_print_function(self, function):
         self.print_function_list.append(function)
+        
+        
+    def add_populate_function(self, function):
+        self.populate_function_list.append(function)
+        
         
         
         
