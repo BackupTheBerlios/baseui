@@ -478,7 +478,7 @@ class Form(wx.Panel):
             if widget_object == None:
                 continue
             
-            widget_populator(widget_object, widget_content)
+            widget_populator(widget_object, widget_content, data_type)
                                 
     
     def clear(self):
@@ -504,7 +504,7 @@ class Form(wx.Panel):
                column_name == None:
                 continue
             
-            self.content_dict[column_name] = widget_getter(widget_object)
+            self.content_dict[column_name] = widget_getter(widget_object, data_type)
         return self.content_dict
     
     

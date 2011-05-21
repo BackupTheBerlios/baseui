@@ -64,8 +64,8 @@ class TrayIcon(wx.TaskBarIcon):
         
         
 
-def widget_populator(widget_object, widget_content):
-    #print 'pop:', widget_object, widget_content
+def widget_populator(widget_object, widget_content, data_type):
+    #print 'pop:', widget_object, widget_content, data_type
     
     # FilePickerCtrl ---------------------------------------------------
     if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
@@ -87,6 +87,12 @@ def widget_populator(widget_object, widget_content):
     
     # TextCtrl --------------------------------------------------------- 
     if widget_object.__class__ ==  wx._controls.TextCtrl:
+        if data_type == 'money':
+            widget_object.SetWindowStyleFlag(widget_object.GetWindowStyleFlag() | wx.TE_RIGHT)
+            if widget_content <> None:
+                widget_content = '%.2f' % float(widget_content)
+                widget_content = widget_content.replace('.', ',')
+
         if widget_content <> None:
             if type(widget_content) <> unicode:
                 widget_content = str(widget_content)
@@ -130,14 +136,19 @@ def widget_populator(widget_object, widget_content):
             widget_object.SetColour(widget_content)
 
     
-def widget_getter(widget_object):
+def widget_getter(widget_object, data_type):
+    #print 'get:', widget_object, data_type
     widget_content = None
     
     # Textctrl ---------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.TextCtrl:
         widget_content = widget_object.GetValue()
+        if data_type == 'money':
+            widget_content = widget_content.replace(',', '.')
+            #print '...', widget_object, widget_content
         if widget_content == '':
             widget_content = None
+
     
     # Combobox ---------------------------------------------------------
     if widget_object.__class__ == wx._controls.ComboBox:
