@@ -14,7 +14,7 @@ from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
-from Widgets import widget_populator, widget_getter
+from Widgets import widget_populator, widget_getter, widget_initializator
 
 
 class Tree(hypertreelist.HyperTreeList):
@@ -441,20 +441,22 @@ class Form(wx.Panel):
                         self.definition_lod[row].update(attributes_dic)
             
             widget_name = dic.get('widget_name')
+            data_type = dic.get('data_type')
             
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
                 widget_object = wx.xrc.XRCCTRL(self, widget_name)
                 self.definition_lod[row]['widget_object'] = widget_object
-            
-
+                widget_initializator(self.definition_lod[row])
+                
+                
     def populate(self, content_dict=None):
         ''' content_dict = {#column_name: #content}
                 #column_name = Name of the database field
                 #content     = Content of the database field'''
 
         self.content_dict = content_dict
-
+        
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
             dic = definition_row[1]

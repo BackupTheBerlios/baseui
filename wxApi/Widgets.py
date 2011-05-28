@@ -5,7 +5,7 @@
 # by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
-import wx
+import wx, string
 
 from Transformations import date_to_str
 
@@ -63,6 +63,59 @@ class TrayIcon(wx.TaskBarIcon):
     #     event.Skip()
         
         
+def widget_initializator(definition_dict):
+    widget_object = definition_dict.get('widget_object')
+    data_type = definition_dict.get('data_type')
+    character_maximum_length = definition_dict.get('character_maximum_length')
+    
+    if widget_object.__class__ in [wx._controls.TextCtrl, wx._controls.ComboBox]:
+        if character_maximum_length <> None:
+            widget_object.SetMaxLength(character_maximum_length)
+
+        widget_object.SetValidator(ValidateDataType(data_type))
+
+
+
+class ValidateDataType(wx.PyValidator):
+    def __init__(self, data_type):
+        wx.PyValidator.__init__(self)
+        
+        self.data_type = data_type
+        
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+        
+    
+    def Clone(self):
+        return ValidateDataType(self.data_type)
+    
+    
+    def OnChar(self, event):
+        key = event.GetKeyCode()
+
+        if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
+            event.Skip()
+            return
+
+        if self.data_type in ['integer', 'bigint']:
+            if chr(key) in string.digits:
+                event.Skip()
+                return
+        elif self.data_type in ['float', 'money']:
+            if chr(key) in ',.' + string.digits:
+                event.Skip()
+                return
+        else:
+            event.Skip()
+            return
+        
+        if not wx.Validator_IsSilent():
+            wx.Bell()
+
+        # Returning without calling even.Skip eats the event before it
+        # gets to the text control
+        return
+
+
 
 def widget_populator(widget_object, widget_content, data_type):
     #print 'pop:', widget_object, widget_content, data_type
