@@ -374,8 +374,11 @@ class Tree(hypertreelist.HyperTreeList):
                     self.SetColumnImage(column=column, image=self.ID_DOWN)
                 elif self.sort_ascending == False:
                     self.SetColumnImage(column=column, image=self.ID_UP)
-                    
-        self.SortChildren(self.root)
+        
+        try:
+            self.SortChildren(self.root)
+        except:
+            pass
 
 
 
