@@ -6,6 +6,7 @@
 #===============================================================================
 
 import wx, wx.xrc
+import json
 
 from wxApi import DataViews
 from misc.FileSystem import iniFile
@@ -39,35 +40,46 @@ class JsonTable(wx.Panel):
     
     
     def populate(self, content_lod=None):
+        try:
+            file = open(self.json_filepath, 'rb')
+            self.content_lod = json.load(file)
+        except:
+            file = open(self.json_filepath, 'wb')
+            json.dump([], file)
+            file.close()
+            
+            file = open(self.json_filepath, 'rb')
+            self.content_lod = json.load(file)
+        
         self.Table.populate(self.content_lod)
-    
+                
     
     def populate_portlet(self):
         # Just creates a panel to draw the Table on, that buttons or else can be 
         # attached near the Table!
-        self.main_panel = wx.Panel(self.portlet_parent)
+        self.panel_main = wx.Panel(self.portlet_parent)
         sizer = self.portlet_parent.GetSizer()
-        sizer.Add(self.main_panel, 0, wx.ALL|wx.EXPAND)
+        sizer.Add(self.panel_main, 0, wx.ALL|wx.EXPAND)
         
         self.sizer_main = wx.FlexGridSizer(1, 2, 0, 0)
         self.sizer_main.AddGrowableCol(0)
         self.sizer_main.AddGrowableRow(0)
         self.sizer_main.SetFlexibleDirection( wx.BOTH )
         self.sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        self.main_panel.SetSizer(self.sizer_main)
+        self.panel_main.SetSizer(self.sizer_main)
         
-        self.Table = DataViews.Tree(self.main_panel)
+        self.Table = DataViews.Tree(self.panel_main)
         self.sizer_buttons = wx.BoxSizer(wx.VERTICAL)
         
-        self.button_add = wx.Button(self.main_panel, wx.ID_ANY, u'Hinzufügen')
+        self.button_add = wx.Button(self.panel_main, wx.ID_ANY, u'Hinzufügen')
         self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5)
         self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
         
-        self.button_edit = wx.Button(self.main_panel, wx.ID_ANY, u'Bearbeiten')
+        self.button_edit = wx.Button(self.panel_main, wx.ID_ANY, u'Bearbeiten')
         self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5)
         self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
         
-        self.button_delete = wx.Button(self.main_panel, wx.ID_ANY, u'Entfernen')
+        self.button_delete = wx.Button(self.panel_main, wx.ID_ANY, u'Entfernen')
         self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5)
         self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
         
@@ -80,7 +92,7 @@ class JsonTable(wx.Panel):
             self.populate()
 
         self.Table.Show()       
-        return self.main_panel
+        return self.panel_main
     
     
     
