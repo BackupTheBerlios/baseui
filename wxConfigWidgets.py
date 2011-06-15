@@ -58,7 +58,7 @@ class JsonTable(wx.Panel):
         # Just creates a panel to draw the Table on, that buttons or else can be 
         # attached near the Table!
         
-        self.main_panel = wx.Panel(self.portlet_parent)
+        self.panel_main = wx.Panel(self.portlet_parent)
         sizer = self.portlet_parent.GetSizer()
         sizer.Add(self.panel_main, 0, wx.ALL|wx.EXPAND)
         
@@ -180,7 +180,7 @@ class IniDialog(wx.Dialog):
             
             value = self.iniFile.get_option(section, option, default)
             widget_object = definition_dict.get('widget_object')
-            widget_populator(widget_object, value)
+            widget_populator(widget_object, value, None)
         
                 
     def save(self):
