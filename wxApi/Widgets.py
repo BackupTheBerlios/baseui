@@ -117,7 +117,7 @@ class ValidateDataType(wx.PyValidator):
 
 
 
-def widget_populator(widget_object, widget_content, data_type):
+def widget_populator(widget_object, widget_content, data_type=None):
     #print 'pop:', widget_object, widget_content, data_type
     
     # FilePickerCtrl ---------------------------------------------------
@@ -189,7 +189,7 @@ def widget_populator(widget_object, widget_content, data_type):
             widget_object.SetColour(widget_content)
 
     
-def widget_getter(widget_object, data_type):
+def widget_getter(widget_object, data_type=None):
     #print 'get:', widget_object, data_type
     widget_content = None
     
