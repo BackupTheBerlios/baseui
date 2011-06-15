@@ -199,7 +199,8 @@ class generic_database(object):
             Be careful, because the content is untransformed and thus, comes
             a little different from database to database! '''
         
-        sql_command = str(sql_command)
+        # cp1252 encoding for proper encoding, don't know exactly why!
+        sql_command = sql_command.encode('cp1252')
         
         try:
             if self.debug: print sql_command

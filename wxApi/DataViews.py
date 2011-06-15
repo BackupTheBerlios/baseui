@@ -14,7 +14,7 @@ from res import IconSet16
 
 from pprint import pprint
 from Transformations import *
-from Widgets import widget_populator, widget_getter
+from Widgets import widget_populator, widget_getter, widget_initializator
 
 
 class Tree(hypertreelist.HyperTreeList):
@@ -41,8 +41,8 @@ class Tree(hypertreelist.HyperTreeList):
         
         
     def OnCompareItems(self, a, b):
-        a_data = self.GetItemText(a, self.sort_column_number).lower()
-        b_data = self.GetItemText(b, self.sort_column_number).lower()
+        a_data = str(self.GetItemText(a, self.sort_column_number).lower())
+        b_data = str(self.GetItemText(b, self.sort_column_number).lower())
         
         # TODO: This sucks somewhat without the foggiest notion of the dateformat, which here is DD.MM.YYYY
         if self.sort_data_type == 'date':
@@ -289,6 +289,8 @@ class Tree(hypertreelist.HyperTreeList):
                     if type(content) <> unicode:
                         content = str(content)
                     self.SetItemText(item, content, column_number)
+                    
+        self.SortChildren(self.root)
 
 
     def build_definition(self, content_lod, column_list=None):
@@ -372,8 +374,11 @@ class Tree(hypertreelist.HyperTreeList):
                     self.SetColumnImage(column=column, image=self.ID_DOWN)
                 elif self.sort_ascending == False:
                     self.SetColumnImage(column=column, image=self.ID_UP)
-                    
-        self.SortChildren(self.root)
+        
+        try:
+            self.SortChildren(self.root)
+        except:
+            pass
 
 
 
@@ -439,20 +444,22 @@ class Form(wx.Panel):
                         self.definition_lod[row].update(attributes_dic)
             
             widget_name = dic.get('widget_name')
+            data_type = dic.get('data_type')
             
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
                 widget_object = wx.xrc.XRCCTRL(self, widget_name)
                 self.definition_lod[row]['widget_object'] = widget_object
-            
-
+                widget_initializator(self.definition_lod[row])
+                
+                
     def populate(self, content_dict=None):
         ''' content_dict = {#column_name: #content}
                 #column_name = Name of the database field
                 #content     = Content of the database field'''
 
         self.content_dict = content_dict
-
+        
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
             dic = definition_row[1]
@@ -478,7 +485,7 @@ class Form(wx.Panel):
             if widget_object == None:
                 continue
             
-            widget_populator(widget_object, widget_content)
+            widget_populator(widget_object, widget_content, data_type)
                                 
     
     def clear(self):
@@ -504,7 +511,7 @@ class Form(wx.Panel):
                column_name == None:
                 continue
             
-            self.content_dict[column_name] = widget_getter(widget_object)
+            self.content_dict[column_name] = widget_getter(widget_object, data_type)
         return self.content_dict
     
     

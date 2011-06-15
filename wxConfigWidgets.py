@@ -57,7 +57,8 @@ class JsonTable(wx.Panel):
     def populate_portlet(self):
         # Just creates a panel to draw the Table on, that buttons or else can be 
         # attached near the Table!
-        self.panel_main = wx.Panel(self.portlet_parent)
+        
+        self.main_panel = wx.Panel(self.portlet_parent)
         sizer = self.portlet_parent.GetSizer()
         sizer.Add(self.panel_main, 0, wx.ALL|wx.EXPAND)
         
