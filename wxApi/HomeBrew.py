@@ -100,29 +100,53 @@ class BufferedWindow(wx.Window):
             wx.ClientDC(self).DrawBitmap(self._Buffer,0,0)
 
             
-            
+
+class DayChart(BufferedWindow):
+    def __init__(self, parent, id = wx.ID_ANY):
+        pass
+        
+        self.line_width = 1.0
+        self.scale = 1.0
+        self.year = 2011
+        self.month = 5
+        self.start_day = 1
+        self.end_day = 8
+        
+        self.DrawData = {}
+        BufferedWindow.__init__(self, parent, id)
+        
+        
+    def Draw(self, dc):
+        dc.SetBackground( wx.Brush("White") )
+        dc.Clear()
+        
+        
+        
 class GanttChart(BufferedWindow):
-    def __init__(self, parent, id = -1):
+    def __init__(self, parent, id = wx.ID_ANY):
         ## Any data the Draw() function needs must be initialized before
         ## calling BufferedWindow.__init__, as it will call the Draw
         ## function.
         
+        self.line_width = 1.0
         self.scale = 1.0
         self.year = 2011
-        self.month = 1
+        self.month = 5
         
         self.DrawData = {}
         BufferedWindow.__init__(self, parent, id)
 
+        
     def Draw(self, dc):        
         dc.SetBackground( wx.Brush("White") )
         dc.Clear() # make sure you clear the bitmap!
-        print 'zoom: %i' % int(self.scale*100)
+        #print 'zoom: %i' % int(self.scale*100)
         top_left_corner =     ( 10 * self.scale,  10 * self.scale)
         bottom_right_corner = (630 * self.scale, 470 * self.scale)
         
         day_size =  ( 20 * self.scale, 20 * self.scale)
         name_size = (100 * self.scale, 25 * self.scale)
+        line_width = self.line_width * self.scale
         
         monthnames_row = 0
         calendarweeks_row = 1
@@ -131,7 +155,7 @@ class GanttChart(BufferedWindow):
         graph_row = 4
         
         content_lod = [
-        {'name': u'Herbert Ärbert',  'id': 0},
+        {'name': u'Herbert Ärbert',  'id': 0, 'date_ranges': [{'from': 12, 'to': 13}, {'from': 17, 'to': 22}]},
         {'name': u'Kalinka Kefir',   'id': 1},
         {'name': u'Ritchie Ritch',   'id': 2},
         {'name': u'Özculücé, Erkan', 'id': 3},
@@ -155,9 +179,9 @@ class GanttChart(BufferedWindow):
         graph_offset = (0, graph_row * day_size[1])
         
         # draw top top ruler --------------------------------------------------
-        dc.SetPen(wx.Pen(foreground_color, 1))
+        dc.SetPen(wx.Pen(foreground_color, line_width))
         
-        font_size = day_size[0] / 2
+        font_size = (day_size[0] / 2) * 0.8
         font = wx.Font(pointSize=font_size,
                        family=wx.FONTFAMILY_DEFAULT,
                        style=wx.FONTSTYLE_NORMAL, 
@@ -182,17 +206,18 @@ class GanttChart(BufferedWindow):
             # Draw year
             pass
             
-            # Draw monthname
-            if day == number_of_monthdays:
-                dc.DrawRectangle(x=top_left_corner[0] + monthnames_offset[0], 
-                                 y=top_left_corner[1] + monthnames_offset[1], 
-                                 width=(day_size[0] * number_of_monthdays) + 1, 
-                                 height=day_size[1] + 1)
-                                 
-                text_offset = self.center_text(dc, weekday_str, day_size)
-                dc.DrawText(text='%s' % monthnames[self.month-1],
-                            x=top_left_corner[0] + text_offset[0] + monthnames_offset[0], 
-                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
+                
+            # Draw day by number
+            dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
+                             y=top_left_corner[1] + weekdaynumbers_offset[1], 
+                             width=day_size[0] + line_width, 
+                             height=day_size[1] + line_width)
+                             
+            text_offset = self.center_text(dc, str(day), day_size)
+            dc.DrawText(text=str(day), 
+                        x=ruler_x_pos + text_offset[0] + weekdaynumbers_offset[0],
+                        y=top_left_corner[1] + text_offset[1] + weekdaynumbers_offset[1])
+            
                             
             # Draw calendar-week
             if weekday == 0:
@@ -200,8 +225,8 @@ class GanttChart(BufferedWindow):
             if weekday == 6 or day == number_of_monthdays:
                 dc.DrawRectangle(x=cal_week_start_xpos + calendarweeks_offset[0], 
                                  y=top_left_corner[1] + calendarweeks_offset[1], 
-                                 width=(day_size[0] * (weekday+1))+1, 
-                                 height=day_size[1] + 1)
+                                 width=(day_size[0] * (weekday+1)) + line_width, 
+                                 height=day_size[1] + line_width)
                                  
                 text_offset = self.center_text(dc, weekday_str, day_size)
                 dc.DrawText(text='KW %i' % calendar_week,
@@ -213,36 +238,37 @@ class GanttChart(BufferedWindow):
             else:
                 dc.SetBrush(wx.Brush(background_color))
                 
-            # Draw day by number
-            dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
-                             y=top_left_corner[1] + weekdaynumbers_offset[1], 
-                             width=day_size[0]+1, 
-                             height=day_size[1] + 1)
-                             
-            text_offset = self.center_text(dc, str(day), day_size)
-            dc.DrawText(text=str(day), 
-                        x=ruler_x_pos + text_offset[0] + weekdaynumbers_offset[0],
-                        y=top_left_corner[1] + text_offset[1] + weekdaynumbers_offset[1])
-            
             # Draw day by weekday
             dc.DrawRectangle(x=ruler_x_pos + weekdaynames_offset[0], 
                              y=top_left_corner[1] + weekdaynames_offset[1], 
-                             width=day_size[0]+1, 
-                             height=day_size[1] + 1)
-                             
-            
+                             width=day_size[0] + line_width, 
+                             height=day_size[1] + line_width)
+                                              
             text_offset = self.center_text(dc, weekday_str, day_size)
             dc.DrawText(text=weekday_str, 
                         x=ruler_x_pos + text_offset[0] + weekdaynames_offset[0], 
                         y=top_left_corner[1] + text_offset[1] + weekdaynames_offset[1])
                         
+            # Draw monthname
+            if day == number_of_monthdays:
+                dc.DrawRectangle(x=top_left_corner[0] + monthnames_offset[0], 
+                                 y=top_left_corner[1] + monthnames_offset[1], 
+                                 width=(day_size[0] * number_of_monthdays) + line_width, 
+                                 height=day_size[1] + line_width)
+                                 
+                text_offset = self.center_text(dc, weekday_str, day_size)
+                dc.DrawText(text='%s' % monthnames[self.month-1],
+                            x=top_left_corner[0] + text_offset[0] + monthnames_offset[0], 
+                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
+
+            
         # Draw dudes
         row = 0
         for content in content_lod:
             dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
                              y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
-                             width=name_size[0] + 1, 
-                             height=name_size[1] + 1)
+                             width=name_size[0] + line_width, 
+                             height=name_size[1] + line_width)
                              
             text_offset = self.center_text(dc, content.get('name'), name_size)
             dc.DrawText(text=content.get('name'), 
@@ -263,8 +289,8 @@ class GanttChart(BufferedWindow):
                     
                 dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
                                  y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
-                                 width=day_size[0] + 1, 
-                                 height=name_size[1] + 1)
+                                 width=day_size[0] + line_width, 
+                                 height=name_size[1] + line_width)
                              
             row += 1
             
@@ -275,6 +301,7 @@ class GanttChart(BufferedWindow):
         return text_offset        
         
 
+        
 class TestFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, "Double Buffered Test",
@@ -305,10 +332,12 @@ class TestFrame(wx.Frame):
         self.Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
         
         self.Window = GanttChart(self)
+        
 
     def OnQuit(self,event):
         self.Close(True)
 
+        
     def on_mousewheel(self, event):
         print event.GetWheelRotation(),
         
