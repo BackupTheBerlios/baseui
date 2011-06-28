@@ -17,6 +17,7 @@ from config import *
 from pprint import pprint
 
 
+# Table widgets ----------------------------------------------------------------
 class DatabaseTableBase(object):
     def __init__(self, db_table, form=None, portlet_parent=None, editable=True, permissions={}):
         self.db_table = db_table
@@ -417,7 +418,8 @@ class FormTable(DatabaseTableBase):
     
     def __init__(self, db_table, form=None, \
                  toolbar_parent=None, portlet_parent=None, \
-                 help_path=None, permissions={}):
+                 help_path=None, permissions={}, \
+                 excel_class=None, print_class=None):
         
         ''' db_object is the current opened database object.
             toolbar_parent is an aui toolbar, which has to be populated from here.
@@ -457,6 +459,8 @@ class FormTable(DatabaseTableBase):
 
     def on_print(self, event=None):
         print "print"
+        # TODO: Good point: content_lod is always ok to do print!
+        #pprint(self.content_lod)
         
     
     def on_search(self, event=None):
@@ -465,6 +469,8 @@ class FormTable(DatabaseTableBase):
         
     def on_export(self, event=None):
         print "export"
+        # TODO: Good point: content_lod is always ok to do export!
+        #pprint(self.content_lod)
         
         
     def on_preferences(self, event=None):

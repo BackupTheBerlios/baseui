@@ -128,7 +128,7 @@ class Database(Panels.Database):
         
        
 class DatabaseLogin(wx.Panel):
-    def __init__(self, parent, image_path, ini_path, ini_section, autosave=True, db_table_users_class=None):
+    def __init__(self, parent, image_path, ini_path, ini_section, autosave=True, db_table_users_class=None, db_table_system_class=None):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
@@ -137,6 +137,7 @@ class DatabaseLogin(wx.Panel):
         self.ini_section = ini_section
         self.autosave = autosave
         self.db_table_users_class = db_table_users_class
+        self.db_table_system_class = db_table_system_class
         
         self.on_connect = None
         self.on_disconnect = None
@@ -245,6 +246,8 @@ class DatabaseLogin(wx.Panel):
         
     
     def set_connected(self):
+        print self.db_table_system_class
+        
         self.db_table_users = self.db_table_users_class(self.get_database())
         result = self.db_table_users.select()
         self.portlet_login.combobox_user.Clear()
