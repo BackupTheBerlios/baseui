@@ -957,5 +957,22 @@ class FormFrame(wx.Frame):
         self.populate_function_list.append(function)
         
         
-        
-        
+
+# Export -----------------------------------------------------------------------
+class ExcelExport(wx.Dialog):
+    def __init__(self):
+        import pyExcelerator
+
+
+
+# Print a table ----------------------------------------------------------------
+class PrintTable():
+    pass
+
+
+
+# Print a form -----------------------------------------------------------------
+class PrintForm():
+    pass
+
+

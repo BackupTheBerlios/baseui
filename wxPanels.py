@@ -13,7 +13,8 @@ from dbApi import SQLdb, Tools as dbTools
 
 
 class Database(Panels.Database):
-    def __init__(self, parent, ini_path, ini_section, autosave=False, db_table_users_class=None):
+    def __init__(self, parent, ini_path, ini_section, autosave=False, 
+                 db_table_users_class=None):
         Panels.Database.__init__(self, parent)
         self.ErrorDialog = Dialogs.Error(self)
         
@@ -246,7 +247,8 @@ class DatabaseLogin(wx.Panel):
         
     
     def set_connected(self):
-        print self.db_table_system_class
+        print 'SYSTEM_TABLE:', self.db_table_system_class
+        
         
         self.db_table_users = self.db_table_users_class(self.get_database())
         result = self.db_table_users.select()
