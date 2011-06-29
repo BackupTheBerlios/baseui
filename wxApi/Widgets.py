@@ -190,7 +190,6 @@ def widget_populator(widget_object, widget_content, data_type=None):
 
     
 def widget_getter(widget_object, data_type=None):
-    #print 'get:', widget_object, data_type
     widget_content = None
     
     # Textctrl ---------------------------------------------------------
@@ -215,6 +214,7 @@ def widget_getter(widget_object, data_type=None):
             try:
                 client_data = widget_object.GetClientData(selection)
                 widget_content = client_data
+                #print '...', widget_object, data_type, type(widget_content), widget_content
             except Exception, inst:
                 pass
         
@@ -254,6 +254,21 @@ def widget_getter(widget_object, data_type=None):
         colour = widget_object.GetColour()
         r, g, b = colour.Get()
         widget_content = '#%02x%02x%02x' % (r, g, b)
+    
+    convert = None
+    if data_type == 'bigint':
+        convert = long
+    if data_type == 'integer':
+        convert = int
+    if data_type in ['float', 'money']:
+        convert = float
+    
+    if convert <> None:
+        try:
+            widget_content = convert(widget_content)
+        except:
+            pass
+            #print 'content:', widget_content, 'in widget', widget_object, 'of data_type:', data_type, 'not able to convert to', convert
     return widget_content
 
 

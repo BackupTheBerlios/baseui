@@ -488,7 +488,7 @@ class Form(wx.Panel):
                 continue
             
             widget_populator(widget_object, widget_content, data_type)
-            self.loaded_content_dict = self.content_dict
+            self.loaded_content_dict = self.get_content()
             
     
     def clear(self):
