@@ -402,6 +402,8 @@ class Form(wx.Panel):
         self.attributes_lod = None
         self.content_lod = None
         
+        self.loaded_content_dict = {}
+        
 
     def on_widget_changed(self, widget=None, widget_definition_dict=None):
         self.validate_widget(widget_definition_dict)
@@ -486,7 +488,8 @@ class Form(wx.Panel):
                 continue
             
             widget_populator(widget_object, widget_content, data_type)
-                                
+            self.loaded_content_dict = self.content_dict
+            
     
     def clear(self):
         pass

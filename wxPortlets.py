@@ -888,18 +888,22 @@ class FormFrame(wx.Frame):
             populate_from.append(referenced_column_name)
             result = referenced_table_object.select(column_list=populate_from)
             
-            item_list = []
-            for item in result:
-                widget_object.Append(mask % item, item.get(referenced_column_name))
+            if widget_object.__class__ ==  wx._controls.ComboBox:
+                for item in result:
+                    widget_object.Append(mask % item, item.get(referenced_column_name))
             
             if self.primary_key <> None:
-                # Overwrite crap in combobox if feeded from foreign table!
+                # Overwrite crap in combobox or textctrl if feeded from foreign table!
                 foreign_key = content_dict.get(column_name)
                 if foreign_key <> None:
                     result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
                     result_dict = result[0]
-                    widget_object.SetStringSelection(mask % result_dict)
-                    
+                    if widget_object.__class__ ==  wx._controls.ComboBox:
+                        widget_object.SetStringSelection(mask % result_dict)
+                    if widget_object.__class__ ==  wx._controls.TextCtrl:
+                        widget_object.SetValue(mask % result_dict)
+                
+                
         for function in self.populate_function_list:
             function(self)
     
