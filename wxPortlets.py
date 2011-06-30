@@ -865,7 +865,8 @@ class FormFrame(wx.Frame):
             enable_list = self.permissions.get('enable')
             if type(enable_list) == list:
                 if column_name not in enable_list:
-                    widget_object.Enable(False)
+                    if widget_object <> None:
+                        widget_object.Enable(False)
                     
             if fill_distinct == True:
                 result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)

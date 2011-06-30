@@ -1,140 +1,196 @@
-# -*- coding: iso-8859-1 -*-#
-#!/usr/bin/env python2.4
+# -*- coding: iso-8859-1 -*-
+
+#===============================================================================
+# BaseUI.wxApi.Calendars module.
+# by Mark Muzenhardt, published under LGPL license.
+#===============================================================================
 
 import wx
 import calendar, datetime, time
 
-# This has been set up to optionally use the wx.BufferedDC if
-# USE_BUFFERED_DC is True, it will be used. Otherwise, it uses the raw
-# wx.Memory DC , etc.
-
-USE_BUFFERED_DC = 1
-
-class BufferedWindow(wx.Window):
-
-    """
-
-    A Buffered window class.
-
-    To use it, subclass it and define a Draw(DC) method that takes a DC
-    to draw to. In that method, put the code needed to draw the picture
-    you want. The window will automatically be double buffered, and the
-    screen will be automatically updated when a Paint event is received.
-
-    When the drawing needs to change, you app needs to call the
-    UpdateDrawing() method. Since the drawing is stored in a bitmap, you
-    can also save the drawing to file by calling the
-    SaveToFile(self,file_name,file_type) method.
-
-    """
+from Widgets import BufferedWindow
 
 
-    def __init__(self, parent, id,
-                 pos = wx.DefaultPosition,
-                 size = wx.DefaultSize,
-                 style = wx.NO_FULL_REPAINT_ON_RESIZE):
-        wx.Window.__init__(self, parent, id, pos, size, style)
+weekend_color = '#FFAA00'
+foreground_color = 'black'
+background_color = 'white'
 
-        wx.EVT_PAINT(self, self.OnPaint)
-        wx.EVT_SIZE(self, self.OnSize)
-
-        # OnSize called to make sure the buffer is initialized.
-        # This might result in OnSize getting called twice on some
-        # platforms at initialization, but little harm done.
-        self.OnSize(None)
-
-    def Draw(self,dc):
-        ## just here as a place holder.
-        ## This method should be over-ridden when subclassed
-        pass
+weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+monthnames = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
         
-    def OnPaint(self, event):
-        # All that is needed here is to draw the buffer to screen
-        if USE_BUFFERED_DC:
-            dc = wx.BufferedPaintDC(self, self._Buffer)
-        else:
-            dc = wx.PaintDC(self)
-            dc.DrawBitmap(self._Buffer,0,0)
-
-            
-    def OnSize(self,event):
-        # The Buffer init is done here, to make sure the buffer is always
-        # the same size as the Window
-        Size  = self.GetClientSizeTuple()
-        print Size
-
-        # Make new offscreen bitmap: this bitmap will always have the
-        # current drawing in it, so it can be used to save the image to
-        # a file, or whatever.
-        self._Buffer = wx.EmptyBitmap(*Size)
-        self.UpdateDrawing()
-
         
-    def SaveToFile(self,FileName,FileType):
-        ## This will save the contents of the buffer
-        ## to the specified file. See the wxWindows docs for 
-        ## wx.Bitmap::SaveFile for the details
-        self._Buffer.SaveFile(FileName,FileType)
-
-        
-    def UpdateDrawing(self):
-        """
-        This would get called if the drawing needed to change, for whatever reason.
-
-        The idea here is that the drawing is based on some data generated
-        elsewhere in the system. If that data changes, the drawing needs to
-        be updated.
-
-        """
-
-        if USE_BUFFERED_DC:
-            dc = wx.BufferedDC(wx.ClientDC(self), self._Buffer)
-            self.Draw(dc)
-        else:
-            # update the buffer
-            dc = wx.MemoryDC()
-            dc.SelectObject(self._Buffer)
-            self.Draw(dc)
-            # update the screen
-            wx.ClientDC(self).DrawBitmap(self._Buffer,0,0)
-
-            
-
 class DayChart(BufferedWindow):
-    def __init__(self, parent, id = wx.ID_ANY):
+    def __init__(self, parent, year=2011, month=6, content=[]):
         pass
         
+        self.parent = parent
         self.line_width = 1.0
         self.scale = 1.0
-        self.year = 2011
-        self.month = 5
+        self.year = year
+        self.month = month
         self.start_day = 1
         self.end_day = 8
+        self.content = content
         
-        self.DrawData = {}
-        BufferedWindow.__init__(self, parent, id)
+        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
+        self.SetSize(parent.GetSize())
+        self.parent.Bind(wx.EVT_SIZE, self.on_resize)
+        
+        
+    def on_resize(self, event):
+        self.SetSize(self.parent.GetSize())
         
         
     def Draw(self, dc):
+        b = wx.Button(self.parent, wx.ID_ANY)
         dc.SetBackground( wx.Brush("White") )
-        dc.Clear()
+        dc.Clear() # make sure you clear the bitmap!
+        #print 'zoom: %i' % int(self.scale*100)
+        parent_size = self.parent.GetSize()
+        top_left_corner =     ( 10,  10)
+        bottom_right_corner = (parent_size[0] - 10, parent_size[1] - 10)
+        
+        name_size = (100 * self.scale, 50 * self.scale)
+        line_width = self.line_width * self.scale
+        
+        monthnames_row = 0
+        weekdaynumbers_row = 1
+        weekdaynames_row = 2
+        graph_row = 3
+        
+        first_weekday = self.start_day
+        number_of_monthdays = 8 #self.end_day - self.start_day + 1
+        #calendar_week = date.isocalendar()[1]
+        
+        day_size =  ( 100 * self.scale, 50 * self.scale)
+        
+        monthnames_offset = (name_size[0], monthnames_row * day_size[1])
+        weekdaynumbers_offset = (name_size[0], weekdaynumbers_row * day_size[1])
+        weekdaynames_offset = (name_size[0], weekdaynames_row * day_size[1])
+        graph_offset = (0, graph_row * day_size[1])
+        
+        # draw top top ruler --------------------------------------------------
+        dc.SetPen(wx.Pen(foreground_color, line_width))
+        
+        if day_size[0] > day_size[1]:
+            smaller_size = day_size[1]
+        font_size = (smaller_size / 2) * 0.8
+        font = wx.Font(pointSize=font_size,
+                       family=wx.FONTFAMILY_DEFAULT,
+                       style=wx.FONTSTYLE_NORMAL, 
+        #               face='Lucida Console', 
+                       weight=wx.FONTWEIGHT_NORMAL)
+        dc.SetFont(font)
+        
+        cal_week_start_xpos = None
+        for day in xrange(first_weekday, number_of_monthdays+1):
+            date = datetime.date(self.year, self.month, day)
+            time_tuple = date.timetuple()
+            weekday = time_tuple.tm_wday
+            weekday_str = weekdays[weekday]
+            calendar_week = date.isocalendar()[1]
+            
+            ruler_x_pos = top_left_corner[0] + ((day-1) * day_size[0])
+            dc.SetBrush(wx.Brush('white'))
+            
+            if cal_week_start_xpos == None:
+                cal_week_start_xpos = ruler_x_pos
+            
+            # Draw year
+            pass
+            
+                
+            # Draw day by number
+            dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
+                             y=top_left_corner[1] + weekdaynumbers_offset[1], 
+                             width=day_size[0] + line_width, 
+                             height=day_size[1] + line_width)
+                             
+            text_offset = self.center_text(dc, str(day), day_size)
+            dc.DrawText(text=str(day), 
+                        x=ruler_x_pos + text_offset[0] + weekdaynumbers_offset[0],
+                        y=top_left_corner[1] + text_offset[1] + weekdaynumbers_offset[1])
+            
+                                
+            # Draw day by weekday
+            dc.DrawRectangle(x=ruler_x_pos + weekdaynames_offset[0], 
+                             y=top_left_corner[1] + weekdaynames_offset[1], 
+                             width=day_size[0] + line_width, 
+                             height=day_size[1] + line_width)
+                                              
+            text_offset = self.center_text(dc, weekday_str, day_size)
+            dc.DrawText(text=weekday_str, 
+                        x=ruler_x_pos + text_offset[0] + weekdaynames_offset[0], 
+                        y=top_left_corner[1] + text_offset[1] + weekdaynames_offset[1])
+                        
+            # Draw monthname
+            if day == number_of_monthdays:
+                dc.DrawRectangle(x=top_left_corner[0] + monthnames_offset[0], 
+                                 y=top_left_corner[1] + monthnames_offset[1], 
+                                 width=(day_size[0] * number_of_monthdays) + line_width, 
+                                 height=day_size[1] + line_width)
+                                 
+                text_offset = self.center_text(dc, weekday_str, day_size)
+                dc.DrawText(text='%s %s (KW %s)' % (monthnames[self.month-1], str(self.year), str(calendar_week)),
+                            x=top_left_corner[0] + text_offset[0] + monthnames_offset[0], 
+                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
+
+            
+        # Draw dudes
+        row = 0
+        for content in self.content:
+            dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
+                             y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
+                             width=name_size[0] + line_width, 
+                             height=name_size[1] + line_width)
+                             
+            text_offset = self.center_text(dc, content.get('name'), name_size)
+            dc.DrawText(text=content.get('name'), 
+                        x=top_left_corner[0] + text_offset[0], 
+                        y=top_left_corner[1] + text_offset[1] + graph_offset[1] + (row*name_size[1]))
+            
+            for day in xrange(1, number_of_monthdays+1):
+                ruler_x_pos = top_left_corner[0] + ((day-1) * day_size[0])
+                
+                date = datetime.date(self.year, self.month, day)
+                time_tuple = date.timetuple()
+                weekday = time_tuple.tm_wday
+                
+                if weekday >= 5:
+                    dc.SetBrush(wx.Brush(weekend_color))
+                else:
+                    dc.SetBrush(wx.Brush(background_color))
+                    
+                dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
+                                 y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
+                                 width=day_size[0] + line_width, 
+                                 height=name_size[1] + line_width)
+                             
+            row += 1
+            
+                    
+    def center_text(self, dc, text='', size=(0,0)):
+        text_size = dc.GetTextExtent(text)
+        text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
+        return text_offset
         
         
         
 class GanttChart(BufferedWindow):
-    def __init__(self, parent, id = wx.ID_ANY):
+    def __init__(self, parent, year, month, content=[]):
         ## Any data the Draw() function needs must be initialized before
         ## calling BufferedWindow.__init__, as it will call the Draw
         ## function.
         
         self.line_width = 1.0
         self.scale = 1.0
-        self.year = 2011
-        self.month = 5
+        self.year = year #2011
+        self.month = month #5
+        self.content = content
         
-        self.DrawData = {}
-        BufferedWindow.__init__(self, parent, id)
+        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
+        self.SetSize(parent.GetSize())
 
         
     def Draw(self, dc):        
@@ -153,21 +209,6 @@ class GanttChart(BufferedWindow):
         weekdaynumbers_row = 2
         weekdaynames_row = 3
         graph_row = 4
-        
-        content_lod = [
-        {'name': u'Herbert Ärbert',  'id': 0, 'date_ranges': [{'from': 12, 'to': 13}, {'from': 17, 'to': 22}]},
-        {'name': u'Kalinka Kefir',   'id': 1},
-        {'name': u'Ritchie Ritch',   'id': 2},
-        {'name': u'Özculücé, Erkan', 'id': 3},
-        {'name': u'Mark Muzenhardt', 'id': 4}]
-        
-        weekend_color = '#FFAA00'
-        foreground_color = 'black'
-        background_color = 'white'
-        
-        # private values ------------------------------------------------------
-        weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-        monthnames = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
         
         first_weekday = calendar.monthrange(self.year, self.month)[0]
         number_of_monthdays = calendar.monthrange(self.year, self.month)[1]
@@ -264,7 +305,7 @@ class GanttChart(BufferedWindow):
             
         # Draw dudes
         row = 0
-        for content in content_lod:
+        for content in self.content:
             dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
                              y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
                              width=name_size[0] + line_width, 
@@ -298,10 +339,11 @@ class GanttChart(BufferedWindow):
     def center_text(self, dc, text='', size=(0,0)):
         text_size = dc.GetTextExtent(text)
         text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
-        return text_offset        
+        return text_offset
         
 
         
+# Just for test Purposes -------------------------------------------------------
 class TestFrame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, "Double Buffered Test",
