@@ -21,32 +21,85 @@ monthnames = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'Aug
         
         
 class DayChart(BufferedWindow):
-    def __init__(self, parent, year=2011, month=6, content=[]):
+    def __init__(self, parent):
         pass
         
         self.parent = parent
         self.line_width = 1.0
         self.scale = 1.0
-        self.year = year
-        self.month = month
-        self.start_day = 1
+        self.year = 2011
+        self.month = 7
+        self.start_day = 4
         self.end_day = 8
+        
+        content = [
+            {'name': u' 6:00'},
+            {'name': u' 7:00'},
+            {'name': u' 8:00'},
+            {'name': u' 9:00'},
+            {'name': u'10:00'},
+            {'name': u'11:00'},
+            {'name': u'12:00'},
+            {'name': u'13:00'},
+            {'name': u'14:00'},
+            {'name': u'15:00'},
+            {'name': u'16:00'},
+            {'name': u'17:00'},
+            {'name': u'18:00'},
+            {'name': u'19:00'},
+            {'name': u'20:00'},
+        ]
+        
         self.content = content
         
         BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
         self.SetSize(parent.GetSize())
         self.parent.Bind(wx.EVT_SIZE, self.on_resize)
         
+        self.Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.on_mouse_right_down)
+        
         
     def on_resize(self, event):
         self.SetSize(self.parent.GetSize())
         
         
+    def on_mousewheel(self, event):
+        #print event.GetWheelRotation() #, event.GetWheelDelta()
+        pass
+    
+    
+    def on_mouse_right_down(self, event):
+        #print 'right button down'
+        pass
+        
+        
+    def set_date_range(self, start_date, end_date=None, nof_days=None):
+        ''' start_date and end_date are date objects, which are giving the
+            date range to the calendar. Optionally, nof_days can be given instead
+            of end_date. '''
+            
+        self.start_date = start_date
+        
+        if nof_days == None:
+            delta = end_date-start_date
+            self.nof_days = delta.days
+        else:
+            self.nof_days = nof_days
+            
+        if end_date == None:
+            delta = datetime.timedelta(days=nof_days)
+            self.end_date = start_date + delta
+        else:
+            self.end_date = end_date
+        
+        print 'start_date:', self.start_date, 'end_date', self.end_date, 'days:', self.nof_days
+    
+        
     def Draw(self, dc):
-        b = wx.Button(self.parent, wx.ID_ANY)
         dc.SetBackground( wx.Brush("White") )
         dc.Clear() # make sure you clear the bitmap!
-        #print 'zoom: %i' % int(self.scale*100)
+        
         parent_size = self.parent.GetSize()
         top_left_corner =     ( 10,  10)
         bottom_right_corner = (parent_size[0] - 10, parent_size[1] - 10)
@@ -75,11 +128,11 @@ class DayChart(BufferedWindow):
         
         if day_size[0] > day_size[1]:
             smaller_size = day_size[1]
-        font_size = (smaller_size / 2) * 0.8
+        font_size = (smaller_size / 2) * 0.6
         font = wx.Font(pointSize=font_size,
                        family=wx.FONTFAMILY_DEFAULT,
                        style=wx.FONTSTYLE_NORMAL, 
-        #               face='Lucida Console', 
+                       #face='Lucida Console', 
                        weight=wx.FONTWEIGHT_NORMAL)
         dc.SetFont(font)
         
