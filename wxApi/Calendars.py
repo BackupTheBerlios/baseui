@@ -25,32 +25,35 @@ class DayChart(BufferedWindow):
         pass
         
         self.parent = parent
+        self.start_date = None
+        self.end_date = None
+        
         self.line_width = 1.0
-        self.scale = 1.0
-        self.year = 2011
-        self.month = 7
-        self.start_day = 4
-        self.end_day = 8
+        #self.scale = 1.0
+        #self.year = 2011
+        #self.month = 7
+        #self.start_day = 4
+        #self.end_day = 8
         
-        content = [
-            {'name': u' 6:00'},
-            {'name': u' 7:00'},
-            {'name': u' 8:00'},
-            {'name': u' 9:00'},
-            {'name': u'10:00'},
-            {'name': u'11:00'},
-            {'name': u'12:00'},
-            {'name': u'13:00'},
-            {'name': u'14:00'},
-            {'name': u'15:00'},
-            {'name': u'16:00'},
-            {'name': u'17:00'},
-            {'name': u'18:00'},
-            {'name': u'19:00'},
-            {'name': u'20:00'},
-        ]
-        
-        self.content = content
+#        content = [
+#            {'name': u' 6:00'},
+#            {'name': u' 7:00'},
+#            {'name': u' 8:00'},
+#            {'name': u' 9:00'},
+#            {'name': u'10:00'},
+#            {'name': u'11:00'},
+#            {'name': u'12:00'},
+#            {'name': u'13:00'},
+#            {'name': u'14:00'},
+#            {'name': u'15:00'},
+#            {'name': u'16:00'},
+#            {'name': u'17:00'},
+#            {'name': u'18:00'},
+#            {'name': u'19:00'},
+#            {'name': u'20:00'},
+#        ]
+#        
+#        self.content = content
         
         BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
         self.SetSize(parent.GetSize())
@@ -74,15 +77,20 @@ class DayChart(BufferedWindow):
         pass
         
         
-    def set_date_range(self, start_date, end_date=None, nof_days=None):
+    def set_date_range(self, start_date=None, end_date=None, nof_days=None):
         ''' start_date and end_date are date objects, which are giving the
             date range to the calendar. Optionally, nof_days can be given instead
-            of end_date. '''
-            
-        self.start_date = start_date
+            of end_date or start_date (so that only two of three values must be 
+            given). '''
+        
+        if start_date == None:
+            delta = datetime.timedelta(days=nof_days)
+            self.start_date = end_date - delta
+        else:
+            self.start_date = start_date
         
         if nof_days == None:
-            delta = end_date-start_date
+            delta = end_date - start_date
             self.nof_days = delta.days
         else:
             self.nof_days = nof_days
@@ -93,34 +101,36 @@ class DayChart(BufferedWindow):
         else:
             self.end_date = end_date
         
-        print 'start_date:', self.start_date, 'end_date', self.end_date, 'days:', self.nof_days
+        self.UpdateDrawing()
+        # print 'start_date:', self.start_date, 'end_date', self.end_date, 'days:', self.nof_days
     
         
     def Draw(self, dc):
-        dc.SetBackground( wx.Brush("White") )
-        dc.Clear() # make sure you clear the bitmap!
+        dc.SetBackground(wx.Brush("White"))
+        dc.Clear()
         
+        if self.start_date == None or self.end_date == None:
+            return
+        
+        # Set the corners of the drawing
         parent_size = self.parent.GetSize()
         top_left_corner =     ( 10,  10)
         bottom_right_corner = (parent_size[0] - 10, parent_size[1] - 10)
         
-        name_size = (100 * self.scale, 50 * self.scale)
-        line_width = self.line_width * self.scale
+        # Set the field sizes for the content.
+        clocktime_size = (100, 50)
+        day_size =  (100, 50)
+        
+        line_width = self.line_width
         
         monthnames_row = 0
         weekdaynumbers_row = 1
         weekdaynames_row = 2
         graph_row = 3
         
-        first_weekday = self.start_day
-        number_of_monthdays = 8 #self.end_day - self.start_day + 1
-        #calendar_week = date.isocalendar()[1]
-        
-        day_size =  ( 100 * self.scale, 50 * self.scale)
-        
-        monthnames_offset = (name_size[0], monthnames_row * day_size[1])
-        weekdaynumbers_offset = (name_size[0], weekdaynumbers_row * day_size[1])
-        weekdaynames_offset = (name_size[0], weekdaynames_row * day_size[1])
+        monthnames_offset = (clocktime_size[0], monthnames_row * day_size[1])
+        weekdaynumbers_offset = (clocktime_size[0], weekdaynumbers_row * day_size[1])
+        weekdaynames_offset = (clocktime_size[0], weekdaynames_row * day_size[1])
         graph_offset = (0, graph_row * day_size[1])
         
         # draw top top ruler --------------------------------------------------
@@ -136,15 +146,17 @@ class DayChart(BufferedWindow):
                        weight=wx.FONTWEIGHT_NORMAL)
         dc.SetFont(font)
         
+        end_delta = self.end_date - self.start_date
         cal_week_start_xpos = None
-        for day in xrange(first_weekday, number_of_monthdays+1):
-            date = datetime.date(self.year, self.month, day)
-            time_tuple = date.timetuple()
-            weekday = time_tuple.tm_wday
-            weekday_str = weekdays[weekday]
-            calendar_week = date.isocalendar()[1]
+        for day_delta in xrange(0, end_delta.days + 1):
+            day_date = self.start_date + datetime.timedelta(days=day_delta)
+            day = day_date.day
+            week = day_date.isocalendar()[1]
+            month = day_date.month
+            year = day_date.year
+            weekday_str = self.get_weekday(date=day_date, string=True)
             
-            ruler_x_pos = top_left_corner[0] + ((day-1) * day_size[0])
+            ruler_x_pos = top_left_corner[0] + ((day_delta-1) * day_size[0])
             dc.SetBrush(wx.Brush('white'))
             
             if cal_week_start_xpos == None:
@@ -153,7 +165,6 @@ class DayChart(BufferedWindow):
             # Draw year
             pass
             
-                
             # Draw day by number
             dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
                              y=top_left_corner[1] + weekdaynumbers_offset[1], 
@@ -164,8 +175,7 @@ class DayChart(BufferedWindow):
             dc.DrawText(text=str(day), 
                         x=ruler_x_pos + text_offset[0] + weekdaynumbers_offset[0],
                         y=top_left_corner[1] + text_offset[1] + weekdaynumbers_offset[1])
-            
-                                
+                
             # Draw day by weekday
             dc.DrawRectangle(x=ruler_x_pos + weekdaynames_offset[0], 
                              y=top_left_corner[1] + weekdaynames_offset[1], 
@@ -177,52 +187,63 @@ class DayChart(BufferedWindow):
                         x=ruler_x_pos + text_offset[0] + weekdaynames_offset[0], 
                         y=top_left_corner[1] + text_offset[1] + weekdaynames_offset[1])
                         
+            #continue
+            
             # Draw monthname
-            if day == number_of_monthdays:
-                dc.DrawRectangle(x=top_left_corner[0] + monthnames_offset[0], 
-                                 y=top_left_corner[1] + monthnames_offset[1], 
-                                 width=(day_size[0] * number_of_monthdays) + line_width, 
-                                 height=day_size[1] + line_width)
-                                 
-                text_offset = self.center_text(dc, weekday_str, day_size)
-                dc.DrawText(text='%s %s (KW %s)' % (monthnames[self.month-1], str(self.year), str(calendar_week)),
-                            x=top_left_corner[0] + text_offset[0] + monthnames_offset[0], 
-                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
-
-            
+#            if day == number_of_monthdays:
+#                dc.DrawRectangle(x=top_left_corner[0] + monthnames_offset[0], 
+#                                 y=top_left_corner[1] + monthnames_offset[1], 
+#                                 width=(day_size[0] * number_of_monthdays) + line_width, 
+#                                 height=day_size[1] + line_width)
+#                                 
+#                text_offset = self.center_text(dc, weekday_str, day_size)
+#                dc.DrawText(text='%s %s (KW %s)' % (monthnames[self.month-1], str(self.year), str(calendar_week)),
+#                            x=top_left_corner[0] + text_offset[0] + monthnames_offset[0], 
+#                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
+#
+#            
         # Draw dudes
-        row = 0
-        for content in self.content:
-            dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
-                             y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
-                             width=name_size[0] + line_width, 
-                             height=name_size[1] + line_width)
-                             
-            text_offset = self.center_text(dc, content.get('name'), name_size)
-            dc.DrawText(text=content.get('name'), 
-                        x=top_left_corner[0] + text_offset[0], 
-                        y=top_left_corner[1] + text_offset[1] + graph_offset[1] + (row*name_size[1]))
+        # row = 0
+#        for content in self.content:
+#            dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
+#                             y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
+#                             width=name_size[0] + line_width, 
+#                             height=name_size[1] + line_width)
+#                             
+#            text_offset = self.center_text(dc, content.get('name'), name_size)
+#            dc.DrawText(text=content.get('name'), 
+#                        x=top_left_corner[0] + text_offset[0], 
+#                        y=top_left_corner[1] + text_offset[1] + graph_offset[1] + (row*name_size[1]))
+#            
+#            for day in xrange(1, number_of_monthdays+1):
+#                ruler_x_pos = top_left_corner[0] + ((day-1) * day_size[0])
+#                
+#                date = datetime.date(self.year, self.month, day)
+#                time_tuple = date.timetuple()
+#                weekday = time_tuple.tm_wday
+#                
+#                if weekday >= 5:
+#                    dc.SetBrush(wx.Brush(weekend_color))
+#                else:
+#                    dc.SetBrush(wx.Brush(background_color))
+#                    
+#                dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
+#                                 y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
+#                                 width=day_size[0] + line_width, 
+#                                 height=name_size[1] + line_width)
+#                             
+#            row += 1
             
-            for day in xrange(1, number_of_monthdays+1):
-                ruler_x_pos = top_left_corner[0] + ((day-1) * day_size[0])
-                
-                date = datetime.date(self.year, self.month, day)
-                time_tuple = date.timetuple()
-                weekday = time_tuple.tm_wday
-                
-                if weekday >= 5:
-                    dc.SetBrush(wx.Brush(weekend_color))
-                else:
-                    dc.SetBrush(wx.Brush(background_color))
-                    
-                dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
-                                 y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
-                                 width=day_size[0] + line_width, 
-                                 height=name_size[1] + line_width)
-                             
-            row += 1
-            
-                    
+    
+    def get_weekday(self, date, string=True):
+        time_tuple = date.timetuple()
+        weekday = time_tuple.tm_wday
+        
+        if string == True:
+            weekday = weekdays[weekday]  
+        return weekday
+    
+    
     def center_text(self, dc, text='', size=(0,0)):
         text_size = dc.GetTextExtent(text)
         text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
