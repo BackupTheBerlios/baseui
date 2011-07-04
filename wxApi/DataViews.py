@@ -51,6 +51,9 @@ class Tree(hypertreelist.HyperTreeList):
             a_data = '%s.%s.%s' % (a_datelist[2], a_datelist[1], a_datelist[0])
             b_data = '%s.%s.%s' % (b_datelist[2], b_datelist[1], b_datelist[0])
         
+        # TODO: There are no more column_numbers, this sucks therefore!
+        #print self.sort_data_type
+        
         if self.sort_data_type == 'bool':
             a_widget = self.GetItemWindow(a, self.sort_column_number)
             b_widget = self.GetItemWindow(b, self.sort_column_number)

@@ -828,13 +828,13 @@ CREATE TABLE """ + self.name + """
         return attributes_lod
 
 
-    def check_attributes(self, attributes_lod, add=False, drop=False, convert=False):
+    def check_attributes(self, attributes_lod, add=False, drop=False, alter=False):
         ''' Returns differences_lod, if attributes_lod differ from the real database table definition.
             See function 'create' for key description of attributes_lod.
 
             add = If True, add not existing columns to the table.
             drop = If True, drop columns which are in the database but not in attributes_lod.
-            convert = If True, try to convert the content with minimum possible data loss.
+            alter = If True, try to convert the content with minimum possible data loss.
             '''
         
         self.attributes = attributes_lod
@@ -855,15 +855,32 @@ CREATE TABLE """ + self.name + """
                 except:
                     raise
 
+        # Check correctness of attributes
+        if alter == True:
+            # print 'alter for table', self.name, 'is switched on!'
+            # TODO: Tune alter to do more (f.e. varchar and numeric!).
+            db_attributes_lod = self.get_attributes()
+            for db_attributes_dict in db_attributes_lod:
+                db_column_name = db_attributes_dict.get('column_name')
+                db_data_type = db_attributes_dict.get('data_type')
+                for attributes_dict in self.attributes:
+                    column_name = attributes_dict.get('column_name')
+                    data_type = attributes_dict.get('data_type')
+                    if column_name == db_column_name:
+                        data_type = self.db_object.data_types.get(data_type).lower()
+                        if db_data_type <> data_type:    
+                            old_column_dict={'column_name': db_column_name}
+                            new_column_dict={'column_name': column_name, 'data_type': data_type}
+                            self.alter(old_column_dict, new_column_dict)
+            
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
         for attributes_dic in attributes_lod:
             #print attributes_dic
             column_name = attributes_dic['column_name']
             if column_name not in database_column_list:
-                not_in_database_lod.append(attributes_dic)                                  
+                not_in_database_lod.append(attributes_dic)                           
         
-                
         # Is there any difference?
         if add == True:
             if len(not_in_database_lod) > 0:
@@ -996,6 +1013,17 @@ CREATE TABLE """ + self.name + """
             if attribute_dict.has_key('referenced_table_name'):
                 referenced_table_lod.append({'referenced_table_name':  attribute_dict['referenced_table_name'], 
                                              'referenced_column_name': attribute_dict['referenced_column_name']})
+        
+        
+    def alter(self, old_attributes_dict, new_attributes_dict):
+        old_column_name = old_attributes_dict.get('column_name')
+        # old_data_type = old_attributes_dict.get('data_type')
+        
+        new_column_name = new_attributes_dict.get('column_name')
+        new_data_type = new_attributes_dict.get('data_type')
+        
+        sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
+        self.db_object.execute(sql_command)
         
         
     def join(self, primary_key_column='', referenced_table_name='', referenced_column_name='', mode='outer', where=''):

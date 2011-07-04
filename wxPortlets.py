@@ -406,6 +406,11 @@ class SubTable(DatabaseTableBase):
         
         
 class FormTable(DatabaseTableBase):
+    #TODO: Search should be self.search (string)
+    #TODO: Filter should be self.filter = {'text': 'Becker', 'sql': 'name=Becker'}
+    #TODO: When delete just sets the delete column, there has to be a function called "set_delete_column"
+    #TODO: self.where_clause should be fitted together from self.search AND self.filter[sql] AND self.delete_column NOT 1 or so...
+        
     ID_NEW = 101
     ID_EDIT = 102
     ID_DELETE = 103

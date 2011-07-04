@@ -154,9 +154,10 @@ class DayChart(BufferedWindow):
             week = day_date.isocalendar()[1]
             month = day_date.month
             year = day_date.year
+            weekday = self.get_weekday(date=day_date, string=False)
             weekday_str = self.get_weekday(date=day_date, string=True)
             
-            ruler_x_pos = top_left_corner[0] + ((day_delta-1) * day_size[0])
+            ruler_x_pos = top_left_corner[0] + ((day_delta) * day_size[0])
             dc.SetBrush(wx.Brush('white'))
             
             if cal_week_start_xpos == None:
@@ -165,6 +166,9 @@ class DayChart(BufferedWindow):
             # Draw year
             pass
             
+            if weekday >= 5:
+                dc.SetBrush(wx.Brush(weekend_color))
+                    
             # Draw day by number
             dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
                              y=top_left_corner[1] + weekdaynumbers_offset[1], 
@@ -187,7 +191,7 @@ class DayChart(BufferedWindow):
                         x=ruler_x_pos + text_offset[0] + weekdaynames_offset[0], 
                         y=top_left_corner[1] + text_offset[1] + weekdaynames_offset[1])
                         
-            #continue
+            dc.SetBrush(wx.Brush(background_color))
             
             # Draw monthname
 #            if day == number_of_monthdays:
@@ -202,37 +206,38 @@ class DayChart(BufferedWindow):
 #                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
 #
 #            
-        # Draw dudes
-        # row = 0
-#        for content in self.content:
-#            dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
-#                             y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
-#                             width=name_size[0] + line_width, 
-#                             height=name_size[1] + line_width)
-#                             
-#            text_offset = self.center_text(dc, content.get('name'), name_size)
-#            dc.DrawText(text=content.get('name'), 
-#                        x=top_left_corner[0] + text_offset[0], 
-#                        y=top_left_corner[1] + text_offset[1] + graph_offset[1] + (row*name_size[1]))
-#            
-#            for day in xrange(1, number_of_monthdays+1):
-#                ruler_x_pos = top_left_corner[0] + ((day-1) * day_size[0])
-#                
-#                date = datetime.date(self.year, self.month, day)
-#                time_tuple = date.timetuple()
-#                weekday = time_tuple.tm_wday
-#                
-#                if weekday >= 5:
-#                    dc.SetBrush(wx.Brush(weekend_color))
-#                else:
-#                    dc.SetBrush(wx.Brush(background_color))
-#                    
-#                dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
-#                                 y=top_left_corner[1] + graph_offset[1] + (row*name_size[1]), 
-#                                 width=day_size[0] + line_width, 
-#                                 height=name_size[1] + line_width)
-#                             
-#            row += 1
+        # Draw timing...
+        row = 0
+        for hour in xrange(9, 18):
+            time = datetime.time(hour=hour)
+            time_str = time.strftime('%H:%M')
+            
+            dc.DrawRectangle(x=top_left_corner[0] + graph_offset[0], 
+                             y=top_left_corner[1] + graph_offset[1] + (row*clocktime_size[1]), 
+                             width=clocktime_size[0] + line_width, 
+                             height=clocktime_size[1] + line_width)
+                             
+            text_offset = self.center_text(dc, time_str, clocktime_size)
+            dc.DrawText(text=time_str, 
+                        x=top_left_corner[0] + text_offset[0], 
+                        y=top_left_corner[1] + text_offset[1] + graph_offset[1] + (row*clocktime_size[1]))
+            
+            for day_delta in xrange(0, end_delta.days + 1):
+                day_date = self.start_date + datetime.timedelta(days=day_delta)
+                day = day_date.day
+                ruler_x_pos = top_left_corner[0] + ((day_delta) * day_size[0])
+                weekday =self.get_weekday(date=day_date, string=False)
+                
+                if weekday >= 5:
+                    dc.SetBrush(wx.Brush(weekend_color))
+                    
+                dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
+                                 y=top_left_corner[1] + graph_offset[1] + (row*clocktime_size[1]), 
+                                 width=day_size[0] + line_width, 
+                                 height=clocktime_size[1] + line_width)
+                
+                dc.SetBrush(wx.Brush(background_color))
+            row += 1
             
     
     def get_weekday(self, date, string=True):
