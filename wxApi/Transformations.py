@@ -70,10 +70,6 @@ def date_to_str(date):
             year = date.year
             month = date.month
             day = date.day
-            
-            #print type(date)
-        #elif type(date) == datetime.datetime:
-        #    print dir(date)
         else:
             if ' ' in date:
                 date = date.split(' ')[0]
@@ -89,7 +85,6 @@ def date_to_str(date):
             month = int(month)
             day = int(day)
         date = '%02i.%02i.%04i' % (day, month, year)
-        #print date
     else:
         date = ''
     return date

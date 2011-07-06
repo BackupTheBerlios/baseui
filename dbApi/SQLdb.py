@@ -716,6 +716,18 @@ class generic_table(object):
         self.primary_key_list = []
         
         
+    def _check_alter_column(self):
+        pass
+    
+    
+    def _check_delete_column(self):
+        pass
+    
+    
+    def _check_add_column(self):
+        pass
+    
+    
     def create(self, attributes_lod = None):
         ''' Creates an empty table in the given database and returnes the SQLcommand.
             attributes_lod is a list of dictionarys with this layout:
@@ -768,6 +780,18 @@ CREATE TABLE """ + self.name + """
         return sql_command
 
 
+    def alter(self, old_attributes_dict, new_attributes_dict):
+        # TODO: Alter: Excuse me, but this does nothing really right!
+        old_column_name = old_attributes_dict.get('column_name')
+        # old_data_type = old_attributes_dict.get('data_type')
+        
+        new_column_name = new_attributes_dict.get('column_name')
+        new_data_type = new_attributes_dict.get('data_type')
+        
+        sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
+        self.db_object.execute(sql_command)
+        
+        
     def get_attributes(self):
         ''' Gets the table attributes and gives them back as list of dictionarys.
             See function 'create' for key description. '''
@@ -1013,17 +1037,6 @@ CREATE TABLE """ + self.name + """
             if attribute_dict.has_key('referenced_table_name'):
                 referenced_table_lod.append({'referenced_table_name':  attribute_dict['referenced_table_name'], 
                                              'referenced_column_name': attribute_dict['referenced_column_name']})
-        
-        
-    def alter(self, old_attributes_dict, new_attributes_dict):
-        old_column_name = old_attributes_dict.get('column_name')
-        # old_data_type = old_attributes_dict.get('data_type')
-        
-        new_column_name = new_attributes_dict.get('column_name')
-        new_data_type = new_attributes_dict.get('data_type')
-        
-        sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
-        self.db_object.execute(sql_command)
         
         
     def join(self, primary_key_column='', referenced_table_name='', referenced_column_name='', mode='outer', where=''):
