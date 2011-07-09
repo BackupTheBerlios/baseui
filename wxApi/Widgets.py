@@ -10,12 +10,12 @@ import wx, string
 from Transformations import date_to_str
 
 
-class BufferedWindow(wx.Window):
+class BufferedWindow(wx.ScrolledWindow):
     def __init__(self, parent, id,
                  pos = wx.DefaultPosition,
                  size = wx.DefaultSize,
                  style = wx.NO_FULL_REPAINT_ON_RESIZE):
-        wx.Window.__init__(self, parent, id, pos, size, style)
+        wx.ScrolledWindow.__init__(self, parent, id, pos, size, style)
 
         wx.EVT_PAINT(self, self.OnPaint)
         wx.EVT_SIZE(self, self.OnSize)

@@ -5,7 +5,7 @@
 # by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
-import wx
+import wx, wx.lib.dragscroller
 import calendar, datetime, time
 
 from decimal import Decimal
@@ -18,80 +18,73 @@ FOREGROUND_COLOR = 'black'
 BACKGROUND_COLOR = 'white'
 LIGHT_GREY = '#A4A4A4'
 
-WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+WEEKDAYS_ABBREVATION = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 MONTHNAMES = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+MONTHNAMES_ABBREVATION = ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
+        
 
+class DayChart(object):
+    def __init__(self, parent, id=wx.ID_ANY):
+        self.parent = parent
+        
+        sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
+        sizer_main.AddGrowableCol( 0 )
+        sizer_main.AddGrowableRow( 1 )
+        self.parent.SetSizer( sizer_main )
         
         
-class DayChart(BufferedWindow):
+        self.panel_header = wx.Panel( self.parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.sizer_panel_header = wx.BoxSizer(wx.VERTICAL)
+        self.panel_header.SetSizer(self.sizer_panel_header)
+        
+        self.day_header = DayHeader(self.panel_header)
+        self.sizer_panel_header.Add(self.day_header, 1, wx.EXPAND)
+        sizer_main.Add( self.panel_header, 1, wx.EXPAND) # |wx.ALL, 5 )
+        
+        self.panel_grid = wx.Panel( self.parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.sizer_panel_grid = wx.BoxSizer(wx.VERTICAL)
+        self.panel_grid.SetSizer(self.sizer_panel_grid)
+        
+        self.day_grid = DayGrid(self.panel_grid)
+        self.sizer_panel_grid.Add(self.day_grid, 1, wx.EXPAND)
+        sizer_main.Add( self.panel_grid, 1, wx.EXPAND) # |wx.ALL, 5 )
+
+        #self.parent.SetWindowStyle(wx.HSCROLL)
+        #self.parent.SetVirtualSize((3000, 3000))
+        #self.parent.SetScrollbar(wx.VSCROLL, 0, 400, 3000)
+        
+        self.parent.Layout()
+        
+        
+    def set_date_range(self, start_date=None, end_date=None, nof_days=None):
+        self.day_header.set_date_range(start_date, end_date, nof_days)
+        self.day_grid.set_date_range(start_date, end_date, nof_days)
+
+
+
+class DayHeader(wx.ScrolledWindow):
     def __init__(self, parent):
         self.parent = parent
+        
         self.start_date = None
         self.end_date = None
         
         self._line_width = 1.0
-        
         self._parent_size = self.parent.GetSize()
         self._top_left_corner =     ( 10,  10)
         self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
         self._clocktime_size = (100, 50)
-        self._day_size =  (100, 50)
+        self._day_size = (200, 50)
         self._graph_row = 2
         self._mouse_pos = (0, 0)
         
-        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
-        self.SetSize(parent.GetSize())
-        self.parent.Bind(wx.EVT_SIZE, self.on_resize)
+        wx.ScrolledWindow.__init__(self, parent, id=wx.ID_ANY)
+        self.SetSize((1400, (self._day_size[1]*2) + self._top_left_corner[1]))# + self._line_width))
         
-        self.Bind(wx.EVT_MOUSE_EVENTS, self.on_mouse_event)
+        self.Bind(wx.EVT_PAINT, self.on_paint)
+                
         
-        
-    def on_mouse_event(self, event):
-        self._mouse_pos = event.GetPositionTuple()
-        self.SetFocus()
-        
-        if event.Dragging():
-            self._dragging_day = self._get_day(self._mouse_pos)
-            self._dragging_time = self._get_time(self._mouse_pos)
-            print 'dragging over day %s, time %s' % (str(self._dragging_day), str(self._dragging_time))
-            
-        if event.LeftDown():
-            self._clicked_day = self._get_day(self._mouse_pos)
-            self._clicked_time = self._get_time(self._mouse_pos)
-            print 'conversion:', self._clicked_time
-        
-        if event.LeftUp():
-            self._released_day = self._get_day(self._mouse_pos)
-            self._released_time = self._get_time(self._mouse_pos)
-            print 'released left on button on day %s, time %s' % (str(self._released_day), str(self._released_time))
-        
-        if event.GetWheelRotation():
-            print 'on_mousewheel:', event.GetWheelRotation()
-
-
-    def on_resize(self, event):
-        self.SetSize(self.parent.GetSize())
-        
-        
-    def _get_day(self, pos_tuple):
-        day = None
-        if self._mouse_pos[0] >= (self._clocktime_size[0] + self._top_left_corner[0]):
-            day = (self._mouse_pos[0] - self._clocktime_size[0] - self._top_left_corner[0]) / self._day_size[0]
-        return day
-    
-    
-    def _get_time(self, pos_tuple):
-        dectime = None
-        if self._mouse_pos[1] >= (self._top_left_corner[1] + (self._graph_row * self._day_size[1])):
-            dectime = float(self._mouse_pos[1] - (self._graph_row * self._day_size[1]) - self._top_left_corner[1]) / self._day_size[1]
-        time = self.dec_to_time(dectime)
-        return time
-        
-        
-    def add_appointment(self, title, day, start_time, end_time):
-        pass
-    
-    
     def set_date_range(self, start_date=None, end_date=None, nof_days=None):
         ''' start_date and end_date are date objects, which are giving the
             date range to the calendar. Optionally, nof_days can be given instead
@@ -116,12 +109,12 @@ class DayChart(BufferedWindow):
         else:
             self.end_date = end_date
         
-        self.UpdateDrawing()
+        self.Refresh()
     
     
-    def Draw(self, dc):
-        dc.SetBackground(wx.Brush("White"))
-        dc.Clear()
+    def on_paint(self, event=None):
+        dc = wx.PaintDC(self)
+        self.DoPrepareDC(dc)
         
         if self.start_date == None or self.end_date == None:
             return
@@ -206,10 +199,199 @@ class DayChart(BufferedWindow):
 #                            x=top_left_corner[0] + text_offset[0] + monthnames_offset[0], 
 #                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
 #
-#            
+#
+        
+        
+    def get_weekday(self, date, string=True):
+        time_tuple = date.timetuple()
+        weekday = time_tuple.tm_wday
+        
+        if string == True:
+            weekday = WEEKDAYS[weekday]  
+        return weekday
+    
+    
+    def center_text(self, dc, text='', size=(0,0)):
+        text_size = dc.GetTextExtent(text)
+        text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
+        return text_offset
+    
+    
+    
+class DayGrid(wx.ScrolledWindow):
+    def __init__(self, parent):
+        self.parent = parent
+        self.start_date = None
+        self.end_date = None
+        
+        #self.start_time = None
+        #self.end_time = None
+        self._line_width = 1.0
+        
+        self._parent_size = self.parent.GetSize()
+        self._top_left_corner =     ( 10,  0)
+        self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
+        self._clocktime_size = (100, 50)
+        self._day_size =  (200, 50)
+        self._graph_row = 0
+        self._mouse_pos = (0, 0)
+        
+        # No, I do not know why the SetScrollbars parameters are calculated this way!
+        wx.ScrolledWindow.__init__(self, parent, id=wx.ID_ANY)
+        self.SetScrollbars(0, self._day_size[1] / 4, 0, (24 * self._day_size[1]) / (self._day_size[1] / 4), 0, 0)
+        
+        self.Bind(wx.EVT_PAINT, self.on_paint)
+        self.Bind(wx.EVT_LEFT_DOWN, self.on_mouse_left_down)
+        self.Bind(wx.EVT_LEFT_UP, self.on_mouse_left_up)
+        self.Bind(wx.EVT_MOTION, self.on_mouse_moved)
+        
+        
+    def on_mouse_left_down(self, event):
+        self._clicked_day = self._get_daydelta(self._mouse_pos)
+        self._clicked_time = self._get_time(self._mouse_pos)
+        print 'conversion:', self._clicked_time
+        
+        
+    def on_mouse_left_up(self, event):
+        self._released_day = self._get_date(self._mouse_pos)
+        self._released_time = self._get_time(self._mouse_pos)
+        print 'released left on button on day %s, time %s' % (str(self._released_day), str(self._released_time))
+        
+        
+    def on_mouse_moved(self, event):
+        self._mouse_pos = self.CalcUnscrolledPosition(event.GetPositionTuple())
+        self.SetFocus()
+        
+        if event.Dragging():
+            self._dragging_day = self._get_daydelta(self._mouse_pos)
+            self._dragging_time = self._get_time(self._mouse_pos)
+            print 'dragging over day %s, time %s' % (str(self._dragging_day), str(self._dragging_time))
+
+
+    def get_date_pos(self, date):
+        x1=None
+        x2=None
+        return x1, x2
+        
+    
+    def get_time_pos(self, time):
+        y1 = None
+        y2 = None
+        return y1, y2
+    
+    
+    def _get_date(self, pos_tuple):
+        daydelta = self._get_daydelta(pos_tuple)
+        date = self.start_date + datetime.timedelta(days=daydelta)
+        return date
+    
+    
+    def _get_daydelta(self, pos_tuple):
+        day = None
+        if self._mouse_pos[0] >= (self._clocktime_size[0] + self._top_left_corner[0]):
+            day = (self._mouse_pos[0] - self._clocktime_size[0] - self._top_left_corner[0]) / self._day_size[0]
+        return day
+    
+    
+    def _get_time(self, pos_tuple):
+        dectime = None
+        if self._mouse_pos[1] >= (self._top_left_corner[1] + (self._graph_row * self._day_size[1])):
+            dectime = float(self._mouse_pos[1] - (self._graph_row * self._day_size[1]) - self._top_left_corner[1]) / self._day_size[1]
+        time = self.dec_to_time(dectime)
+        time = self.round_time(time)
+        return time
+    
+    
+    def round_time(self, time):
+        hour = time.hour
+        minute = time.minute
+        
+        for c in xrange(0, 75, 15):
+            if minute > c:
+                continue
+            else:
+                minute = c - 15
+                break
+        
+        if minute <= 0:
+            minute = 0
+            
+        time = datetime.time(hour, minute)
+        return time
+        
+        
+    def add_appointment(self, title, day, start_time, end_time):
+        pass
+    
+    
+    def mark_timerange(self):
+        pass
+    
+    
+    def set_date_range(self, start_date=None, end_date=None, nof_days=None):
+        ''' start_date and end_date are date objects, which are giving the
+            date range to the calendar. Optionally, nof_days can be given instead
+            of end_date or start_date (so that only two of three values must be 
+            given). '''
+        
+        if start_date == None:
+            delta = datetime.timedelta(days=nof_days)
+            self.start_date = end_date - delta
+        else:
+            self.start_date = start_date
+        
+        if nof_days == None:
+            delta = end_date - start_date
+            self.nof_days = delta.days
+        else:
+            self.nof_days = nof_days
+            
+        if end_date == None:
+            delta = datetime.timedelta(days=nof_days)
+            self.end_date = start_date + delta
+        else:
+            self.end_date = end_date
+        
+        self.Refresh()
+    
+    
+    def on_paint(self, event=None):
+        dc = wx.PaintDC(self)
+        self.DoPrepareDC(dc)
+        
+        #dc.SetBackground(wx.Brush("White"))
+        #dc.Clear()
+        
+        if self.start_date == None or self.end_date == None:
+            return
+        
+        #monthnames_row = 0
+        weekdaynumbers_row = 0
+        #weekdaynames_row = 1
+        
+        #monthnames_offset = (clocktime_size[0], monthnames_row * day_size[1])
+        weekdaynumbers_offset = (self._clocktime_size[0], weekdaynumbers_row * self._day_size[1])
+        #weekdaynames_offset = (self._clocktime_size[0], weekdaynames_row * self._day_size[1])
+        graph_offset = (0, self._graph_row * self._day_size[1])
+        
+        # draw top top ruler --------------------------------------------------
+#        dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width))
+#        
+        if self._day_size[0] > self._day_size[1]:
+            smaller_size = self._day_size[1]
+        font_size = (smaller_size / 2) * 0.6
+        font = wx.Font(pointSize=font_size,
+                       family=wx.FONTFAMILY_DEFAULT,
+                       style=wx.FONTSTYLE_NORMAL, 
+                       #face='Lucida Console', 
+                       weight=wx.FONTWEIGHT_NORMAL)
+        dc.SetFont(font)
+#        
+        end_delta = self.end_date - self.start_date
+
         # Draw timing...
         row = 0
-        for hour in xrange(9, 18):
+        for hour in xrange(0, 24):
             time = datetime.time(hour=hour)
             time_str = time.strftime('%H:%M')
             
@@ -266,6 +448,9 @@ class DayChart(BufferedWindow):
     
     
     def dec_to_time(self, dectime):
+        if dectime == None:
+            return None
+        
         hour=int(str(dectime).split('.')[0])
         
         dectime_str = Decimal(str(dectime))
@@ -281,9 +466,10 @@ class DayChart(BufferedWindow):
         text_size = dc.GetTextExtent(text)
         text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
         return text_offset
-        
-        
-        
+            
+            
+
+# GANTT charting technology ---------------------------------------------------
 class GanttChart(BufferedWindow):
     def __init__(self, parent, year, month, content=[]):
         ## Any data the Draw() function needs must be initialized before
@@ -302,7 +488,7 @@ class GanttChart(BufferedWindow):
         
     def Draw(self, dc):        
         dc.SetBackground( wx.Brush("White") )
-        dc.Clear() # make sure you clear the bitmap!
+        #dc.Clear() # make sure you clear the bitmap!
         #print 'zoom: %i' % int(self.scale*100)
         top_left_corner =     ( 10 * self.scale,  10 * self.scale)
         bottom_right_corner = (630 * self.scale, 470 * self.scale)
@@ -449,91 +635,3 @@ class GanttChart(BufferedWindow):
         return text_offset
         
 
-        
-# Just for test Purposes -------------------------------------------------------
-class TestFrame(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self, None, -1, "Double Buffered Test",
-                         wx.DefaultPosition,
-                         size=(500,500),
-                         style=wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
-
-        ## Set up the MenuBar
-        MenuBar = wx.MenuBar()
-
-        file_menu = wx.Menu()
-        ID_EXIT_MENU = wx.NewId()
-        file_menu.Append(ID_EXIT_MENU, "E&xit","Terminate the program")
-        wx.EVT_MENU(self, ID_EXIT_MENU, self.OnQuit)
-        MenuBar.Append(file_menu, "&File")
-
-        draw_menu = wx.Menu()
-        ID_DRAW_MENU = wx.NewId()
-        draw_menu.Append(ID_DRAW_MENU, "&New Drawing","Update the Drawing Data")
-        wx.EVT_MENU(self, ID_DRAW_MENU,self.NewDrawing)
-        BMP_ID = wx.NewId()
-        draw_menu.Append(BMP_ID,'&Save Drawing\tAlt-I','')
-        wx.EVT_MENU(self,BMP_ID, self.SaveToFile)
-        MenuBar.Append(draw_menu, "&Draw")
-
-        self.SetMenuBar(MenuBar)
-        
-        self.Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
-        
-        self.Window = GanttChart(self)
-        
-
-    def OnQuit(self,event):
-        self.Close(True)
-
-        
-    def on_mousewheel(self, event):
-        print event.GetWheelRotation(),
-        
-        if event.GetWheelRotation() > 0:
-            self.Window.scale += (self.Window.scale / 10)
-            if self.Window.scale*100 > 1000:
-                self.Window.scale = 10.0
-        else:
-            self.Window.scale -= (self.Window.scale / 10)
-            if self.Window.scale*100 < 10:
-                self.Window.scale = 0.1
-        self.Window.UpdateDrawing()
-        
-        
-    def NewDrawing(self,event):
-        self.Window.UpdateDrawing()
-        
-        
-    def SaveToFile(self,event):
-        dlg = wx.FileDialog(self, "Choose a file name to save the image as a PNG to",
-                           defaultDir = "",
-                           defaultFile = "",
-                           wildcard = "*.png",
-                           style = wx.SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            self.Window.SaveToFile(dlg.GetPath(),wx.BITMAP_TYPE_PNG)
-        dlg.Destroy()
-
-    
-
-class DemoApp(wx.App):
-    def OnInit(self):
-        #wx.InitAllImageHandlers() # called so a PNG can be saved      
-        frame = TestFrame()
-        frame.Show(True)
-
-        ## initialize a drawing
-        ## It doesn't seem like this should be here, but the Frame does
-        ## not get sized until Show() is called, so it doesn't work if
-        ## it is put in the __init__ method.
-        frame.NewDrawing(None)
-
-        self.SetTopWindow(frame)
-
-        return True
-
-if __name__ == "__main__":
-    print "about to initialize the app"
-    app = DemoApp(0)
-    app.MainLoop()
