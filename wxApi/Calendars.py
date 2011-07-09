@@ -63,7 +63,7 @@ class DayChart(object):
 
 
 
-class DayHeader(wx.ScrolledWindow):
+class DayHeader(BufferedWindow):
     def __init__(self, parent):
         self.parent = parent
         
@@ -79,10 +79,11 @@ class DayHeader(wx.ScrolledWindow):
         self._graph_row = 2
         self._mouse_pos = (0, 0)
         
-        wx.ScrolledWindow.__init__(self, parent, id=wx.ID_ANY)
-        self.SetSize((1400, (self._day_size[1]*2) + self._top_left_corner[1]))# + self._line_width))
+        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
+        self.SetSize((1400, (self._day_size[1]*2) + self._top_left_corner[1]))
         
-        self.Bind(wx.EVT_PAINT, self.on_paint)
+        #self.Bind(wx.EVT_PAINT, self.on_paint)
+        #self.parent.Bind(wx.EVT_SIZE, self.on_size)
                 
         
     def set_date_range(self, start_date=None, end_date=None, nof_days=None):
@@ -109,12 +110,13 @@ class DayHeader(wx.ScrolledWindow):
         else:
             self.end_date = end_date
         
-        self.Refresh()
+        self.UpdateDrawing()
     
     
-    def on_paint(self, event=None):
-        dc = wx.PaintDC(self)
+    def Draw(self, dc): #event=None):
+        #dc = wx.PaintDC(self)
         self.DoPrepareDC(dc)
+        dc.Clear()
         
         if self.start_date == None or self.end_date == None:
             return
@@ -218,7 +220,7 @@ class DayHeader(wx.ScrolledWindow):
     
     
     
-class DayGrid(wx.ScrolledWindow):
+class DayGrid(BufferedWindow):
     def __init__(self, parent):
         self.parent = parent
         self.start_date = None
@@ -237,10 +239,9 @@ class DayGrid(wx.ScrolledWindow):
         self._mouse_pos = (0, 0)
         
         # No, I do not know why the SetScrollbars parameters are calculated this way!
-        wx.ScrolledWindow.__init__(self, parent, id=wx.ID_ANY)
+        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
         self.SetScrollbars(0, self._day_size[1] / 4, 0, (24 * self._day_size[1]) / (self._day_size[1] / 4), 0, 0)
         
-        self.Bind(wx.EVT_PAINT, self.on_paint)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_mouse_left_down)
         self.Bind(wx.EVT_LEFT_UP, self.on_mouse_left_up)
         self.Bind(wx.EVT_MOTION, self.on_mouse_moved)
@@ -352,15 +353,15 @@ class DayGrid(wx.ScrolledWindow):
         else:
             self.end_date = end_date
         
-        self.Refresh()
+        self.UpdateDrawing()
     
     
-    def on_paint(self, event=None):
-        dc = wx.PaintDC(self)
+    def Draw(self, dc): #event=None):
+        #dc = wx.PaintDC(self)
         self.DoPrepareDC(dc)
         
         #dc.SetBackground(wx.Brush("White"))
-        #dc.Clear()
+        dc.Clear()
         
         if self.start_date == None or self.end_date == None:
             return

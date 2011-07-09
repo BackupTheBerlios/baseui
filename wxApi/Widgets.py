@@ -8,6 +8,7 @@
 import wx, string
 
 from Transformations import date_to_str
+from pprint import pprint
 
 
 class BufferedWindow(wx.ScrolledWindow):
@@ -19,18 +20,23 @@ class BufferedWindow(wx.ScrolledWindow):
 
         wx.EVT_PAINT(self, self.OnPaint)
         wx.EVT_SIZE(self, self.OnSize)
-        
+        wx.EVT_SCROLLWIN(self, self.OnScroll)
         self.OnSize(None)
-
-
+    
+    
     def Draw(self, dc):
         pass
 
         
     def OnPaint(self, event):
         dc = wx.BufferedPaintDC(self, self._Buffer)
-
-            
+        
+    
+    def OnScroll(self, event):
+        self.OnSize(None)
+        event.Skip()
+        
+                
     def OnSize(self, event):
         Size  = self.GetClientSizeTuple()
         
