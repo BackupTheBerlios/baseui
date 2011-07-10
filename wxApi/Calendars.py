@@ -351,6 +351,9 @@ class DayGrid(CalendarBase):
         
         self._marker_starts = None
         self._marker_ends = None
+        self._move_tracker_starts = None
+        self._move_tracker_ends = None
+        
         self._hovering_dict = None
         
         self.appointments_lod = []
@@ -358,6 +361,7 @@ class DayGrid(CalendarBase):
         self._graph_row = 0
         self._mouse_pos = (0, 0)
         
+        self._move_appointment = False
         self._left_down = False
         
         # No, I do not know why the SetScrollbars parameters are calculated this way!
@@ -374,22 +378,65 @@ class DayGrid(CalendarBase):
             self._left_down = True
             self._clicked_datetime = self.get_datetime(self._mouse_pos)
             
+            if self._hovering_dict <> None:
+                self._move_appointment = self._hovering_dict
+                 
         if event.LeftUp():
             self._left_down = False
             self._released_datetime = self.get_datetime(self._mouse_pos)
             
-            try:
-                self.add_appointment(title='foggie', start_datetime=self._clicked_datetime, end_datetime=self._released_datetime)
-            except Exception, inst:
-                self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
-        
+            if self._move_appointment == False:
+                try:
+                    self.add_appointment(title='foggie', start_datetime=self._clicked_datetime, end_datetime=self._released_datetime)
+                except Exception, inst:
+                    self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
+            else:
+                self.move_appointment(self._released_datetime - self._clicked_datetime)
+            self._move_appointment = False
+            
+        if event.RightDown():
+            if self._hovering_dict <> None:
+                print 'right:', self._hovering_dict
+                self.appointments_lod.remove(self._hovering_dict)
+                self.reset_marker()
+                
         if event.Dragging() and self._left_down:
             self._dragging_datetime = self.get_datetime(self._mouse_pos)
-            self.mark_timerange(self._clicked_datetime, self._dragging_datetime)
             
+            if self._move_appointment == False:
+                self.mark_timerange(self._clicked_datetime, self._dragging_datetime)
+            else:
+                self.track_move(self._dragging_datetime - self._clicked_datetime)
+                
+                #starts = self._move_appointment.get('starts')
+                #ends = self._move_appointment.get('ends')
+                
+                #print self._clicked_datetime + (self._dragging_datetime - self._clicked_datetime)
+                #print 'Move:', self._move_appointment
+                
         event.Skip()
         
     
+    def check_overlap(self, start_dt=None, end_dt=None, check_dict=None):
+        if check_dict <> None:
+            start_dt = check_dict.get('starts')
+            end_dt = check_dict.get('ends')
+            
+        for appointment_dict in self.appointments_lod:
+            if check_dict == appointment_dict:
+                continue
+            
+            starts = appointment_dict.get('starts')
+            ends = appointment_dict.get('ends')
+            
+            # Check if overlapping.
+            if start_dt > starts and start_dt < ends or \
+               start_dt < starts and end_dt > ends or \
+               end_dt > starts and start_dt < starts:
+                return False
+        return True
+    
+                
     def check_hovering(self):
         hovering_dict = None
         
@@ -408,7 +455,7 @@ class DayGrid(CalendarBase):
                 break
         
         if hovering_dict <> None:
-            self.SetCursor(wx.StockCursor(wx.CURSOR_MAGNIFIER))
+            self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
             self.UpdateDrawing()
         else:
             if self._hovering_dict <> None:
@@ -419,31 +466,59 @@ class DayGrid(CalendarBase):
             
             
     def add_appointment(self, title, start_datetime, end_datetime):
+        if start_datetime > end_datetime:
+            start_datetime, end_datetime = end_datetime, start_datetime
+        
+        print start_datetime, '---', end_datetime
+        
         if start_datetime <> end_datetime:
             if start_datetime.day == end_datetime.day: 
-                self.appointments_lod.append({'title': 'Foggie', 'starts': start_datetime, 'ends': end_datetime})
-                print self.appointments_lod
-                self.UpdateDrawing()
+                if self.check_overlap(start_datetime, end_datetime):
+                    self.appointments_lod.append({'title': 'Foggie', 'starts': start_datetime, 'ends': end_datetime})
+                    #print self.appointments_lod
+                    self.UpdateDrawing()
+                else:
+                    self.reset_marker()
+                    raise Exception(u'Termine dürfen sich nicht überschneiden!')
             else:
                 raise Exception(u'Ein Termin darf sich nicht über mehrere Tage erstrecken!')
         else:
             pass
             
             
-    def mark_timerange(self, start_datetime, dragged_datetime):
+    def track_move(self, delta):
+        starts = self._move_appointment.get('starts')
+        ends = self._move_appointment.get('ends')
         
+        self._move_tracker_starts = self.get_datetime_pos(starts + delta)
+        self._move_tracker_ends = self.get_datetime_pos(ends + delta)
+        self.UpdateDrawing()
+        
+        
+    def move_appointment(self, delta):
+        self._move_appointment['starts'] += delta
+        self._move_appointment['ends'] += delta
+        
+        if self.check_overlap(check_dict=self._move_appointment) == False:
+            self._move_appointment['starts'] -= delta
+            self._move_appointment['ends'] -= delta          
+        
+        self._move_tracker_starts = None
+        self._move_tracker_ends = None
+        self.reset_marker()
+    
+        
+    def reset_marker(self):
+        self._marker_starts = None
+        self._marker_ends = None
+        self.UpdateDrawing()
+        
+        
+    def mark_timerange(self, start_datetime, dragged_datetime):
         self._marker_starts = self.get_datetime_pos(start_datetime)
         self._marker_ends = self.get_datetime_pos(dragged_datetime)
         #print 'marking', self._marker_starts, '<->', self._marker_ends
         self.UpdateDrawing()
-        
-        
-    def draw_appointments(self, appointments):
-        ''' appointments is a list of dictionarys, which has that layout:
-            [{'id': 0, 'title: 'Dentist, 'start_datetime': <datetime_object>, 'end_datetime': <datetime_object>}] '''
-            
-        for appointment_dict in appointments:
-            pass
         
         
     def Draw(self, dc):
@@ -498,6 +573,9 @@ class DayGrid(CalendarBase):
                 dc.SetBrush(wx.Brush(BACKGROUND_COLOR))
             row += 1
             
+        if self._move_tracker_starts <> None and self._move_tracker_ends <> None:
+            self.DrawMoveTracker(dc)
+            
         if self._marker_starts <> None and self._marker_ends <> None:
             self.DrawMarker(dc)
             
@@ -505,14 +583,22 @@ class DayGrid(CalendarBase):
             self.DrawAppointments(dc)
             
             
+    def DrawMoveTracker(self, dc):
+        dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width * 3))
+        dc.DrawRectangle(x=self._move_tracker_starts[0], 
+                         y=self._move_tracker_starts[3], 
+                         width=self._move_tracker_ends[2] - self._move_tracker_starts[0] + self._line_width, 
+                         height=self._move_tracker_ends[3] - self._move_tracker_starts[3] + self._line_width)
+        
+        
     def DrawMarker(self, dc):
         dc.SetBrush(wx.Brush(MARKER_COLOR))
         dc.DrawRectangle(x=self._marker_starts[0], 
                          y=self._marker_starts[3], 
                          width=self._marker_ends[2] - self._marker_starts[0] + self._line_width, 
                          height=self._marker_ends[3] - self._marker_starts[3] + self._line_width)
-    
-    
+        
+        
     def DrawAppointments(self, dc):
         dc.SetBrush(wx.Brush(APPOINTMENT_COLOR))
         for appointment_dict in self.appointments_lod:
@@ -522,6 +608,7 @@ class DayGrid(CalendarBase):
             app_starts_pos = self.get_datetime_pos(start_dt)
             app_ends_pos = self.get_datetime_pos(end_dt)
             
+            # Check hovering (!!!)
             if self._hovering_dict == appointment_dict:
                 dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width * 3)) #, wx.DOT))
             else:
@@ -531,8 +618,14 @@ class DayGrid(CalendarBase):
                              y=app_starts_pos[3], 
                              width =app_ends_pos[2] - app_starts_pos[0] + self._line_width, 
                              height=app_ends_pos[3] - app_starts_pos[3] + self._line_width)
-
-
+            
+            dc.SetTextForeground(BACKGROUND_COLOR)
+            self.adjust_font(dc, size=(30, 30))
+            
+            dc.DrawText(text='%s - %s' % (start_dt.strftime('%H:%M'), end_dt.strftime('%H:%M')), 
+                        x=app_starts_pos[0] + 5, 
+                        y=app_starts_pos[3] + 5)
+            
 
 # GANTT charting technology ---------------------------------------------------
 class GanttChart(BufferedWindow):
