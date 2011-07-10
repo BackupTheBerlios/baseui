@@ -405,9 +405,11 @@ class DayGrid(CalendarBase):
                 
             if self._start_resize_dict <> None:
                 self._start_resize_appointment = self._start_resize_dict
+                print 'start_resize begins'
                 
             if self._end_resize_dict <> None:
                 self._end_resize_appointment = self._end_resize_dict
+                print 'end_resize begins'
                 
         if event.LeftDClick():
             self.open_appointment(self._hovering_dict)
@@ -600,6 +602,14 @@ class DayGrid(CalendarBase):
         self.reset_marker()
     
         
+    def resize_start(self, delta):
+        pass
+    
+    
+    def resize_end(self, delta):
+        pass
+    
+    
     def mark_timerange(self, start_datetime, dragged_datetime):
         self._marker_starts = self.get_datetime_pos(start_datetime)
         self._marker_ends = self.get_datetime_pos(dragged_datetime)
@@ -664,6 +674,9 @@ class DayGrid(CalendarBase):
                 dc.SetBrush(wx.Brush(BACKGROUND_COLOR))
             row += 1
             
+        if self._start_resize_appointment <> None or self._end_resize_appointment <> None:
+            self.DrawResizeMarker(dc)
+            
         if self._move_tracker_starts <> None and self._move_tracker_ends <> None:
             self.DrawMoveTracker(dc)
             
@@ -674,6 +687,10 @@ class DayGrid(CalendarBase):
             self.DrawAppointments(dc)
             
             
+    def DrawResizeMarker(self, dc):
+        pass
+    
+    
     def DrawMoveTracker(self, dc):
         dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width * 3))
         dc.DrawRectangle(x=self._move_tracker_starts[0], 
