@@ -358,13 +358,19 @@ class DayGrid(CalendarBase):
         self._move_tracker_ends = None
         
         self._hovering_dict = None
+        self._move_appointment = None
+        self._start_resize_dict = None
+        self._start_resize_appointment = None
+        self._end_resize_dict = None
+        self._end_resize_appointment = None
+        
+        self._resize_edge = 4 # even value because divided by 2
         
         self.appointments_lod = []
         
         self._graph_row = 0
         self._mouse_pos = (0, 0)
         
-        self._move_appointment = False
         self._left_down = False
         
         # No, I do not know why the SetScrollbars parameters are calculated this way!
@@ -375,10 +381,12 @@ class DayGrid(CalendarBase):
         
     def on_mouse_events(self, event):
         self._mouse_pos = self.CalcUnscrolledPosition(event.GetPositionTuple())
+        event.Skip()
         
         left_border = self.get_date_pos(self.start_date)[0]
         right_border = self.get_date_pos(self.end_date)[1]
         
+        # If the mouse cursor is off the border, do nothing.
         if event.Leaving() or \
            self._mouse_pos[0] < left_border or \
            self._mouse_pos[0] > right_border:
@@ -388,8 +396,6 @@ class DayGrid(CalendarBase):
         
         self.check_hovering()
         
-        #print left_border, right_border, '-', self._mouse_pos
-        
         if event.LeftDown():
             self._left_down = True
             self._clicked_datetime = self.get_datetime(self._mouse_pos)
@@ -397,38 +403,65 @@ class DayGrid(CalendarBase):
             if self._hovering_dict <> None:
                 self._move_appointment = self._hovering_dict
                 
+            if self._start_resize_dict <> None:
+                self._start_resize_appointment = self._start_resize_dict
+                
+            if self._end_resize_dict <> None:
+                self._end_resize_appointment = self._end_resize_dict
+                
+        if event.LeftDClick():
+            self.open_appointment(self._hovering_dict)
+            
         if event.LeftUp():
             self._left_down = False
             self._released_datetime = self.get_datetime(self._mouse_pos)
-            
-            if self._move_appointment == False:
+                
+            if self._move_appointment == None and \
+               self._start_resize_appointment == None and \
+               self._end_resize_appointment == None:
                 try:
                     self.add_appointment(title='foggie', start_datetime=self._clicked_datetime, end_datetime=self._released_datetime)
                 except Exception, inst:
                     self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
-            else:
-                self.move_appointment(self._released_datetime - self._clicked_datetime)
             
+            if self._move_appointment <> None:
+                self.move_appointment(self._released_datetime - self._clicked_datetime)
+                        
+            if self._start_resize_appointment <> None:
+                print 'start resize ends!'
+                self._start_resize_appointment = None
+            
+            if self._end_resize_appointment <> None:
+                print 'end resize ends!'
+                self._end_resize_appointment = None
+                
         if event.RightDown():
             if self._hovering_dict <> None:
                 self.on_appointment_right_clicked()
+                
         if event.Dragging() and self._left_down:
             self._dragging_datetime = self.get_datetime(self._mouse_pos)
             
-            if self._move_appointment == False:
+            if self._move_appointment == None and \
+               self._start_resize_appointment == None and \
+               self._end_resize_appointment == None:
                 self.mark_timerange(self._clicked_datetime, self._dragging_datetime)
-            else:
+            
+            if self._move_appointment <> None:
                 self.track_move(self._dragging_datetime - self._clicked_datetime)
-                
-        event.Skip()
         
     
     def create_context_menu(self):
         context_menu = wx.Menu()
         context_menu.Append(self.ID_EDIT, u"Öffnen")
+        context_menu.Bind(wx.EVT_MENU, self.on_open_appointment, id=self.ID_EDIT)
         context_menu.Append(self.ID_DELETE, "Löschen")
         context_menu.Bind(wx.EVT_MENU, self.on_remove_appointment, id=self.ID_DELETE)
         return context_menu
+        
+        
+    def on_open_appointment(self, event=None):
+        self.open_appointment(self._hovering_dict)
         
         
     def on_appointment_right_clicked(self):
@@ -458,30 +491,60 @@ class DayGrid(CalendarBase):
                 
     def check_hovering(self):
         hovering_dict = None
+        start_resize_dict = None
+        end_resize_dict = None
         
+        got_it = False
         for appointment_dict in self.appointments_lod:
             starts = appointment_dict.get('starts')
             ends = appointment_dict.get('ends')
             
             start_coords = self.get_datetime_pos(starts)
             end_coords = self.get_datetime_pos(ends)
-                
+            
+            # Check hovering between the x-axis    
             if self._mouse_pos[0] > start_coords[0] and \
-               self._mouse_pos[0] < start_coords[2] and \
-               self._mouse_pos[1] > start_coords[3] and \
-               self._mouse_pos[1] < end_coords[3]:
-                hovering_dict = appointment_dict
-                break
+               self._mouse_pos[0] < start_coords[2]:
+                # Check hovering between the y-axis
+                if self._mouse_pos[1] >= start_coords[3] + self._resize_edge and \
+                   self._mouse_pos[1] <= end_coords[3] - self._resize_edge:
+                    hovering_dict = appointment_dict
+                    got_it = True
+                    
+                # Check hovering on upper edge to resize
+                if self._mouse_pos[1] > start_coords[3] - self._resize_edge and \
+                   self._mouse_pos[1] < start_coords[3] + self._resize_edge:
+                    start_resize_dict = appointment_dict
+                    got_it = True
+                    
+                # Check hovering on lower edge to resize
+                if self._mouse_pos[1] > end_coords[3] - self._resize_edge and \
+                   self._mouse_pos[1] < end_coords[3] + self._resize_edge:
+                    end_resize_dict = appointment_dict
+                    got_it = True
+                
+                # No need to continue if one dict has been found!
+                if got_it == True:
+                    break
         
         if hovering_dict <> None:
             self.SetCursor(wx.StockCursor(wx.CURSOR_HAND))
             self.UpdateDrawing()
         else:
             if self._hovering_dict <> None:
-                self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+                #self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
                 self._hovering_dict = hovering_dict
                 self.UpdateDrawing()
+                
+        if start_resize_dict <> None or end_resize_dict <> None:
+            self.SetCursor(wx.StockCursor(wx.CURSOR_SIZENS))
+        
+        if got_it == False:
+            self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+            
         self._hovering_dict = hovering_dict
+        self._start_resize_dict = start_resize_dict
+        self._end_resize_dict = end_resize_dict
             
             
     def add_appointment(self, title, start_datetime, end_datetime):
@@ -492,7 +555,6 @@ class DayGrid(CalendarBase):
             if start_datetime.day == end_datetime.day: 
                 if self.check_overlap(start_datetime, end_datetime):
                     self.appointments_lod.append({'title': 'Foggie', 'starts': start_datetime, 'ends': end_datetime})
-                    #print self.appointments_lod
                     self.UpdateDrawing()
                 else:
                     self.reset_marker()
@@ -501,6 +563,10 @@ class DayGrid(CalendarBase):
                 raise Exception(u'Ein Termin darf sich nicht über mehrere Tage erstrecken!')
         else:
             pass
+        
+        
+    def open_appointment(self, appointment_dict):
+        print u'no form defined! can´t open', appointment_dict
             
             
     def track_move(self, delta):
@@ -514,7 +580,7 @@ class DayGrid(CalendarBase):
         
         
     def reset_tracker(self):
-        self._move_appointment = False
+        self._move_appointment = None
         
         self._move_tracker_starts = None
         self._move_tracker_ends = None
@@ -811,7 +877,7 @@ class GanttChart(BufferedWindow):
                              
             row += 1
             
-                    
+            
     def center_text(self, dc, text='', size=(0,0)):
         text_size = dc.GetTextExtent(text)
         text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
