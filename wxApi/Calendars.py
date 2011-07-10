@@ -11,12 +11,15 @@ import calendar, datetime, time
 from decimal import Decimal
 from pprint import pprint
 from Widgets import BufferedWindow
+from Dialogs import Error
 
 
-WEEKEND_COLOR = '#FFAA00'
+WEEKEND_COLOR = '#AADDFF'
 FOREGROUND_COLOR = 'black'
 BACKGROUND_COLOR = 'white'
 LIGHT_GREY = '#A4A4A4'
+MARKER_COLOR = '#6699FF'
+APPOINTMENT_COLOR = '#2255FF'
 
 WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
 WEEKDAYS_ABBREVATION = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
@@ -24,6 +27,189 @@ MONTHNAMES = ['Januar', 'Februar', u'März', 'April', 'Mai', 'Juni', 'Juli', 'Aug
 MONTHNAMES_ABBREVATION = ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
         
 
+class CalendarBase(BufferedWindow):
+    def __init__(self, parent):
+        self.parent = parent
+        
+        self.start_date = None
+        self.end_date = None
+        
+        self._line_width = 1.0
+        self._parent_size = self.parent.GetSize()
+        self._top_left_corner =     ( 10,  10)
+        self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
+        self._clocktime_size = (100, 40)
+        self._day_size = (200, 50)
+        self._graph_row = 2
+        self._mouse_pos = (0, 0)
+        
+        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
+        self.dialog_error = Error(parent)
+        
+
+    def set_date_range(self, start_date=None, end_date=None, nof_days=None):
+        ''' start_date and end_date are date objects, which are giving the
+            date range to the calendar. Optionally, nof_days can be given instead
+            of end_date or start_date (so that only two of three values must be 
+            given). '''
+        
+        if start_date == None:
+            delta = datetime.timedelta(days=nof_days)
+            self.start_date = end_date - delta
+        else:
+            self.start_date = start_date
+        
+        if nof_days == None:
+            delta = end_date - start_date
+            self.nof_days = delta.days
+        else:
+            self.nof_days = nof_days
+            
+        if end_date == None:
+            delta = datetime.timedelta(days=nof_days)
+            self.end_date = start_date + delta
+        else:
+            self.end_date = end_date
+        
+        self.UpdateDrawing()
+        
+        
+    def get_weekday(self, date, string=True):
+        time_tuple = date.timetuple()
+        weekday = time_tuple.tm_wday
+        
+        if string == True:
+            weekday = WEEKDAYS[weekday]  
+        return weekday
+    
+    
+    def dec_to_time(self, dectime):
+        if dectime == None:
+            return None
+        
+        hour=int(str(dectime).split('.')[0])
+        
+        dectime_str = Decimal(str(dectime))
+        dectime_str = '%.2f' % dectime_str
+        minute=Decimal(str(dectime_str).split('.')[1])*60
+        minute=int(minute/100)
+        
+        time = datetime.time(hour, minute)
+        return time
+    
+    
+    def center_text(self, dc, text='', size=(0,0)):
+        text_size = dc.GetTextExtent(text)
+        text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
+        return text_offset
+    
+    
+    def adjust_font(self, dc, size, font=None):
+        face = font
+        
+        if size[0] > size[1]:
+            smaller_size = size[1]
+        else:
+            smaller_size = size[0]
+            
+        font_size = (smaller_size / 2) * 0.6
+        
+        font_dict = {}
+        font_dict['pointSize'] = font_size
+        font_dict['family'] = wx.FONTFAMILY_DEFAULT
+        font_dict['style'] = wx.FONTSTYLE_NORMAL
+        if face <> None:
+            font_dict['face'] = face, 
+        font_dict['weight'] = wx.FONTWEIGHT_NORMAL
+                       
+        font = wx.Font(**font_dict)
+        dc.SetFont(font)
+    
+    
+    def get_date_pos(self, date):
+        delta = date-self.start_date
+        day_delta = delta.days
+        
+        x1 = self._top_left_corner[0] + self._clocktime_size[0] + (self._day_size[0] * day_delta)
+        x2 = x1 + self._day_size[0]
+        return x1, x2
+        
+    
+    def get_time_pos(self, time, mins=True):
+        rounded_time = self.round_time(time, round_down=False)
+        hour = rounded_time.hour
+        minute = rounded_time.minute
+        
+        if mins == True:
+            minute_offset = int(self._clocktime_size[1] * (minute / float(60)))
+        else:
+            minute_offset = self._clocktime_size[1]
+            
+        y1 = self._top_left_corner[1] + (self._clocktime_size[1] * hour)
+        y2 = y1 + minute_offset
+        return y1, y2
+    
+    
+    def get_datetime_pos(self, dt):
+        time = datetime.time(dt.hour, dt.minute, dt.second)
+        date = datetime.date(dt.year, dt.month, dt.day)
+        
+        x1, x2 = self.get_date_pos(date)
+        y1, y2 = self.get_time_pos(time)
+        return x1, y1, x2, y2
+    
+    
+    def get_date(self, pos_tuple):
+        daydelta = self.get_daydelta(pos_tuple)
+        date = self.start_date + datetime.timedelta(days=daydelta)
+        return date
+    
+    
+    def get_daydelta(self, pos_tuple):
+        day = None
+        if self._mouse_pos[0] >= (self._clocktime_size[0] + self._top_left_corner[0]):
+            day = (self._mouse_pos[0] - self._clocktime_size[0] - self._top_left_corner[0]) / self._day_size[0]
+        return day
+    
+    
+    def get_time(self, pos_tuple):
+        dectime = None
+        if self._mouse_pos[1] >= (self._top_left_corner[1] + (self._graph_row * self._clocktime_size[1])):
+            dectime = float(self._mouse_pos[1] - (self._graph_row * self._clocktime_size[1]) - self._top_left_corner[1]) / self._clocktime_size[1]
+        time = self.dec_to_time(dectime)
+        time = self.round_time(time)
+        return time
+    
+    
+    def get_datetime(self, pos_tuple):
+        date = self.get_date(pos_tuple)
+        time = self.get_time(pos_tuple)
+        dt = datetime.datetime(date.year, date.month, date.day, time.hour, time.minute, time.second)
+        return dt
+    
+        
+    def round_time(self, time, round_down=True):
+        hour = time.hour
+        minute = time.minute
+        
+        for c in xrange(0, 75, 15):
+            if minute > c:
+                continue
+            else:
+                if round_down == True:
+                    minute = c - 15
+                else:
+                    minute = c
+                break
+        
+        if minute <= 0:
+            minute = 0
+            
+        time = datetime.time(hour, minute)
+        return time
+    
+    
+        
 class DayChart(object):
     def __init__(self, parent, id=wx.ID_ANY):
         self.parent = parent
@@ -63,61 +249,13 @@ class DayChart(object):
 
 
 
-class DayHeader(BufferedWindow):
+class DayHeader(CalendarBase):
     def __init__(self, parent):
-        self.parent = parent
-        
-        self.start_date = None
-        self.end_date = None
-        
-        self._line_width = 1.0
-        self._parent_size = self.parent.GetSize()
-        self._top_left_corner =     ( 10,  10)
-        self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
-        self._clocktime_size = (100, 50)
-        self._day_size = (200, 50)
-        self._graph_row = 2
-        self._mouse_pos = (0, 0)
-        
-        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
+        CalendarBase.__init__(self, parent)
         self.SetSize((1400, (self._day_size[1]*2) + self._top_left_corner[1]))
         
-        #self.Bind(wx.EVT_PAINT, self.on_paint)
-        #self.parent.Bind(wx.EVT_SIZE, self.on_size)
-                
         
-    def set_date_range(self, start_date=None, end_date=None, nof_days=None):
-        ''' start_date and end_date are date objects, which are giving the
-            date range to the calendar. Optionally, nof_days can be given instead
-            of end_date or start_date (so that only two of three values must be 
-            given). '''
-        
-        if start_date == None:
-            delta = datetime.timedelta(days=nof_days)
-            self.start_date = end_date - delta
-        else:
-            self.start_date = start_date
-        
-        if nof_days == None:
-            delta = end_date - start_date
-            self.nof_days = delta.days
-        else:
-            self.nof_days = nof_days
-            
-        if end_date == None:
-            delta = datetime.timedelta(days=nof_days)
-            self.end_date = start_date + delta
-        else:
-            self.end_date = end_date
-        
-        self.UpdateDrawing()
-    
-    
-    def Draw(self, dc): #event=None):
-        #dc = wx.PaintDC(self)
-        self.DoPrepareDC(dc)
-        dc.Clear()
-        
+    def Draw(self, dc): #event=None):        
         if self.start_date == None or self.end_date == None:
             return
         
@@ -132,16 +270,7 @@ class DayHeader(BufferedWindow):
         
         # draw top top ruler --------------------------------------------------
         dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width))
-        
-        if self._day_size[0] > self._day_size[1]:
-            smaller_size = self._day_size[1]
-        font_size = (smaller_size / 2) * 0.6
-        font = wx.Font(pointSize=font_size,
-                       family=wx.FONTFAMILY_DEFAULT,
-                       style=wx.FONTSTYLE_NORMAL, 
-                       #face='Lucida Console', 
-                       weight=wx.FONTWEIGHT_NORMAL)
-        dc.SetFont(font)
+        self.adjust_font(dc, self._day_size)
         
         end_delta = self.end_date - self.start_date
         cal_week_start_xpos = None
@@ -202,27 +331,13 @@ class DayHeader(BufferedWindow):
 #                            y=top_left_corner[1] + text_offset[1] + monthnames_offset[1])
 #
 #
-        
-        
-    def get_weekday(self, date, string=True):
-        time_tuple = date.timetuple()
-        weekday = time_tuple.tm_wday
-        
-        if string == True:
-            weekday = WEEKDAYS[weekday]  
-        return weekday
-    
-    
-    def center_text(self, dc, text='', size=(0,0)):
-        text_size = dc.GetTextExtent(text)
-        text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
-        return text_offset
-    
-    
-    
-class DayGrid(BufferedWindow):
+
+
+
+class DayGrid(CalendarBase):
     def __init__(self, parent):
-        self.parent = parent
+        CalendarBase.__init__(self, parent)
+        
         self.start_date = None
         self.end_date = None
         
@@ -233,161 +348,114 @@ class DayGrid(BufferedWindow):
         self._parent_size = self.parent.GetSize()
         self._top_left_corner =     ( 10,  0)
         self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
-        self._clocktime_size = (100, 50)
-        self._day_size =  (200, 50)
+        
+        self._marker_starts = None
+        self._marker_ends = None
+        self._hovering_dict = None
+        
+        self.appointments_lod = []
+        
         self._graph_row = 0
         self._mouse_pos = (0, 0)
         
+        self._left_down = False
+        
         # No, I do not know why the SetScrollbars parameters are calculated this way!
-        BufferedWindow.__init__(self, parent, id=wx.ID_ANY)
-        self.SetScrollbars(0, self._day_size[1] / 4, 0, (24 * self._day_size[1]) / (self._day_size[1] / 4), 0, 0)
+        self.SetScrollbars(0, self._clocktime_size[1] / 4, 0, (24 * self._clocktime_size[1]) / (self._clocktime_size[1] / 4), 0, 0)
         
-        self.Bind(wx.EVT_LEFT_DOWN, self.on_mouse_left_down)
-        self.Bind(wx.EVT_LEFT_UP, self.on_mouse_left_up)
-        self.Bind(wx.EVT_MOTION, self.on_mouse_moved)
+        self.Bind(wx.EVT_MOUSE_EVENTS, self.on_mouse_events)
         
         
-    def on_mouse_left_down(self, event):
-        self._clicked_day = self._get_daydelta(self._mouse_pos)
-        self._clicked_time = self._get_time(self._mouse_pos)
-        print 'conversion:', self._clicked_time
-        
-        
-    def on_mouse_left_up(self, event):
-        self._released_day = self._get_date(self._mouse_pos)
-        self._released_time = self._get_time(self._mouse_pos)
-        print 'released left on button on day %s, time %s' % (str(self._released_day), str(self._released_time))
-        
-        
-    def on_mouse_moved(self, event):
+    def on_mouse_events(self, event):
         self._mouse_pos = self.CalcUnscrolledPosition(event.GetPositionTuple())
-        self.SetFocus()
+        self.check_hovering()
         
-        if event.Dragging():
-            self._dragging_day = self._get_daydelta(self._mouse_pos)
-            self._dragging_time = self._get_time(self._mouse_pos)
-            print 'dragging over day %s, time %s' % (str(self._dragging_day), str(self._dragging_time))
-
-
-    def get_date_pos(self, date):
-        x1=None
-        x2=None
-        return x1, x2
+        if event.LeftDown():
+            self._left_down = True
+            self._clicked_datetime = self.get_datetime(self._mouse_pos)
+            
+        if event.LeftUp():
+            self._left_down = False
+            self._released_datetime = self.get_datetime(self._mouse_pos)
+            
+            try:
+                self.add_appointment(title='foggie', start_datetime=self._clicked_datetime, end_datetime=self._released_datetime)
+            except Exception, inst:
+                self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
+        
+        if event.Dragging() and self._left_down:
+            self._dragging_datetime = self.get_datetime(self._mouse_pos)
+            self.mark_timerange(self._clicked_datetime, self._dragging_datetime)
+            
+        event.Skip()
         
     
-    def get_time_pos(self, time):
-        y1 = None
-        y2 = None
-        return y1, y2
-    
-    
-    def _get_date(self, pos_tuple):
-        daydelta = self._get_daydelta(pos_tuple)
-        date = self.start_date + datetime.timedelta(days=daydelta)
-        return date
-    
-    
-    def _get_daydelta(self, pos_tuple):
-        day = None
-        if self._mouse_pos[0] >= (self._clocktime_size[0] + self._top_left_corner[0]):
-            day = (self._mouse_pos[0] - self._clocktime_size[0] - self._top_left_corner[0]) / self._day_size[0]
-        return day
-    
-    
-    def _get_time(self, pos_tuple):
-        dectime = None
-        if self._mouse_pos[1] >= (self._top_left_corner[1] + (self._graph_row * self._day_size[1])):
-            dectime = float(self._mouse_pos[1] - (self._graph_row * self._day_size[1]) - self._top_left_corner[1]) / self._day_size[1]
-        time = self.dec_to_time(dectime)
-        time = self.round_time(time)
-        return time
-    
-    
-    def round_time(self, time):
-        hour = time.hour
-        minute = time.minute
+    def check_hovering(self):
+        hovering_dict = None
         
-        for c in xrange(0, 75, 15):
-            if minute > c:
-                continue
-            else:
-                minute = c - 15
+        for appointment_dict in self.appointments_lod:
+            starts = appointment_dict.get('starts')
+            ends = appointment_dict.get('ends')
+            
+            start_coords = self.get_datetime_pos(starts)
+            end_coords = self.get_datetime_pos(ends)
+                
+            if self._mouse_pos[0] > start_coords[0] and \
+               self._mouse_pos[0] < start_coords[2] and \
+               self._mouse_pos[1] > start_coords[3] and \
+               self._mouse_pos[1] < end_coords[3]:
+                hovering_dict = appointment_dict
                 break
         
-        if minute <= 0:
-            minute = 0
+        if hovering_dict <> None:
+            self.SetCursor(wx.StockCursor(wx.CURSOR_MAGNIFIER))
+            self.UpdateDrawing()
+        else:
+            if self._hovering_dict <> None:
+                self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+                self._hovering_dict = hovering_dict
+                self.UpdateDrawing()
+        self._hovering_dict = hovering_dict
             
-        time = datetime.time(hour, minute)
-        return time
-        
-        
-    def add_appointment(self, title, day, start_time, end_time):
-        pass
-    
-    
-    def mark_timerange(self):
-        pass
-    
-    
-    def set_date_range(self, start_date=None, end_date=None, nof_days=None):
-        ''' start_date and end_date are date objects, which are giving the
-            date range to the calendar. Optionally, nof_days can be given instead
-            of end_date or start_date (so that only two of three values must be 
-            given). '''
-        
-        if start_date == None:
-            delta = datetime.timedelta(days=nof_days)
-            self.start_date = end_date - delta
-        else:
-            self.start_date = start_date
-        
-        if nof_days == None:
-            delta = end_date - start_date
-            self.nof_days = delta.days
-        else:
-            self.nof_days = nof_days
             
-        if end_date == None:
-            delta = datetime.timedelta(days=nof_days)
-            self.end_date = start_date + delta
+    def add_appointment(self, title, start_datetime, end_datetime):
+        if start_datetime <> end_datetime:
+            if start_datetime.day == end_datetime.day: 
+                self.appointments_lod.append({'title': 'Foggie', 'starts': start_datetime, 'ends': end_datetime})
+                print self.appointments_lod
+                self.UpdateDrawing()
+            else:
+                raise Exception(u'Ein Termin darf sich nicht über mehrere Tage erstrecken!')
         else:
-            self.end_date = end_date
+            pass
+            
+            
+    def mark_timerange(self, start_datetime, dragged_datetime):
         
+        self._marker_starts = self.get_datetime_pos(start_datetime)
+        self._marker_ends = self.get_datetime_pos(dragged_datetime)
+        #print 'marking', self._marker_starts, '<->', self._marker_ends
         self.UpdateDrawing()
-    
-    
-    def Draw(self, dc): #event=None):
-        #dc = wx.PaintDC(self)
-        self.DoPrepareDC(dc)
         
-        #dc.SetBackground(wx.Brush("White"))
-        dc.Clear()
         
+    def draw_appointments(self, appointments):
+        ''' appointments is a list of dictionarys, which has that layout:
+            [{'id': 0, 'title: 'Dentist, 'start_datetime': <datetime_object>, 'end_datetime': <datetime_object>}] '''
+            
+        for appointment_dict in appointments:
+            pass
+        
+        
+    def Draw(self, dc):
         if self.start_date == None or self.end_date == None:
             return
         
-        #monthnames_row = 0
         weekdaynumbers_row = 0
-        #weekdaynames_row = 1
         
         #monthnames_offset = (clocktime_size[0], monthnames_row * day_size[1])
         weekdaynumbers_offset = (self._clocktime_size[0], weekdaynumbers_row * self._day_size[1])
         #weekdaynames_offset = (self._clocktime_size[0], weekdaynames_row * self._day_size[1])
-        graph_offset = (0, self._graph_row * self._day_size[1])
-        
-        # draw top top ruler --------------------------------------------------
-#        dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width))
-#        
-        if self._day_size[0] > self._day_size[1]:
-            smaller_size = self._day_size[1]
-        font_size = (smaller_size / 2) * 0.6
-        font = wx.Font(pointSize=font_size,
-                       family=wx.FONTFAMILY_DEFAULT,
-                       style=wx.FONTSTYLE_NORMAL, 
-                       #face='Lucida Console', 
-                       weight=wx.FONTWEIGHT_NORMAL)
-        dc.SetFont(font)
-#        
+        self.adjust_font(dc, self._clocktime_size)        
         end_delta = self.end_date - self.start_date
 
         # Draw timing...
@@ -396,15 +464,15 @@ class DayGrid(BufferedWindow):
             time = datetime.time(hour=hour)
             time_str = time.strftime('%H:%M')
             
-            dc.DrawRectangle(x=self._top_left_corner[0] + graph_offset[0], 
-                             y=self._top_left_corner[1] + graph_offset[1] + (row*self._clocktime_size[1]), 
+            dc.DrawRectangle(x=self._top_left_corner[0], 
+                             y=self._top_left_corner[1] + (row*self._clocktime_size[1]), 
                              width=self._clocktime_size[0] + self._line_width, 
                              height=self._clocktime_size[1] + self._line_width)
                              
             text_offset = self.center_text(dc, time_str, self._clocktime_size)
             dc.DrawText(text=time_str, 
                         x=self._top_left_corner[0] + text_offset[0], 
-                        y=self._top_left_corner[1] + text_offset[1] + graph_offset[1] + (row*self._clocktime_size[1]))
+                        y=self._top_left_corner[1] + text_offset[1] + (row*self._clocktime_size[1]))
             
             for day_delta in xrange(0, end_delta.days + 1):
                 day_date = self.start_date + datetime.timedelta(days=day_delta)
@@ -416,59 +484,55 @@ class DayGrid(BufferedWindow):
                     dc.SetBrush(wx.Brush(WEEKEND_COLOR))
                     
                 dc.DrawRectangle(x=ruler_x_pos + weekdaynumbers_offset[0], 
-                                 y=self._top_left_corner[1] + graph_offset[1] + (row*self._clocktime_size[1]), 
+                                 y=self._top_left_corner[1] + (row*self._clocktime_size[1]), 
                                  width=self._day_size[0] + self._line_width, 
                                  height=self._clocktime_size[1] + self._line_width)
                 
                 # Draw dashed quarters
                 dc.SetPen(wx.Pen(LIGHT_GREY, self._line_width, wx.DOT))
                 for quarter in xrange(1, 4):
-                    dc.DrawLine(ruler_x_pos + weekdaynumbers_offset[0],                     self._top_left_corner[1] + graph_offset[1] + (row*self._clocktime_size[1]) + ((self._day_size[1] / 4) * quarter) + self._line_width, 
-                                ruler_x_pos + weekdaynumbers_offset[0] + self._day_size[0], self._top_left_corner[1] + graph_offset[1] + (row*self._clocktime_size[1]) + ((self._day_size[1] / 4) * quarter) + self._line_width)
+                    dc.DrawLine(ruler_x_pos + weekdaynumbers_offset[0],                     self._top_left_corner[1] + (row*self._clocktime_size[1]) + ((self._clocktime_size[1] / 4) * quarter), 
+                                ruler_x_pos + weekdaynumbers_offset[0] + self._day_size[0], self._top_left_corner[1] + (row*self._clocktime_size[1]) + ((self._clocktime_size[1] / 4) * quarter))
                 
                 dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width, wx.SOLID))    
                 dc.SetBrush(wx.Brush(BACKGROUND_COLOR))
             row += 1
             
+        if self._marker_starts <> None and self._marker_ends <> None:
+            self.DrawMarker(dc)
             
-    def draw_appointments(self, appointments):
-        ''' appointments is a list of dictionarys, which has that layout:
-            [{'id': 0, 'title: 'Dentist, 'start_time': <datetime_object>, 'end_time': <datetime_object>}] '''
-            
-        for appointment_dict in appointments:
-            pass
-        
-        
-    def get_weekday(self, date, string=True):
-        time_tuple = date.timetuple()
-        weekday = time_tuple.tm_wday
-        
-        if string == True:
-            weekday = WEEKDAYS[weekday]  
-        return weekday
-    
-    
-    def dec_to_time(self, dectime):
-        if dectime == None:
-            return None
-        
-        hour=int(str(dectime).split('.')[0])
-        
-        dectime_str = Decimal(str(dectime))
-        dectime_str = '%.2f' % dectime_str
-        minute=Decimal(str(dectime_str).split('.')[1])*60
-        minute=int(minute/100)
-        
-        time = datetime.time(hour, minute)
-        return time
-    
-    
-    def center_text(self, dc, text='', size=(0,0)):
-        text_size = dc.GetTextExtent(text)
-        text_offset = ((size[0] - text_size[0]) / 2, ((size[1]-text_size[1]) / 2))
-        return text_offset
+        if self.appointments_lod <> []:
+            self.DrawAppointments(dc)
             
             
+    def DrawMarker(self, dc):
+        dc.SetBrush(wx.Brush(MARKER_COLOR))
+        dc.DrawRectangle(x=self._marker_starts[0], 
+                         y=self._marker_starts[3], 
+                         width=self._marker_ends[2] - self._marker_starts[0] + self._line_width, 
+                         height=self._marker_ends[3] - self._marker_starts[3] + self._line_width)
+    
+    
+    def DrawAppointments(self, dc):
+        dc.SetBrush(wx.Brush(APPOINTMENT_COLOR))
+        for appointment_dict in self.appointments_lod:
+            start_dt = appointment_dict.get('starts')
+            end_dt = appointment_dict.get('ends')
+            
+            app_starts_pos = self.get_datetime_pos(start_dt)
+            app_ends_pos = self.get_datetime_pos(end_dt)
+            
+            if self._hovering_dict == appointment_dict:
+                dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width * 3)) #, wx.DOT))
+            else:
+                dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width)) #, wx.DOT))
+                
+            dc.DrawRectangle(x=app_starts_pos[0], 
+                             y=app_starts_pos[3], 
+                             width =app_ends_pos[2] - app_starts_pos[0] + self._line_width, 
+                             height=app_ends_pos[3] - app_starts_pos[3] + self._line_width)
+
+
 
 # GANTT charting technology ---------------------------------------------------
 class GanttChart(BufferedWindow):

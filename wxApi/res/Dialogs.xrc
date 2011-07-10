@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
 	<object class="wxDialog" name="Error">
-		<style>wxDEFAULT_DIALOG_STYLE</style>
+		<style>wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</style>
 		<size>456,175</size>
 		<title></title>
 		<centered>1</centered>
 		<object class="wxFlexGridSizer">
-			<rows>2</rows>
+			<rows>4</rows>
 			<cols>1</cols>
 			<vgap>0</vgap>
 			<hgap>0</hgap>
 			<growablecols>0</growablecols>
-			<growablerows>0</growablerows>
+			<growablerows>3</growablerows>
 			<object class="sizeritem">
 				<option>1</option>
 				<flag>wxALL|wxEXPAND</flag>

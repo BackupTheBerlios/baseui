@@ -38,7 +38,7 @@
             <property name="name">Error</property>
             <property name="pos"></property>
             <property name="size">456,175</property>
-            <property name="style">wxDEFAULT_DIALOG_STYLE</property>
+            <property name="style">wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER</property>
             <property name="subclass"></property>
             <property name="title"></property>
             <property name="tooltip"></property>
@@ -83,13 +83,13 @@
                 <property name="cols">1</property>
                 <property name="flexible_direction">wxBOTH</property>
                 <property name="growablecols">0</property>
-                <property name="growablerows">0</property>
+                <property name="growablerows">3</property>
                 <property name="hgap">0</property>
                 <property name="minimum_size"></property>
                 <property name="name">fgSizer4</property>
                 <property name="non_flexible_grow_mode">wxFLEX_GROWMODE_SPECIFIED</property>
                 <property name="permission">none</property>
-                <property name="rows">2</property>
+                <property name="rows">4</property>
                 <property name="vgap">0</property>
                 <object class="sizeritem" expanded="1">
                     <property name="border">5</property>

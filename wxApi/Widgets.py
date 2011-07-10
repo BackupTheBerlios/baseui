@@ -33,13 +33,14 @@ class BufferedWindow(wx.ScrolledWindow):
         
     
     def OnScroll(self, event):
-        self.OnSize(None)
+        Size  = self.GetClientSizeTuple()
+        self._Buffer = wx.EmptyBitmap(*Size)
+        self.UpdateDrawing()
         event.Skip()
         
                 
     def OnSize(self, event):
         Size  = self.GetClientSizeTuple()
-        
         self._Buffer = wx.EmptyBitmap(*Size)
         self.UpdateDrawing()
 
@@ -50,6 +51,8 @@ class BufferedWindow(wx.ScrolledWindow):
         
     def UpdateDrawing(self):
         dc = wx.BufferedDC(wx.ClientDC(self), self._Buffer)
+        self.DoPrepareDC(dc)
+        dc.Clear()
         self.Draw(dc)
 
             
