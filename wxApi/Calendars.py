@@ -335,6 +335,9 @@ class DayHeader(CalendarBase):
 
 
 class DayGrid(CalendarBase):
+    ID_EDIT = 101
+    ID_DELETE = 102
+    
     def __init__(self, parent):
         CalendarBase.__init__(self, parent)
         
@@ -372,7 +375,20 @@ class DayGrid(CalendarBase):
         
     def on_mouse_events(self, event):
         self._mouse_pos = self.CalcUnscrolledPosition(event.GetPositionTuple())
+        
+        left_border = self.get_date_pos(self.start_date)[0]
+        right_border = self.get_date_pos(self.end_date)[1]
+        
+        if event.Leaving() or \
+           self._mouse_pos[0] < left_border or \
+           self._mouse_pos[0] > right_border:
+            self.reset_tracker()
+            self.reset_marker()
+            return
+        
         self.check_hovering()
+        
+        #print left_border, right_border, '-', self._mouse_pos
         
         if event.LeftDown():
             self._left_down = True
@@ -380,7 +396,7 @@ class DayGrid(CalendarBase):
             
             if self._hovering_dict <> None:
                 self._move_appointment = self._hovering_dict
-                 
+                
         if event.LeftUp():
             self._left_down = False
             self._released_datetime = self.get_datetime(self._mouse_pos)
@@ -392,14 +408,10 @@ class DayGrid(CalendarBase):
                     self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
             else:
                 self.move_appointment(self._released_datetime - self._clicked_datetime)
-            self._move_appointment = False
             
         if event.RightDown():
             if self._hovering_dict <> None:
-                print 'right:', self._hovering_dict
-                self.appointments_lod.remove(self._hovering_dict)
-                self.reset_marker()
-                
+                self.on_appointment_right_clicked()
         if event.Dragging() and self._left_down:
             self._dragging_datetime = self.get_datetime(self._mouse_pos)
             
@@ -408,22 +420,29 @@ class DayGrid(CalendarBase):
             else:
                 self.track_move(self._dragging_datetime - self._clicked_datetime)
                 
-                #starts = self._move_appointment.get('starts')
-                #ends = self._move_appointment.get('ends')
-                
-                #print self._clicked_datetime + (self._dragging_datetime - self._clicked_datetime)
-                #print 'Move:', self._move_appointment
-                
         event.Skip()
         
     
-    def check_overlap(self, start_dt=None, end_dt=None, check_dict=None):
-        if check_dict <> None:
-            start_dt = check_dict.get('starts')
-            end_dt = check_dict.get('ends')
-            
+    def create_context_menu(self):
+        context_menu = wx.Menu()
+        context_menu.Append(self.ID_EDIT, u"Öffnen")
+        context_menu.Append(self.ID_DELETE, "Löschen")
+        context_menu.Bind(wx.EVT_MENU, self.on_remove_appointment, id=self.ID_DELETE)
+        return context_menu
+        
+        
+    def on_appointment_right_clicked(self):
+        self.PopupMenu(self.create_context_menu())
+        
+        
+    def on_remove_appointment(self, event=None):
+        self.appointments_lod.remove(self._hovering_dict)
+        self.reset_marker()
+        
+        
+    def check_overlap(self, start_dt=None, end_dt=None, exclude=None):
         for appointment_dict in self.appointments_lod:
-            if check_dict == appointment_dict:
+            if exclude == appointment_dict:
                 continue
             
             starts = appointment_dict.get('starts')
@@ -469,8 +488,6 @@ class DayGrid(CalendarBase):
         if start_datetime > end_datetime:
             start_datetime, end_datetime = end_datetime, start_datetime
         
-        print start_datetime, '---', end_datetime
-        
         if start_datetime <> end_datetime:
             if start_datetime.day == end_datetime.day: 
                 if self.check_overlap(start_datetime, end_datetime):
@@ -490,34 +507,42 @@ class DayGrid(CalendarBase):
         starts = self._move_appointment.get('starts')
         ends = self._move_appointment.get('ends')
         
-        self._move_tracker_starts = self.get_datetime_pos(starts + delta)
-        self._move_tracker_ends = self.get_datetime_pos(ends + delta)
+        if (starts + delta).day == (ends + delta).day:
+            self._move_tracker_starts = self.get_datetime_pos(starts + delta)
+            self._move_tracker_ends = self.get_datetime_pos(ends + delta)
+        self.UpdateDrawing()
+        
+        
+    def reset_tracker(self):
+        self._move_appointment = False
+        
+        self._move_tracker_starts = None
+        self._move_tracker_ends = None
         self.UpdateDrawing()
         
         
     def move_appointment(self, delta):
-        self._move_appointment['starts'] += delta
-        self._move_appointment['ends'] += delta
+        starts = self._move_appointment.get('starts')
+        ends = self._move_appointment.get('ends')
         
-        if self.check_overlap(check_dict=self._move_appointment) == False:
-            self._move_appointment['starts'] -= delta
-            self._move_appointment['ends'] -= delta          
+        if self.check_overlap(starts + delta, ends + delta, self._move_appointment) and \
+           (starts + delta).day == (ends + delta).day:
+            self._move_appointment['starts'] += delta
+            self._move_appointment['ends'] += delta          
         
-        self._move_tracker_starts = None
-        self._move_tracker_ends = None
+        self.reset_tracker()
         self.reset_marker()
     
-        
-    def reset_marker(self):
-        self._marker_starts = None
-        self._marker_ends = None
-        self.UpdateDrawing()
-        
         
     def mark_timerange(self, start_datetime, dragged_datetime):
         self._marker_starts = self.get_datetime_pos(start_datetime)
         self._marker_ends = self.get_datetime_pos(dragged_datetime)
-        #print 'marking', self._marker_starts, '<->', self._marker_ends
+        self.UpdateDrawing()
+        
+        
+    def reset_marker(self):
+        self._marker_starts = None
+        self._marker_ends = None
         self.UpdateDrawing()
         
         
