@@ -384,6 +384,9 @@ class DayGrid(CalendarBase):
         left_border = self.get_date_pos(self.start_date)[0]
         right_border = self.get_date_pos(self.end_date)[1]
         
+        if event.Entering():
+            self.SetFocus()
+            
         # If the mouse cursor is off the border, do nothing.
         if event.Leaving() or \
            self._mouse_pos[0] < left_border or \
@@ -403,11 +406,9 @@ class DayGrid(CalendarBase):
                 
             if self._start_resize_dict <> None:
                 self._start_resize_appointment = self._start_resize_dict
-                print 'start_resize begins'
                 
             if self._end_resize_dict <> None:
                 self._end_resize_appointment = self._end_resize_dict
-                print 'end_resize begins'
                 
         if event.LeftDClick():
             self.open_appointment(self._hovering_dict)
@@ -443,19 +444,20 @@ class DayGrid(CalendarBase):
         if event.Dragging() and self._left_down:
             self._dragging_datetime = self.get_datetime(self._mouse_pos)
             
+            delta = self._dragging_datetime - self._clicked_datetime
             if self._move_appointment == None and \
                self._start_resize_appointment == None and \
                self._end_resize_appointment == None:
                 self.mark_timerange(self._clicked_datetime, self._dragging_datetime)
             
             if self._move_appointment <> None:
-                self.track_move(self._dragging_datetime - self._clicked_datetime)
+                self.track_move(delta)
         
             if self._start_resize_appointment <> None:
-                self.track_start_resize(self._dragging_datetime - self._clicked_datetime)
+                self.track_start_resize(delta)
                 
             if self._end_resize_appointment <> None:
-                self.track_end_resize(self._dragging_datetime - self._clicked_datetime)
+                self.track_end_resize(delta)
         
     
     def create_context_menu(self):
@@ -539,7 +541,6 @@ class DayGrid(CalendarBase):
             self.UpdateDrawing()
         else:
             if self._hovering_dict <> None:
-                #self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
                 self._hovering_dict = hovering_dict
                 self.UpdateDrawing()
                 
