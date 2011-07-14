@@ -738,8 +738,6 @@ class FormFrame(wx.Frame):
         self.remote_parent = remote_parent
         self.permissions = permissions
         
-        #print 'form:', self.permissions
-        
         # This lists are made to get portlets going.
         self.save_function_list = []
         self.delete_function_list = []

@@ -426,15 +426,16 @@ class DayGrid(CalendarBase):
                 except Exception, inst:
                     self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
             
+            delta = self._released_datetime - self._clicked_datetime
             if self._move_appointment <> None:
-                self.move_appointment(self._released_datetime - self._clicked_datetime)
+                self.move_appointment(delta)
                         
             if self._start_resize_appointment <> None:
-                print 'start resize ends!'
+                self.resize_appointment(delta) #print 'start resize ends!'
                 self._start_resize_appointment = None
             
             if self._end_resize_appointment <> None:
-                print 'end resize ends!'
+                self.resize_appointment(delta)
                 self._end_resize_appointment = None
                 
         if event.RightDown():
@@ -451,6 +452,12 @@ class DayGrid(CalendarBase):
             
             if self._move_appointment <> None:
                 self.track_move(self._dragging_datetime - self._clicked_datetime)
+        
+            if self._start_resize_appointment <> None:
+                self.track_start_resize(self._dragging_datetime - self._clicked_datetime)
+                
+            if self._end_resize_appointment <> None:
+                self.track_end_resize(self._dragging_datetime - self._clicked_datetime)
         
     
     def create_context_menu(self):
@@ -583,9 +590,11 @@ class DayGrid(CalendarBase):
         
     def reset_tracker(self):
         self._move_appointment = None
-        
         self._move_tracker_starts = None
         self._move_tracker_ends = None
+        
+        self._start_resize_appointment = None
+        self._end_resize_appointment = None
         self.UpdateDrawing()
         
         
@@ -602,12 +611,32 @@ class DayGrid(CalendarBase):
         self.reset_marker()
     
         
-    def resize_start(self, delta):
-        pass
+    def resize_appointment(self, delta):
+        if self._start_resize_appointment <> None:
+            self._start_resize_appointment['starts'] += delta
+        if self._end_resize_appointment <> None:
+            self._end_resize_appointment['ends'] += delta
+        self.reset_tracker()
+        
+            
+    def track_start_resize(self, delta):
+        starts = self._start_resize_appointment.get('starts')
+        ends = self._start_resize_appointment.get('ends')
+        
+        if (starts + delta).day == (ends).day:
+            self._move_tracker_starts = self.get_datetime_pos(starts + delta)
+            self._move_tracker_ends = self.get_datetime_pos(ends)
+        self.UpdateDrawing()
     
     
-    def resize_end(self, delta):
-        pass
+    def track_end_resize(self, delta):
+        starts = self._end_resize_appointment.get('starts')
+        ends = self._end_resize_appointment.get('ends')
+        
+        if (starts).day == (ends + delta).day:
+            self._move_tracker_starts = self.get_datetime_pos(starts)
+            self._move_tracker_ends = self.get_datetime_pos(ends + delta)
+        self.UpdateDrawing()
     
     
     def mark_timerange(self, start_datetime, dragged_datetime):
@@ -674,17 +703,17 @@ class DayGrid(CalendarBase):
                 dc.SetBrush(wx.Brush(BACKGROUND_COLOR))
             row += 1
             
-        if self._start_resize_appointment <> None or self._end_resize_appointment <> None:
-            self.DrawResizeMarker(dc)
-            
-        if self._move_tracker_starts <> None and self._move_tracker_ends <> None:
-            self.DrawMoveTracker(dc)
-            
         if self._marker_starts <> None and self._marker_ends <> None:
             self.DrawMarker(dc)
             
         if self.appointments_lod <> []:
             self.DrawAppointments(dc)
+            
+        if self._start_resize_appointment <> None or self._end_resize_appointment <> None:
+            self.DrawResizeMarker(dc)
+            
+        if self._move_tracker_starts <> None and self._move_tracker_ends <> None:
+            self.DrawMoveTracker(dc)
             
             
     def DrawResizeMarker(self, dc):
@@ -693,6 +722,7 @@ class DayGrid(CalendarBase):
     
     def DrawMoveTracker(self, dc):
         dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width * 3))
+        dc.SetBrush(wx.Brush(BACKGROUND_COLOR))
         dc.DrawRectangle(x=self._move_tracker_starts[0], 
                          y=self._move_tracker_starts[3], 
                          width=self._move_tracker_ends[2] - self._move_tracker_starts[0] + self._line_width, 
@@ -705,6 +735,12 @@ class DayGrid(CalendarBase):
                          y=self._marker_starts[3], 
                          width=self._marker_ends[2] - self._marker_starts[0] + self._line_width, 
                          height=self._marker_ends[3] - self._marker_starts[3] + self._line_width)
+        
+#        dc.SetTextForeground(BACKGROUND_COLOR)
+#        self.adjust_font(dc, size=(30, 30))
+#        dc.DrawText(text='%s - %s' % (start_dt.strftime('%H:%M'), end_dt.strftime('%H:%M')), 
+#                    x=app_starts_pos[0] + 5, 
+#                    y=app_starts_pos[3] + 5)
         
         
     def DrawAppointments(self, dc):
@@ -729,7 +765,6 @@ class DayGrid(CalendarBase):
             
             dc.SetTextForeground(BACKGROUND_COLOR)
             self.adjust_font(dc, size=(30, 30))
-            
             dc.DrawText(text='%s - %s' % (start_dt.strftime('%H:%M'), end_dt.strftime('%H:%M')), 
                         x=app_starts_pos[0] + 5, 
                         y=app_starts_pos[3] + 5)
