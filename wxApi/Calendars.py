@@ -39,7 +39,7 @@ class CalendarBase(BufferedWindow):
         self._top_left_corner =     ( 10,  10)
         self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
         self._clocktime_size = (100, 40)
-        self._day_size = (200, 50)
+        self._day_size = (200, 40)
         self._graph_row = 2
         self._mouse_pos = (0, 0)
         
@@ -104,9 +104,7 @@ class CalendarBase(BufferedWindow):
         return text_offset
     
     
-    def adjust_font(self, dc, size, font=None):
-        face = font
-        
+    def adjust_font(self, dc, size, face='Tahoma'):
         if size[0] > size[1]:
             smaller_size = size[1]
         else:
@@ -119,9 +117,9 @@ class CalendarBase(BufferedWindow):
         font_dict['family'] = wx.FONTFAMILY_DEFAULT
         font_dict['style'] = wx.FONTSTYLE_NORMAL
         if face <> None:
-            font_dict['face'] = face, 
+            font_dict['face'] = face
         font_dict['weight'] = wx.FONTWEIGHT_NORMAL
-                       
+        
         font = wx.Font(**font_dict)
         dc.SetFont(font)
     
@@ -567,11 +565,8 @@ class DayGrid(CalendarBase):
                     self.UpdateDrawing()
                 else:
                     self.reset_marker()
-                    raise Exception(u'Termine dürfen sich nicht überschneiden!')
             else:
-                raise Exception(u'Ein Termin darf sich nicht über mehrere Tage erstrecken!')
-        else:
-            pass
+                self.reset_marker()
         
         
     def open_appointment(self, appointment_dict):
@@ -640,8 +635,9 @@ class DayGrid(CalendarBase):
     
     
     def mark_timerange(self, start_datetime, dragged_datetime):
-        self._marker_starts = self.get_datetime_pos(start_datetime)
-        self._marker_ends = self.get_datetime_pos(dragged_datetime)
+        if start_datetime.day == dragged_datetime.day:
+            self._marker_starts = self.get_datetime_pos(start_datetime)
+            self._marker_ends = self.get_datetime_pos(dragged_datetime)
         self.UpdateDrawing()
         
         
