@@ -422,7 +422,7 @@ class DayGrid(CalendarBase):
                self._start_resize_appointment == None and \
                self._end_resize_appointment == None:
                 try:
-                    self.add_appointment(title='foggie', start_datetime=self._clicked_datetime, end_datetime=self._released_datetime)
+                    self.add_appointment(title=None, start_datetime=self._clicked_datetime, end_datetime=self._released_datetime)
                 except Exception, inst:
                     self.dialog_error.show(instance=inst, message=u'Fehler beim hinzufügen eines Termins.')
             
@@ -569,7 +569,7 @@ class DayGrid(CalendarBase):
         if start_datetime <> end_datetime:
             if start_datetime.day == end_datetime.day: 
                 if self.check_overlap(start_datetime, end_datetime):
-                    self.appointments_lod.append({'title': 'Foggie', 'starts': start_datetime, 'ends': end_datetime})
+                    self.appointments_lod.append({'title': title, 'starts': start_datetime, 'ends': end_datetime})
                     self.UpdateDrawing()
                 else:
                     self.reset_marker()
