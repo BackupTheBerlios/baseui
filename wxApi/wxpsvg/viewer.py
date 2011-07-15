@@ -315,8 +315,8 @@ class ViewFrame(wx.Frame):
         element = self.tree.GetItemPyData(item)
         if element is None:
             return
+
         path = self.document.paths[element]
-        print path
         
     def OnUpdateUI(self, evt):
         if self.render.lastRender is not None:

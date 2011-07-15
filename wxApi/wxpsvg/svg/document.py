@@ -13,6 +13,8 @@ import css
 from css.colour import colourValue
 from css import values
 from attributes import paintValue
+from pprint import pprint
+
 
 document = """<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
@@ -78,6 +80,7 @@ class SVGDocument(object):
         Create an SVG document from an ElementTree node.
         """
         self.handlers = {
+            '{http://www.w3.org/2000/svg}tspan':self.addTspanToDocument,
             '{http://www.w3.org/2000/svg}svg':self.addGroupToDocument,
             '{http://www.w3.org/2000/svg}a':self.addGroupToDocument,
             '{http://www.w3.org/2000/svg}g':self.addGroupToDocument,
@@ -88,7 +91,7 @@ class SVGDocument(object):
             '{http://www.w3.org/2000/svg}polyline': self.addPolyLineToDocument,
             '{http://www.w3.org/2000/svg}polygon': self.addPolygonToDocument,
             '{http://www.w3.org/2000/svg}path':self.addPathDataToDocument,
-            '{http://www.w3.org/2000/svg}text':self.addTextToDocument
+            '{http://www.w3.org/2000/svg}text':self.addTextToDocument,
         }
         
         assert element.tag == '{http://www.w3.org/2000/svg}svg', 'Not an SVG fragment'
@@ -117,6 +120,7 @@ class SVGDocument(object):
         current.update(css.inlineStyle(element.get("style", "")))
         self.stateStack.append(current)
         handler = self.handlers.get(element.tag, lambda *any: (None, None))
+        print handler
         path, ops = handler(element)
         self.paths[element] = path
         self.stateStack.pop()
@@ -228,8 +232,53 @@ class SVGDocument(object):
                 font.SetPointSize(int(val))
         return font
     
+    def addTspanToDocument(self, node):
+        #print '... TSPAWN', node
+        x, y = [attrAsFloat(node, attr) for attr in ('x', 'y')]
+        
+        def DoDrawText(context, text, x, y, brush=wx.NullGraphicsBrush):
+            #SVG spec appears to originate text from the bottom
+            #rather than the top as with our API. This function
+            #will measure and then re-orient the text as needed.
+            w, h = context.GetTextExtent(text)
+            y -= h
+            #context.SetTextForeground('black')
+            context.DrawText(text, x, y)
+            #print 'DRAWING TSPAWN TEXT:', text
+        font = self.getFontFromState()
+        brush = self.getBrushFromState()
+        
+        if not (brush and brush.IsOk()):
+            brush = wx.BLACK_BRUSH
+        #normalize whitespace
+        #TODO: SVG probably has rules for this
+        text = ' '.join(node.text.split() if node.text else "")
+        #print 'TSPAWN TEXT:', text
+        if text is None:
+            return None, []
+        ops = [
+            (wx.GraphicsContext.SetFont, (font, brush.Colour)),
+            (DoDrawText, (text, x, y, brush))
+        ]
+        #print 'TSPAN:', ops, text
+        return None, ops
+        
+        
     def addTextToDocument(self, node):
         x, y = [attrAsFloat(node, attr) for attr in ('x', 'y')]
+        # print node.getchildren()
+        
+        ops = [
+            (wx.GraphicsContext.PushState, ())
+        ]
+        for child in node.getchildren():
+            cpath, cops = self.processElement(child)
+            ops.extend(cops)
+            #return cpath, cops
+        ops.append(
+            (wx.GraphicsContext.PopState, ())
+        )
+        return None, ops
         
         def DoDrawText(context, text, x, y, brush=wx.NullGraphicsBrush):
             #SVG spec appears to originate text from the bottom
@@ -240,6 +289,7 @@ class SVGDocument(object):
             context.DrawText(text, x, y, brush)
         font = self.getFontFromState()
         brush = self.getBrushFromState()
+        
         if not (brush and brush.IsOk()):
             brush = wx.BLACK_BRUSH
         #normalize whitespace
@@ -251,6 +301,7 @@ class SVGDocument(object):
             (wx.GraphicsContext.SetFont, (font, brush.Colour)),
             (DoDrawText, (text, x, y))
         ]
+        #print '... OPS', ops, text
         return None, ops
         
     @pathHandler
