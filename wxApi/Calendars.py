@@ -571,7 +571,9 @@ class DayGrid(CalendarBase):
         
         
     def open_appointment(self, appointment_dict):
+        # Just override this function in derrived class
         print u'no form defined! can´t open', appointment_dict
+        pass
             
             
     def track_move(self, delta):
@@ -609,9 +611,16 @@ class DayGrid(CalendarBase):
         
     def resize_appointment(self, delta):
         if self._start_resize_appointment <> None:
-            self._start_resize_appointment['starts'] += delta
+            starts = self._start_resize_appointment.get('starts')
+            ends = self._start_resize_appointment.get('ends')
+            if self.check_overlap(starts + delta, ends, self._start_resize_appointment):
+                self._start_resize_appointment['starts'] += delta
+        
         if self._end_resize_appointment <> None:
-            self._end_resize_appointment['ends'] += delta
+            starts = self._end_resize_appointment.get('starts')
+            ends = self._end_resize_appointment.get('ends')
+            if self.check_overlap(starts, ends + delta, self._end_resize_appointment):
+                self._end_resize_appointment['ends'] += delta
         self.reset_tracker()
         
             
@@ -629,7 +638,7 @@ class DayGrid(CalendarBase):
         starts = self._end_resize_appointment.get('starts')
         ends = self._end_resize_appointment.get('ends')
         
-        if (starts).day == (ends + delta).day:
+        if starts.day == (ends + delta).day:
             self._move_tracker_starts = self.get_datetime_pos(starts)
             self._move_tracker_ends = self.get_datetime_pos(ends + delta)
         self.UpdateDrawing()
