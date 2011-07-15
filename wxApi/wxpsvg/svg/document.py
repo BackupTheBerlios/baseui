@@ -48,7 +48,8 @@ def valueToPixels(val, defaultUnits="px"):
         val, unit = values.length.parseString(val)
     except ParseException:
         print "***", val
-        raise
+        #raise
+        val = 0
     #todo: unit conversion to something other than pixels
     return val
 

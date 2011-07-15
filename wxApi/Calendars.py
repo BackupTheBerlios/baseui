@@ -362,7 +362,7 @@ class DayGrid(CalendarBase):
         self._end_resize_dict = None
         self._end_resize_appointment = None
         
-        self._resize_edge = 4 # even value because divided by 2
+        self._resize_edge = 4
         
         self.appointments_lod = []
         
@@ -373,6 +373,7 @@ class DayGrid(CalendarBase):
         
         # No, I do not know why the SetScrollbars parameters are calculated this way!
         self.SetScrollbars(0, self._clocktime_size[1] / 4, 0, (24 * self._clocktime_size[1]) / (self._clocktime_size[1] / 4), 0, 0)
+        self.scroll_to_time(datetime.time(6,0))
         
         self.Bind(wx.EVT_MOUSE_EVENTS, self.on_mouse_events)
         
@@ -480,6 +481,12 @@ class DayGrid(CalendarBase):
     def on_remove_appointment(self, event=None):
         self.appointments_lod.remove(self._hovering_dict)
         self.reset_marker()
+        
+        
+    def scroll_to_time(self, scroll_time, mins=False):
+        pos = self.get_time_pos(scroll_time, mins)
+        # Can not figure out why this calculation works !?
+        self.Scroll(0, (pos[1]/10)-4)
         
         
     def check_overlap(self, start_dt=None, end_dt=None, exclude=None):
