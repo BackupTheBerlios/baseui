@@ -610,6 +610,338 @@ class FormTablePreferences(Dialogs.FormTablePreferences):
         
         
 # Form frames ------------------------------------------------------------------
+class DatabaseFormBase(object):
+    def __init__(self, parent=None,
+                       icon_path=None,
+                       title='',
+                       xrc_path=None,
+                       panel_name=None,
+                       remote_parent=None,
+                       permissions={}):
+        
+        self.parent = parent 
+        self.title = title
+        self.panel_name = panel_name
+        self.icon_path = icon_path
+        self.xrc_path = xrc_path
+        
+        self.remote_parent = remote_parent
+        self.permissions = permissions
+                
+        # This lists are made to get portlets going.
+        self.save_function_list = []
+        self.delete_function_list = []
+        self.populate_function_list = []
+        
+        self.primary_key = None
+        if self.remote_parent.primary_key <> None:
+            self.primary_key = self.remote_parent.primary_key
+        
+        self.db_table = remote_parent.db_table
+        self.db_object = self.db_table.db_object
+        
+        
+    def on_save(self, event=None):
+        form_content = self.form.get_content()
+        pk_column = self.db_table.get_primary_key_columns()[0]
+        
+        try:
+            if self.primary_key <> None:
+                form_content[pk_column] = self.primary_key
+                self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
+            else:
+                self.primary_key = self.db_table.insert(key_column=pk_column, content=form_content)
+        
+            for function in self.save_function_list:
+                function(self.primary_key)
+                
+            self.remote_parent.populate()
+            self.on_close()
+        except Exception, inst:
+            self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
+                
+        
+    def on_delete(self, event=None):
+        dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
+                                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        answer = dialog.ShowModal()
+        if answer == wx.ID_YES:
+            pk_column = self.db_table.get_primary_key_columns()[0]
+            try:
+                self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
+                
+                for function in self.delete_function_list:
+                    function(self.primary_key)
+            
+                self.remote_parent.populate()
+                self.on_close()
+            except Exception, inst:
+                add_text = str(inst[0])
+                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!\n' + add_text)
+        
+        
+    def initialize(self, definition_lod=None, attributes_lod=None, portlets_lod=None):
+        self.definition_lod = definition_lod
+        self.attributes_lod = attributes_lod
+        
+        self.form.initialize(definition_lod=self.definition_lod, 
+                             attributes_lod=self.attributes_lod)
+        self.definition_lod = self.form.definition_lod
+
+        
+    def populate(self):
+        if self.primary_key <> None:
+            pk_column = self.db_table.get_primary_key_columns()[0]
+            content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))
+            content_dict = content_lod[0]
+            self.form.populate(content_dict)
+        
+        # This populates the dropdown of comboboxes.
+        definition_lod = self.form.definition_lod
+        for dic in definition_lod:
+            populate_from = dic.get('populate_from')
+            mask = dic.get('mask')
+            referenced_table_object = dic.get('referenced_table_object')
+            if referenced_table_object <> None:
+                referenced_column_name = referenced_table_object.get_primary_key_columns()[0]
+            #referenced_column_name = dic.get('referenced_column_name')
+            widget_object = dic.get('widget_object')
+            column_name = dic.get('column_name')
+            fill_distinct = dic.get('fill_distinct')
+            on_populate = dic.get('on_populate')
+            
+            enable_list = self.permissions.get('enable')
+            if type(enable_list) == list:
+                if column_name not in enable_list:
+                    if widget_object <> None:
+                        widget_object.Enable(False)
+                    
+            if fill_distinct == True:
+                result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
+                for item in result:
+                    if item == None:
+                        continue
+                    widget_object.Append(item)
+                
+            if on_populate <> None:
+                on_populate(dic)
+                
+            if populate_from == None:
+                continue
+            if mask == None:
+                mask = '%(' +'%s' % populate_from[0] + ')s'
+            
+            if referenced_table_object == None:
+                continue
+            
+            populate_from.append(referenced_column_name)
+            result = referenced_table_object.select(column_list=populate_from)
+            
+            if widget_object.__class__ ==  wx._controls.ComboBox:
+                for item in result:
+                    widget_object.Append(mask % item, item.get(referenced_column_name))
+            
+            if self.primary_key <> None:
+                # Overwrite crap in combobox or textctrl if feeded from foreign table!
+                foreign_key = content_dict.get(column_name)
+                if foreign_key <> None:
+                    result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
+                    result_dict = result[0]
+                    if widget_object.__class__ ==  wx._controls.ComboBox:
+                        widget_object.SetStringSelection(mask % result_dict)
+                    if widget_object.__class__ ==  wx._controls.TextCtrl:
+                        widget_object.SetValue(mask % result_dict)
+                
+                
+        for function in self.populate_function_list:
+            function(self)
+            
+            
+    def get_widget(self, widget_name):
+        widget = self.form.get_widget(widget_name)
+        return widget
+    
+    
+    def add_save_function(self, function):
+        self.save_function_list.append(function)
+        
+    
+    def add_delete_function(self, function):
+        self.delete_function_list.append(function)
+        
+        
+    def add_populate_function(self, function):
+        self.populate_function_list.append(function)
+
+
+        
+class FormFrame(wx.Frame, DatabaseFormBase):
+    ID_SAVE = 101
+    ID_DELETE = 102
+    ID_PRINT = 103
+    
+    ID_PREFERENCES = 201
+    ID_HELP = 202
+    
+    def __init__(self, parent=None,
+                       icon_path=None,
+                       title='',
+                       xrc_path=None,
+                       panel_name=None,
+                       help_path=None,
+                       remote_parent=None,
+                       permissions={}):
+        
+        ''' db_table is the the table in which this Form writes the data. The remote_parent
+            is triggered on save and close, so that the parent widget can be updated. parent
+            is simply the wxWidgets-Parent, usually a Frame. title is the Frame-title, 
+            panel_name is the name of the panel which is loaded from the file behind xrc_path.
+            The help-path enables online help, if given. '''
+        
+        self.help_path = help_path
+        self.print_function_list = []
+        
+        DatabaseFormBase.__init__(self, parent, icon_path, title, xrc_path, panel_name, remote_parent, permissions)
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
+        if icon_path <> None:
+            self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
+        
+        self.Bind(wx.EVT_CLOSE, self.on_close)
+        
+        self.aui_manager = wx.aui.AuiManager(self)
+        self.create_toolbar()
+        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
+        self.error_dialog = Dialogs.Error(self)
+        
+        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
+                         Name("toolbar_standard").Caption("Standard").
+                         ToolbarPane().Top().Resizable().
+                         LeftDockable(False).RightDockable(False))
+        self.aui_manager.AddPane(self.form, wx.aui.AuiPaneInfo().CaptionVisible(False).
+                                 Name("panel_main").TopDockable(False).
+                                 Center().Layer(1).CloseButton(False))
+        self.aui_manager.Update()
+        self.Show()
+        self.Centre()
+        
+        
+    def on_close(self, event=None):
+        del(self.toolbar_standard)
+        self.Destroy()
+        
+        
+    def on_print(self, event=None):
+        #TODO: It would be better if self would be given on_delete and on_save.
+        for function in self.print_function_list:
+            function(self)
+            
+        
+    def on_preferences(self, event=None):
+        self.frame_preferences = FormTablePreferences(parent=self, title='Einstellungen', remote_parent=self)
+        self.frame_preferences.ShowModal()
+        
+        
+    def on_help(self, event=None):
+        print 'help'
+    
+    
+    def create_toolbar(self, dataset=True, report=True, help=True):
+        self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
+        
+        if self.permissions == None:
+            self.permissions = {}
+            
+        if self.permissions.get('save') <> False:
+            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap(), 'speichern')
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
+        
+        if self.permissions.get('delete') <> False:
+            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap(), u'löschen')
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
+        
+        if self.permissions.get('print') <> False:
+            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap(), u'drucken')
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        
+        # If no primary key is there, just deactivate delete and print!
+        if self.primary_key == None:
+            self.toolbar_standard.EnableTool(self.ID_DELETE, False)
+            self.toolbar_standard.EnableTool(self.ID_PRINT,  False)
+            
+        #self.toolbar_standard.AddSeparator()
+        #self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
+        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
+        
+        #if self.help_path <> None:
+        #    self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
+        #    self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
+        
+        
+    def add_print_function(self, function):
+        self.print_function_list.append(function)
+                
+        
+
+class SubForm(wx.Dialog, DatabaseFormBase):
+    def __init__(self, parent=None,
+                       icon_path=None,
+                       title='',
+                       xrc_path=None,
+                       panel_name=None,
+                       remote_parent=None,
+                       permissions={}):
+        
+        DatabaseFormBase.__init__(self, parent, icon_path, title, xrc_path, panel_name, remote_parent, permissions)
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 456,175 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER )
+        if icon_path <> None:
+            self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
+        
+        sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
+        sizer_main.AddGrowableCol( 0 )
+        sizer_main.AddGrowableRow( 0 )
+        sizer_main.SetFlexibleDirection( wx.BOTH )
+        sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        
+        self.panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        sizer_main.Add( self.panel, 1, wx.EXPAND |wx.ALL, 5 )
+        
+        sizer_buttons = wx.BoxSizer( wx.HORIZONTAL )
+        sizer_buttons.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+        
+        self.button_save = wx.Button( self, wx.ID_ANY, u"Speichern", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_buttons.Add( self.button_save, 0, wx.ALL, 5 )
+        
+        self.button_delete = wx.Button( self, wx.ID_ANY, u"Löschen", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_buttons.Add( self.button_delete, 0, wx.ALL, 5 )
+        
+        self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sizer_buttons.Add( self.button_cancel, 0, wx.ALL, 5 )
+        
+        sizer_main.Add( sizer_buttons, 1, wx.EXPAND, 5 )
+        
+        self.SetSizer( sizer_main )
+        self.Layout()
+        
+        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
+        self.error_dialog = Dialogs.Error(self)
+        
+        self.Centre( wx.BOTH )
+        self.ShowModal()
+        
+        
+    def add_save_function(self, function):
+        self.save_function_list.append(function)
+        
+    
+    def add_delete_function(self, function):
+        self.delete_function_list.append(function)
+        
+        
+    def add_populate_function(self, function):
+        self.populate_function_list.append(function)
+
+
+
 class SearchFrame(wx.Dialog):
     ID_OK = 101
     
@@ -703,267 +1035,7 @@ class SearchFrame(wx.Dialog):
         
     def populate(self):
         pass
-    
-        
-        
-class FormFrame(wx.Frame):
-    ID_SAVE = 101
-    ID_DELETE = 102
-    ID_PRINT = 103
-    
-    ID_PREFERENCES = 201
-    ID_HELP = 202
-    
-    def __init__(self, parent=None,
-                       icon_path=None,
-                       title='',
-                       xrc_path=None,
-                       panel_name=None,
-                       help_path=None,
-                       remote_parent=None,
-                       permissions={}):
-        
-        ''' db_table is the the table in which this Form writes the data. The remote_parent
-            is triggered on save and close, so that the parent widget can be updated. parent
-            is simply the wxWidgets-Parent, usually a Frame. title is the Frame-title, 
-            panel_name is the name of the panel which is loaded from the file behind xrc_path.
-            The help-path enables online help, if given. '''
-        
-        self.parent = parent 
-        self.title = title
-        self.panel_name = panel_name
-        self.icon_path = icon_path
-        self.xrc_path = xrc_path
-        self.help_path = help_path
-        self.remote_parent = remote_parent
-        self.permissions = permissions
-        
-        # This lists are made to get portlets going.
-        self.save_function_list = []
-        self.delete_function_list = []
-        self.print_function_list = []
-        self.populate_function_list = []
-        
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
-        if icon_path <> None:
-            self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
-        
-        self.Bind(wx.EVT_CLOSE, self.on_close)
-        
-        self.primary_key = None
-        if self.remote_parent.primary_key <> None:
-            self.primary_key = self.remote_parent.primary_key
             
-        self.aui_manager = wx.aui.AuiManager(self)
-        
-        self.create_toolbar()
-        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
-        
-        self.aui_manager.AddPane(self.toolbar_standard, wx.aui.AuiPaneInfo().
-                         Name("toolbar_standard").Caption("Standard").
-                         ToolbarPane().Top().Resizable().
-                         LeftDockable(False).RightDockable(False))
-        self.aui_manager.AddPane(self.form, wx.aui.AuiPaneInfo().CaptionVisible(False).
-                                 Name("panel_main").TopDockable(False).
-                                 Center().Layer(1).CloseButton(False))
-        self.aui_manager.Update()
-        self.Show()
-        self.Centre()
-        
-        self.db_table = remote_parent.db_table
-        self.db_object = self.db_table.db_object
-        
-        self.error_dialog = Dialogs.Error(self)
-        
-        
-    def on_close(self, event=None):
-        del(self.toolbar_standard)
-        self.Destroy()
-        
-        
-    def on_save(self, event=None):
-        form_content = self.form.get_content()
-        pk_column = self.db_table.get_primary_key_columns()[0]
-        
-        try:
-            if self.primary_key <> None:
-                form_content[pk_column] = self.primary_key
-                self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
-            else:
-                self.primary_key = self.db_table.insert(key_column=pk_column, content=form_content)
-        
-            for function in self.save_function_list:
-                function(self.primary_key)
-                
-            self.remote_parent.populate()
-            self.on_close()
-        except Exception, inst:
-            self.error_dialog.show(instance=inst, message='Beim speichern dieses Datensatzes ist ein Fehler aufgetreten!')
-                
-        
-    def on_delete(self, event=None):
-        dialog = wx.MessageDialog(None, u'Soll dieser Datensatz wirklich gelöscht werden?', 'Frage', 
-                                    wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-        answer = dialog.ShowModal()
-        if answer == wx.ID_YES:
-            pk_column = self.db_table.get_primary_key_columns()[0]
-            try:
-                self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
-                
-                for function in self.delete_function_list:
-                    function(self.primary_key)
-            
-                self.remote_parent.populate()
-                self.on_close()
-            except Exception, inst:
-                add_text = str(inst[0])
-                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!\n' + add_text)
-        
-        
-    def on_print(self, event=None):
-        #TODO: It would be better if self would be given on_delete and on_save.
-        for function in self.print_function_list:
-            function(self)
-            
-        
-    def on_preferences(self, event=None):
-        self.frame_preferences = FormTablePreferences(parent=self, title='Einstellungen', remote_parent=self)
-        self.frame_preferences.ShowModal()
-        
-        
-    def on_help(self, event=None):
-        print 'help'
-        
-        
-    def initialize(self, definition_lod=None, attributes_lod=None, portlets_lod=None):
-        self.definition_lod = definition_lod
-        self.attributes_lod = attributes_lod
-        
-        self.form.initialize(definition_lod=self.definition_lod, 
-                             attributes_lod=self.attributes_lod)
-        self.definition_lod = self.form.definition_lod
-
-        
-    def populate(self):
-        if self.primary_key <> None:
-            pk_column = self.db_table.get_primary_key_columns()[0]
-            content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))
-            content_dict = content_lod[0]
-            self.form.populate(content_dict)
-        
-        # This populates the dropdown of comboboxes.
-        definition_lod = self.form.definition_lod
-        for dic in definition_lod:
-            populate_from = dic.get('populate_from')
-            mask = dic.get('mask')
-            referenced_table_object = dic.get('referenced_table_object')
-            if referenced_table_object <> None:
-                referenced_column_name = referenced_table_object.get_primary_key_columns()[0]
-            #referenced_column_name = dic.get('referenced_column_name')
-            widget_object = dic.get('widget_object')
-            column_name = dic.get('column_name')
-            fill_distinct = dic.get('fill_distinct')
-            on_populate = dic.get('on_populate')
-            
-            enable_list = self.permissions.get('enable')
-            if type(enable_list) == list:
-                if column_name not in enable_list:
-                    if widget_object <> None:
-                        widget_object.Enable(False)
-                    
-            if fill_distinct == True:
-                result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
-                for item in result:
-                    if item == None:
-                        continue
-                    widget_object.Append(item)
-                
-            if on_populate <> None:
-                on_populate(dic)
-                
-            if populate_from == None:
-                continue
-            if mask == None:
-                mask = '%(' +'%s' % populate_from[0] + ')s'
-            
-            if referenced_table_object == None:
-                continue
-            
-            populate_from.append(referenced_column_name)
-            result = referenced_table_object.select(column_list=populate_from)
-            
-            if widget_object.__class__ ==  wx._controls.ComboBox:
-                for item in result:
-                    widget_object.Append(mask % item, item.get(referenced_column_name))
-            
-            if self.primary_key <> None:
-                # Overwrite crap in combobox or textctrl if feeded from foreign table!
-                foreign_key = content_dict.get(column_name)
-                if foreign_key <> None:
-                    result = referenced_table_object.select(column_list=populate_from, where='%s = %s' % (referenced_column_name, foreign_key))
-                    result_dict = result[0]
-                    if widget_object.__class__ ==  wx._controls.ComboBox:
-                        widget_object.SetStringSelection(mask % result_dict)
-                    if widget_object.__class__ ==  wx._controls.TextCtrl:
-                        widget_object.SetValue(mask % result_dict)
-                
-                
-        for function in self.populate_function_list:
-            function(self)
-    
-    
-    def create_toolbar(self, dataset=True, report=True, help=True):
-        self.toolbar_standard = wx.aui.AuiToolBar(self, id=wx.ID_ANY) 
-        
-        if self.permissions == None:
-            self.permissions = {}
-            
-        if self.permissions.get('save') <> False:
-            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap(), 'speichern')
-            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
-        
-        if self.permissions.get('delete') <> False:
-            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap(), u'löschen')
-            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
-        
-        if self.permissions.get('print') <> False:
-            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap(), u'drucken')
-            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
-        
-        # If no primary key is there, just deactivate delete and print!
-        if self.primary_key == None:
-            self.toolbar_standard.EnableTool(self.ID_DELETE, False)
-            self.toolbar_standard.EnableTool(self.ID_PRINT,  False)
-            
-        #self.toolbar_standard.AddSeparator()
-        #self.toolbar_standard.AddTool(self.ID_PREFERENCES, "Einstellungen", IconSet16.getpreferences_16Bitmap())
-        #self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_preferences, id=self.ID_PREFERENCES)
-        
-        #if self.help_path <> None:
-        #    self.toolbar_standard.AddTool(self.ID_HELP, "Hilfe", IconSet16.gethelp_16Bitmap())
-        #    self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_help, id=self.ID_HELP)
-        
-        
-    def get_widget(self, widget_name):
-        widget = self.form.get_widget(widget_name)
-        return widget
-    
-    
-    def add_save_function(self, function):
-        self.save_function_list.append(function)
-        
-    
-    def add_delete_function(self, function):
-        self.delete_function_list.append(function)
-        
-        
-    def add_print_function(self, function):
-        self.print_function_list.append(function)
-        
-        
-    def add_populate_function(self, function):
-        self.populate_function_list.append(function)
-        
         
 
 # Export -----------------------------------------------------------------------

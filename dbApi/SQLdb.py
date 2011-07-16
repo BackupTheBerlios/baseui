@@ -1242,6 +1242,7 @@ WHERE
         return pk_columns_list       
         
         
+        
 class mysql_table(generic_table):
     def __init__(self, base_object, db_object, table_name):
         generic_table.__init__(self, base_object, db_object, table_name)
@@ -1330,7 +1331,8 @@ class odbc_excel_table(odbc_generic_table):
         
         content_lod = self.db_object.dictresult(sql_command % self.name)
         content_lod = Transformations.normalize_content(self.get_attributes(), content_lod, self.db_object)
-        
+        return content_lod
+    
         
         
 # Database Table Columns -------------------------------------------------------

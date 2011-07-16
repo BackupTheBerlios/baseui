@@ -13,6 +13,7 @@ class DayChart(Calendars.DayChart):
     def __init__(self, parent, db_table=None, form_class=None):
         Calendars.DayChart.__init__(self, parent)
         
+        print 'DB_TABLE_DAY:', db_table
         self.day_grid.open_appointment = self.on_open_appointment
         self.db_table = db_table
         self.form = form_class
