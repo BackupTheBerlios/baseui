@@ -244,7 +244,11 @@ class DayChart(object):
     def set_date_range(self, start_date=None, end_date=None, nof_days=None):
         self.day_header.set_date_range(start_date, end_date, nof_days)
         self.day_grid.set_date_range(start_date, end_date, nof_days)
-
+        
+        
+    def populate(self, content_lod):
+        print 'löddöl:', content_lod
+        
 
 
 class DayHeader(CalendarBase):

@@ -141,7 +141,11 @@ def normalize_content(attributes_lod, content_lod, db_object=None):
                         if data_type.startswith('bool'):
                             content_dic[column_name] = transform_bool(content)
                         if data_type.lower() == 'datetime':
-                            content_dic[column_name] = transform_timestamp(content)
+                            pass
+                            # Here is an error! If nothing happens, no error occurs!
+                            # I think, giving back a datetime object is the right choise!
+                            #content_dic[column_name] = transform_timestamp(content)
+                            #print 'DEVIL:', content_dic[column_name]
                         if data_type.lower() == 'date':
                             content_dic[column_name] = transform_date(content)
                         if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:

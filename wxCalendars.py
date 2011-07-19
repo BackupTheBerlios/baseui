@@ -14,26 +14,24 @@ class DayChart(Calendars.DayChart):
         Calendars.DayChart.__init__(self, parent)
         
         self.day_grid.open_appointment = self.on_open_appointment
+        
         self.db_table = db_table
         self.form = form_class
         self.remote_parent = remote_parent
         self.primary_key = None
         
+    
+    def on_populate(self, data=None):
+        print 'populating parent form'
+        self.populate()
         
-    def on_save(self, data):
-        print 'saving calendar,', data
-        pprint(self.day_grid.appointments_lod)
-        
-        
-    def on_delete(self, data):
-        print 'delete calendar', data
-        
-        
-    def on_populate(self, primary_key):
-        #self.primary_key = primary_key.primary_key
-        #print 'populating calendar', self.primary_key, primary_key.db_table
-        #print self.parent
-        pass
+#    def on_save(self, data):
+#        print 'saving calendar,', data
+#        pprint(self.day_grid.appointments_lod)
+#        
+#        
+#    def on_delete(self, data):
+#        print 'delete calendar', data
         
     
     def on_open_appointment(self, appointment_dict):
@@ -44,4 +42,9 @@ class DayChart(Calendars.DayChart):
             print 'No form defined!'
 
 
-
+    def populate(self, data=None):
+        print 'POPULATE', data, self.day_grid.appointments_lod
+        
+        
+        
+        
