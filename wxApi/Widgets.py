@@ -6,6 +6,7 @@
 #===============================================================================
 
 import wx, string
+import datetime
 
 from Transformations import date_to_str
 from pprint import pprint
@@ -244,7 +245,13 @@ def widget_getter(widget_object, data_type=None):
         widget_content = widget_object.GetValue()
         if data_type == 'money':
             widget_content = widget_content.replace(',', '.')
-            #print '...', widget_object, widget_content
+        elif data_type == 'datetime':
+            try:
+                dt=datetime.datetime.strptime(widget_content, '%Y-%m-%d %H:%M:%S')
+            except:
+                dt=None
+            widget_content = dt
+            
         if widget_content == '':
             widget_content = None
 
@@ -315,7 +322,6 @@ def widget_getter(widget_object, data_type=None):
             widget_content = convert(widget_content)
         except:
             pass
-            #print 'content:', widget_content, 'in widget', widget_object, 'of data_type:', data_type, 'not able to convert to', convert
     return widget_content
 
 

@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 
 #===============================================================================
-# GTKapi Transformations module.
+# wxApi Transformations module.
 # by Mark Muzenhardt, published under LGPL-License.
 #===============================================================================
 

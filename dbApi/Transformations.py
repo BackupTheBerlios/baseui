@@ -104,6 +104,7 @@ class SQLtoPythonTransformer(object):
 
 
 def write_transform(content, engine):
+    #print 'WRITE TRANSFORMING', content, type(content)
     if content == None:
         new_content = 'NULL'
     elif content == False and (engine == 'sqlite' or engine == 'odbc'):

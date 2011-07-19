@@ -385,8 +385,8 @@ class DayGrid(CalendarBase):
         left_border = self.get_date_pos(self.start_date)[0]
         right_border = self.get_date_pos(self.end_date)[1]
         
-        if event.Entering():
-            self.SetFocus()
+        #if event.Entering():
+        #    self.SetFocus()
             
         # If the mouse cursor is off the border, do nothing.
         if event.Leaving() or \
@@ -569,8 +569,10 @@ class DayGrid(CalendarBase):
         if start_datetime <> end_datetime:
             if start_datetime.day == end_datetime.day: 
                 if self.check_overlap(start_datetime, end_datetime):
-                    self.appointments_lod.append({'title': title, 'starts': start_datetime, 'ends': end_datetime})
+                    appointment = {'title': title, 'starts': start_datetime, 'ends': end_datetime}
+                    self.appointments_lod.append(appointment)
                     self.UpdateDrawing()
+                    self.open_appointment(appointment)
                 else:
                     self.reset_marker()
             else:

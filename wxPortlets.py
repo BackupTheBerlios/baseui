@@ -642,7 +642,7 @@ class DatabaseFormBase(object):
         
         
     def on_save(self, event=None):
-        form_content = self.form.get_content()
+        form_content = self.get_content()
         pk_column = self.db_table.get_primary_key_columns()[0]
         
         try:
@@ -689,7 +689,10 @@ class DatabaseFormBase(object):
         self.definition_lod = self.form.definition_lod
 
         
-    def populate(self):
+    def populate(self, content_dict=None):
+        if content_dict <> None:
+            self.form.populate(content_dict)
+            
         if self.primary_key <> None:
             pk_column = self.db_table.get_primary_key_columns()[0]
             content_lod = self.db_table.select(where='%s = %s' % (pk_column, self.primary_key))
@@ -762,6 +765,11 @@ class DatabaseFormBase(object):
         return widget
     
     
+    def get_content(self):
+        form_content = self.form.get_content()
+        return form_content
+        
+        
     def add_save_function(self, function):
         self.save_function_list.append(function)
         
@@ -882,7 +890,7 @@ class FormFrame(wx.Frame, DatabaseFormBase):
                 
         
 
-class SubForm(wx.Dialog, DatabaseFormBase):
+class SubForm(wx.Frame, DatabaseFormBase):
     def __init__(self, parent=None,
                        icon_path=None,
                        title='',
@@ -892,7 +900,7 @@ class SubForm(wx.Dialog, DatabaseFormBase):
                        permissions={}):
         
         DatabaseFormBase.__init__(self, parent, icon_path, title, xrc_path, panel_name, remote_parent, permissions)
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 456,175 ), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER )
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = title, pos = wx.DefaultPosition, size = wx.DefaultSize) #, style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER )
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -902,31 +910,37 @@ class SubForm(wx.Dialog, DatabaseFormBase):
         sizer_main.SetFlexibleDirection( wx.BOTH )
         sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        self.panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        sizer_main.Add( self.panel, 1, wx.EXPAND |wx.ALL, 5 )
+        #self.panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
+        sizer_main.Add( self.form, 1, wx.EXPAND |wx.ALL, 5 )
         
         sizer_buttons = wx.BoxSizer( wx.HORIZONTAL )
         sizer_buttons.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
         
         self.button_save = wx.Button( self, wx.ID_ANY, u"Speichern", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_save.Bind(wx.EVT_BUTTON, self.on_save)
         sizer_buttons.Add( self.button_save, 0, wx.ALL, 5 )
         
         self.button_delete = wx.Button( self, wx.ID_ANY, u"Löschen", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete)
         sizer_buttons.Add( self.button_delete, 0, wx.ALL, 5 )
         
         self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_cancel.Bind(wx.EVT_BUTTON, self.on_close)
         sizer_buttons.Add( self.button_cancel, 0, wx.ALL, 5 )
         
         sizer_main.Add( sizer_buttons, 1, wx.EXPAND, 5 )
         
         self.SetSizer( sizer_main )
-        self.Layout()
-        
-        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
         self.error_dialog = Dialogs.Error(self)
         
+        self.Layout()
         self.Centre( wx.BOTH )
-        self.ShowModal()
+        self.Show()
+        
+        
+    def on_close(self, event=None):
+        self.Destroy()
         
         
     def add_save_function(self, function):

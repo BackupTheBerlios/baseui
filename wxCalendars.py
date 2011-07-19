@@ -10,13 +10,13 @@ from pprint import pprint
 
 
 class DayChart(Calendars.DayChart):
-    def __init__(self, parent, db_table=None, form_class=None):
+    def __init__(self, parent, db_table=None, form_class=None, remote_parent=None):
         Calendars.DayChart.__init__(self, parent)
         
-        print 'DB_TABLE_DAY:', db_table
         self.day_grid.open_appointment = self.on_open_appointment
         self.db_table = db_table
         self.form = form_class
+        self.remote_parent = remote_parent
         self.primary_key = None
         
         
@@ -30,17 +30,18 @@ class DayChart(Calendars.DayChart):
         
         
     def on_populate(self, primary_key):
-        self.primary_key = primary_key
-        print 'populating calendar', primary_key
-        print self.parent
+        #self.primary_key = primary_key.primary_key
+        #print 'populating calendar', self.primary_key, primary_key.db_table
+        #print self.parent
+        pass
         
     
-    def on_open_appointment(self, data):
+    def on_open_appointment(self, appointment_dict):
         if self.form <> None:
             form_instance = self.form(parent=self.parent, remote_parent=self, permissions={}) #self.form_permissions)
+            form_instance.populate(appointment_dict)
         else:
             print 'No form defined!'
-        #print 'open, data', data
 
 
 

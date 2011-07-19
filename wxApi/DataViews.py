@@ -475,7 +475,7 @@ class Form(wx.Panel):
                 widget_object = self.definition_lod[row]['widget_object']
                 column_name = self.definition_lod[row]['column_name']
                 try:
-                    widget_content = content_dict[column_name]
+                    widget_content = content_dict.get(column_name)
                 except:
                     print content_dict
                     raise
@@ -503,7 +503,7 @@ class Form(wx.Panel):
             further description of its data format). '''
 
         self.content_dict = {}
-
+        
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
             dic = definition_row[1]
