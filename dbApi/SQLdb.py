@@ -891,7 +891,9 @@ CREATE TABLE """ + self.name + """
                     column_name = attributes_dict.get('column_name')
                     data_type = attributes_dict.get('data_type')
                     if column_name == db_column_name:
-                        data_type = self.db_object.data_types.get(data_type).lower()
+                        data_type = self.db_object.data_types.get(data_type)
+                        if data_type <> None:
+                            data_type = data_type.lower()
                         if db_data_type <> data_type:    
                             old_column_dict={'column_name': db_column_name}
                             new_column_dict={'column_name': column_name, 'data_type': data_type}
