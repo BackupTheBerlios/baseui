@@ -489,7 +489,7 @@ class DayGrid(CalendarBase):
         
     def scroll_to_time(self, scroll_time, mins=False):
         pos = self.get_time_pos(scroll_time, mins)
-        # Can not figure out why this calculation works !?
+        # Can not figure out why this calculation works, but it does indeed !?
         self.Scroll(0, (pos[1]/10)-4)
         
         
@@ -613,6 +613,7 @@ class DayGrid(CalendarBase):
         starts = self._move_appointment.get('starts')
         ends = self._move_appointment.get('ends')
         
+        print self._move_appointment
         if self.check_overlap(starts + delta, ends + delta, self._move_appointment) and \
            (starts + delta).day == (ends + delta).day:
             self._move_appointment['starts'] += delta
@@ -767,6 +768,7 @@ class DayGrid(CalendarBase):
         for appointment_dict in self.appointments_lod:
             start_dt = appointment_dict.get('starts')
             end_dt = appointment_dict.get('ends')
+            title = appointment_dict.get('title')
             
             app_starts_pos = self.get_datetime_pos(start_dt)
             app_ends_pos = self.get_datetime_pos(end_dt)
@@ -787,6 +789,9 @@ class DayGrid(CalendarBase):
             dc.DrawText(text='%s - %s' % (start_dt.strftime('%H:%M'), end_dt.strftime('%H:%M')), 
                         x=app_starts_pos[0] + 5, 
                         y=app_starts_pos[3] + 5)
+            dc.DrawText(text='%s' % str(title),
+                        x=app_starts_pos[0] + 5,
+                        y=app_starts_pos[3] + 20)
             
 
 # GANTT charting technology ---------------------------------------------------

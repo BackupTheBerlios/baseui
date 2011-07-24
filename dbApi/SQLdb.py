@@ -249,7 +249,6 @@ class generic_database(object):
                     table_object = table(self, table_name)
                 except:
                     print 'Error with table %s' % table_name
-                    # x = raw_input('<RETURN>')
                     continue
                 
                 try:
@@ -257,7 +256,6 @@ class generic_database(object):
                     column_list = table_object.get_columns()
                 except Exception, inst:
                     print '%s with table %s' % (table_name, str(inst))
-                    # x = raw_input('<RETURN>')
                     continue
                 
                 csv_writer = csv.DictWriter(open(path + table_name + '.csv', 'wb'), fieldnames=column_list)
@@ -320,17 +318,17 @@ class sqlite_database(generic_database):
         
 class postgresql_database(generic_database):
     data_types = {
-        'bool': 'BOOL',
-        'char': 'CHAR',
-        'varchar': 'VARCHAR',
-        'text': 'TEXT',
-        'integer': 'INTEGER',
-        'float': 'FLOAT8',
-        'numeric': 'NUMERIC',
-        'date': 'DATE',
-        'time': 'TIME',
+        'bool':     'BOOL',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'TEXT',
+        'integer':  'INTEGER',
+        'float':    'FLOAT8',
+        'numeric':  'NUMERIC',
+        'date':     'DATE',
+        'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        'blob': 'BYTEA',
+        'blob':     'BYTEA',
         }
     
     encodings = {'utf8':    'utf-8',
@@ -410,17 +408,17 @@ class postgresql_database(generic_database):
         
 class mssql_database(generic_database):
     data_types = {
-        'bool': 'BIT',
-        'char': 'CHAR',
-        'varchar': 'VARCHAR',
-        'text': 'TEXT',
-        'integer': 'INT',
-        'float': 'FLOAT',
-        'numeric': 'NUMERIC',
-        'date': 'DATETIME',
-        'time': 'CHAR(8)',
+        'bool':     'BIT',
+        'char':     'CHAR',
+        'varchar':  'VARCHAR',
+        'text':     'TEXT',
+        'integer':  'INT',
+        'float':    'FLOAT',
+        'numeric':  'NUMERIC',
+        'date':     'DATETIME',
+        'time':     'CHAR(8)',
         'datetime': 'DATETIME',
-        'blob': 'IMAGE',
+        'blob':     'IMAGE',
         }
         
     def __init__(self, base_object, engine='mssql'):
@@ -507,17 +505,17 @@ class mysql_database(generic_database):
     
 class oracle_database(generic_database):
     data_types = {
-        'bool': 'CHAR(1)',
-        'char': 'CHAR2',
-        'varchar': 'VARCHAR2',
-        'text': 'CLOB',
-        'integer': 'INT',
-        'float': 'FLOAT',
-        'numeric': 'NUMERIC',
-        'date': 'DATE',
-        'time': 'CHAR(8)',
+        'bool':     'CHAR(1)',
+        'char':     'CHAR2',
+        'varchar':  'VARCHAR2',
+        'text':     'CLOB',
+        'integer':  'INT',
+        'float':    'FLOAT',
+        'numeric':  'NUMERIC',
+        'date':     'DATE',
+        'time':     'CHAR(8)',
         'datetime': 'DATE',
-        'blob': 'CLOB',
+        'blob':     'CLOB',
         }
         
     def __init__(self, base_object, engine='oracle'):
@@ -1088,7 +1086,6 @@ CREATE TABLE """ + self.name + """
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command)
-                # return content_lod
         except:
             raise
         return content_lod
@@ -1439,7 +1436,12 @@ class column:
     def drop(self):
         pass
 
-
+    
+    def alter(self):
+        #TODO: Alter should be possible on colums, too.
+        pass
+    
+    
     def get_content(self):
         ''' Fetches all rows and gives them back as list. '''
 

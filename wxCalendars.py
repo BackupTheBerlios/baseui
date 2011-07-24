@@ -6,10 +6,11 @@
 #===============================================================================
 
 from wxApi import Calendars
+from ContentDefinitionBase import TableContentBase
 from pprint import pprint
 
 
-class DayChart(Calendars.DayChart):
+class DayChart(Calendars.DayChart, TableContentBase):
     def __init__(self, parent, db_table=None, form_class=None, remote_parent=None):
         Calendars.DayChart.__init__(self, parent)
         
@@ -22,16 +23,13 @@ class DayChart(Calendars.DayChart):
         
     
     def on_populate(self, data=None):
-        print 'populating parent form'
-        self.populate()
-        
-#    def on_save(self, data):
-#        print 'saving calendar,', data
-#        pprint(self.day_grid.appointments_lod)
-#        
-#        
-#    def on_delete(self, data):
-#        print 'delete calendar', data
+        pk = self.remote_parent.primary_key
+        if pk <> None:
+            self.populate()
+        else:
+            # Disable calendar when remote_parent has no pk (f.e. new dataset on remote).
+            self.panel_grid.Enable(False)
+            self.panel_header.Enable(False)
         
     
     def on_open_appointment(self, appointment_dict):
