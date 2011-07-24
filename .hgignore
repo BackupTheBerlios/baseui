@@ -6,3 +6,5 @@ glob:*.orig
 glob:*.bak
 glob:*.db
 glob:misc/*.png
+syntax: glob
+wxApi/wxpsvg/svg/compliance/svg/*.svg
