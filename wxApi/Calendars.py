@@ -346,8 +346,10 @@ class DayGrid(CalendarBase):
         self.start_date = None
         self.end_date = None
         
-        #self.start_time = None
-        #self.end_time = None
+        self.move_function_list = []
+        self.resize_function_list = []
+        self.delete_function_list = []
+        
         self._line_width = 1.0
         
         self._parent_size = self.parent.GetSize()
@@ -388,9 +390,6 @@ class DayGrid(CalendarBase):
         
         left_border = self.get_date_pos(self.start_date)[0]
         right_border = self.get_date_pos(self.end_date)[1]
-        
-        #if event.Entering():
-        #    self.SetFocus()
             
         # If the mouse cursor is off the border, do nothing.
         if event.Leaving() or \
@@ -484,6 +483,11 @@ class DayGrid(CalendarBase):
         
     def on_remove_appointment(self, event=None):
         self.appointments_lod.remove(self._hovering_dict)
+        
+        for delete_function in self.delete_function_list:
+            if delete_function <> None:
+                delete_function(self._hovering_dict)
+                
         self.reset_marker()
         
         
@@ -508,7 +512,7 @@ class DayGrid(CalendarBase):
                 return False
         return True
     
-                
+    
     def check_hovering(self):
         hovering_dict = None
         start_resize_dict = None
@@ -613,28 +617,39 @@ class DayGrid(CalendarBase):
         starts = self._move_appointment.get('starts')
         ends = self._move_appointment.get('ends')
         
-        print self._move_appointment
         if self.check_overlap(starts + delta, ends + delta, self._move_appointment) and \
            (starts + delta).day == (ends + delta).day:
             self._move_appointment['starts'] += delta
             self._move_appointment['ends'] += delta          
         
+        for move_function in self.move_function_list:
+            if move_function <> None:
+                move_function(self._move_appointment)
+                        
         self.reset_tracker()
         self.reset_marker()
     
         
     def resize_appointment(self, delta):
+        appointment = None
         if self._start_resize_appointment <> None:
             starts = self._start_resize_appointment.get('starts')
             ends = self._start_resize_appointment.get('ends')
             if self.check_overlap(starts + delta, ends, self._start_resize_appointment):
                 self._start_resize_appointment['starts'] += delta
-        
+                appointment = self._start_resize_appointment                
+                
         if self._end_resize_appointment <> None:
             starts = self._end_resize_appointment.get('starts')
             ends = self._end_resize_appointment.get('ends')
             if self.check_overlap(starts, ends + delta, self._end_resize_appointment):
                 self._end_resize_appointment['ends'] += delta
+                appointment = self._end_resize_appointment
+                
+        if appointment <> None:
+            for resize_function in self.resize_function_list:
+                if resize_function <> None:
+                    resize_function(appointment)
         self.reset_tracker()
         
             
@@ -669,6 +684,18 @@ class DayGrid(CalendarBase):
         self._marker_starts = None
         self._marker_ends = None
         self.UpdateDrawing()
+        
+    
+    def add_move_function(self, function):
+        self.move_function_list.append(function)
+        
+        
+    def add_resize_function(self, function):
+        self.resize_function_list.append(function)
+        
+    
+    def add_delete_function(self, function):
+        self.delete_function_list.append(function)
         
         
     def Draw(self, dc):

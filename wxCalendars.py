@@ -15,6 +15,9 @@ class DayChart(Calendars.DayChart, TableContentBase):
         Calendars.DayChart.__init__(self, parent)
         
         self.day_grid.open_appointment = self.on_open_appointment
+        self.day_grid.add_move_function(self.update_appointment)
+        self.day_grid.add_resize_function(self.update_appointment)
+        self.day_grid.add_delete_function(self.delete_appointment)
         
         self.db_table = db_table
         self.form = form_class
@@ -44,5 +47,16 @@ class DayChart(Calendars.DayChart, TableContentBase):
         print 'POPULATE', data, self.day_grid.appointments_lod
         
         
+    def update_appointment(self, appointment):
+        print 'I WANT TO MOVE IT, MOVE IT!', self.db_table, appointment
+        self.db_table.update(appointment, where='id = %i' % appointment.get('id'))
         
-        
+
+    def delete_appointment(self, appointment):
+        pk_column = self.db_table.get_primary_key_columns()[0]
+        pk = appointment.get(pk_column)
+        self.db_table.delete(where='%s = %i' % (pk_column, pk))
+        pass
+    
+    
+    
