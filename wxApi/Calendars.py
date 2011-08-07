@@ -819,10 +819,14 @@ class DayGrid(CalendarBase):
             dc.DrawText(text='%s - %s' % (start_dt.strftime('%H:%M'), end_dt.strftime('%H:%M')), 
                         x=app_starts_pos[0] + 5, 
                         y=app_starts_pos[3] + 5)
-            dc.DrawText(text='%s' % str(title),
-                        x=app_starts_pos[0] + 5,
-                        y=app_starts_pos[3] + 20)
             
+            if title <> None:
+                dc.DrawLabel(text='%s' % str(title), rect=(app_starts_pos[0] + 5,
+                                                           app_starts_pos[3] + 25,
+                                                           app_ends_pos[2] - app_starts_pos[0] + self._line_width - 5,
+                                                           app_ends_pos[3] - app_starts_pos[3] + self._line_width - 5))
+
+
 
 # GANTT charting technology ---------------------------------------------------
 class GanttChart(BufferedWindow):
