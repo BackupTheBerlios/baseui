@@ -578,8 +578,8 @@ class DayGrid(CalendarBase):
             if start_datetime.day == end_datetime.day: 
                 if self.check_overlap(start_datetime, end_datetime):
                     appointment = {'title': title, 'starts': start_datetime, 'ends': end_datetime}
-                    self.appointments_lod.append(appointment)
-                    self.UpdateDrawing()
+                    #self.appointments_lod.append(appointment)
+                    #self.UpdateDrawing()
                     self.open_appointment(appointment)
                 else:
                     self.reset_marker()
@@ -589,7 +589,6 @@ class DayGrid(CalendarBase):
         
     def open_appointment(self, appointment_dict):
         # Just override this function in derrived class
-        print u'no form defined! can´t open', appointment_dict
         pass
             
             
@@ -796,10 +795,14 @@ class DayGrid(CalendarBase):
             start_dt = appointment_dict.get('starts')
             end_dt = appointment_dict.get('ends')
             title = appointment_dict.get('title')
+            bg_colour = appointment_dict.get('#bg_colour')
             
             app_starts_pos = self.get_datetime_pos(start_dt)
             app_ends_pos = self.get_datetime_pos(end_dt)
             
+            if bg_colour <> None:
+                dc.SetBrush(wx.Brush(bg_colour))
+                
             # Check hovering (!!!)
             if self._hovering_dict == appointment_dict:
                 dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width * 3)) #, wx.DOT))

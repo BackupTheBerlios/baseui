@@ -20,6 +20,8 @@ class DayChart(Calendars.DayChart, TableContentBase):
         self.day_grid.add_delete_function(self.delete_appointment)
         
         self.db_table = db_table
+        self.db_object = self.db_table.db_object
+        
         self.form = form_class
         self.remote_parent = remote_parent
         self.primary_key = None
@@ -44,12 +46,16 @@ class DayChart(Calendars.DayChart, TableContentBase):
 
 
     def populate(self, data=None):
-        print 'POPULATE', data, self.day_grid.appointments_lod
+        pass
         
         
     def update_appointment(self, appointment):
-        print 'I WANT TO MOVE IT, MOVE IT!', self.db_table, appointment
-        self.db_table.update(appointment, where='id = %i' % appointment.get('id'))
+        appointment_dict = {}
+        for attribute in self.db_table.attributes:
+            column_name = attribute.get('column_name')
+            appointment_dict[column_name] = appointment.get(column_name)
+            
+        self.db_table.update(appointment_dict, where='id = %i' % appointment.get('id'))
         
 
     def delete_appointment(self, appointment):
