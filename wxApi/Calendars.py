@@ -36,7 +36,7 @@ class CalendarBase(BufferedWindow):
         
         self._line_width = 1.0
         self._parent_size = self.parent.GetSize()
-        self._top_left_corner =     ( 10,  10)
+        self._top_left_corner =     ( 10, 10)
         self._bottom_right_corner = (self._parent_size[0] - 10, self._parent_size[1] - 10)
         self._clocktime_size = (100, 40)
         self._day_size = (200, 40)
@@ -349,6 +349,7 @@ class DayGrid(CalendarBase):
         self.move_function_list = []
         self.resize_function_list = []
         self.delete_function_list = []
+        self.right_click_function_list = []
         
         self._line_width = 1.0
         
@@ -444,7 +445,9 @@ class DayGrid(CalendarBase):
         if event.RightDown():
             if self._hovering_dict <> None:
                 self.on_appointment_right_clicked()
-                
+            for function in self.right_click_function_list:
+                function(event)
+                    
         if event.Dragging() and self._left_down:
             self._dragging_datetime = self.get_datetime(self._mouse_pos)
             
@@ -695,6 +698,10 @@ class DayGrid(CalendarBase):
     
     def add_delete_function(self, function):
         self.delete_function_list.append(function)
+       
+        
+    def add_right_click_function(self, function):
+        self.right_click_function_list.append(function)
         
         
     def Draw(self, dc):

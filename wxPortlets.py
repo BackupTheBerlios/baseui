@@ -776,9 +776,9 @@ class FormFrame(wx.Frame, DatabaseFormBase):
             self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap(), u'löschen')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
         
-#        if self.permissions.get('print') <> False:
-#            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap(), u'drucken')
-#            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        if self.permissions.get('print') <> False:
+            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap(), u'drucken')
+            self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         # If no primary key is there, just deactivate delete and print!
         if self.primary_key == None:
