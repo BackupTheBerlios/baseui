@@ -350,6 +350,7 @@ class DayGrid(CalendarBase):
         self.resize_function_list = []
         self.delete_function_list = []
         self.right_click_function_list = []
+        self.draw_function_list = []
         
         self._line_width = 1.0
         
@@ -591,7 +592,7 @@ class DayGrid(CalendarBase):
         
         
     def open_appointment(self, appointment_dict):
-        # Just override this function in derrived class
+        # Just override this function in derived class
         pass
             
             
@@ -704,6 +705,10 @@ class DayGrid(CalendarBase):
         self.right_click_function_list.append(function)
         
         
+    def add_draw_function(self, function):
+        self.draw_function_list.append(function)
+        
+        
     def Draw(self, dc):
         if self.start_date == None or self.end_date == None:
             return
@@ -759,9 +764,12 @@ class DayGrid(CalendarBase):
         if self._marker_starts <> None and self._marker_ends <> None:
             self.DrawMarker(dc)
             
+        for draw_function in self.draw_function_list:
+            draw_function(dc)
+            
         if self.appointments_lod <> []:
             self.DrawAppointments(dc)
-            
+
         if self._start_resize_appointment <> None or self._end_resize_appointment <> None:
             self.DrawResizeMarker(dc)
             
@@ -832,7 +840,9 @@ class DayGrid(CalendarBase):
                                                            app_starts_pos[3] + 25,
                                                            app_ends_pos[2] - app_starts_pos[0] + self._line_width - 5,
                                                            app_ends_pos[3] - app_starts_pos[3] + self._line_width - 5))
-
+            
+            dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width)) #, wx.DOT))
+                
 
 
 # GANTT charting technology ---------------------------------------------------
