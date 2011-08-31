@@ -26,6 +26,7 @@ class DatabaseTableBase(TableContentBase):
         self.form = form
         self.portlet_parent = portlet_parent
         self.editable = editable
+        self.fetch = None
         
         if permissions <> None:
             self.permissions = permissions.get('table')
@@ -166,12 +167,12 @@ class DatabaseTableBase(TableContentBase):
     def populate(self, content_lod=None):
         if content_lod == None:
             if self.filter == None and self.search_string == None:
-                self.content_lod = self.db_table.get_content()
+                self.content_lod = self.db_table.get_content(fetch=self.fetch)
             elif self.filter == False:
                 return
             else:
                 clause = self.build_where_clause()
-                self.content_lod = self.db_table.select(where=clause)
+                self.content_lod = self.db_table.select(where=clause, fetch=self.fetch)
         else:
             self.content_lod = content_lod
             
@@ -396,7 +397,21 @@ class FormTable(DatabaseTableBase):
         if self.help_path <> None:
             self.HTMLhelp.show(self.help_path)
     
-                
+    
+    def on_combobox_filter_changed(self, event=None):
+        selection = self.combobox_filter.GetSelection()
+        if selection == 0:
+            self.fetch = None
+        if selection == 1:
+            self.fetch = 100
+        if selection == 2:
+            self.fetch = 500
+        if selection == 3:
+            self.fetch = 1000
+        self.Table.SetFocus()
+        self.populate()
+        
+        
     def update(self):
         self.button_new.set_sensitive(1)
         self.button_delete.set_sensitive(0)
@@ -449,11 +464,14 @@ class FormTable(DatabaseTableBase):
         
         #if filter == True:
         self.toolbar_parent.AddSeparator()
-        combobox_filter = wx.ComboBox(
-            parent=self.toolbar_parent, id=-1, choices=['<alle>'],
+        self.combobox_filter = wx.ComboBox(
+            parent=self.toolbar_parent, id=-1, choices=['<alle>', 'letzte 100', 'letzte 500', 'letzte 1000'],
             size=(150,-1), style=wx.CB_DROPDOWN)
-        combobox_filter.SetToolTip(wx.ToolTip('Filter'))
-        self.toolbar_parent.AddControl(combobox_filter)
+        self.combobox_filter.SetToolTip(wx.ToolTip('Filter'))
+        self.combobox_filter.SetSelection(0)
+        self.combobox_filter.Bind(wx.EVT_COMBOBOX, self.on_combobox_filter_changed)
+        self.toolbar_parent.AddControl(self.combobox_filter)
+        
         
         #if preferences == True or help == True:
         #self.toolbar_parent.AddSeparator()

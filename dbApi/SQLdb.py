@@ -169,7 +169,7 @@ class generic_database(object):
         self.cursor.execute("COMMIT")
 
 
-    def listresult(self, sql_command):
+    def listresult(self, sql_command, fetch=None):
         ''' Executes the given sql_command and gives back a list_of_lists if there
             is more then just one row. Else this just returns a simple list. '''
         
@@ -179,8 +179,11 @@ class generic_database(object):
         except:
             print sql_command
             raise
-
-        tmp_result = self.cursor.fetchall()
+        
+        if fetch==None:
+            tmp_result = self.cursor.fetchall()
+        else:
+            tmp_result = self.cursor.fetchmany(fetch)
 
         outer_list = []
         for outer_item in tmp_result:
@@ -194,7 +197,7 @@ class generic_database(object):
         return outer_list
 
 
-    def dictresult(self, sql_command):
+    def dictresult(self, sql_command, fetch=None):
         ''' Executes the given sql_command and gives back a list of dictionarys. 
             Be careful, because the content is untransformed and thus, comes
             a little different from database to database! '''
@@ -209,7 +212,10 @@ class generic_database(object):
             print sql_command
             raise
         
-        lol_result = self.cursor.fetchall()
+        if fetch==None:
+            lol_result = self.cursor.fetchall()
+        else:
+            lol_result = self.cursor.fetchmany(fetch)
 
         lod_result = []
         for row in lol_result:
@@ -917,10 +923,10 @@ CREATE TABLE """ + self.name + """
         return not_in_database_lod, not_in_definition_lod
         
         
-    def get_content(self):
+    def get_content(self, fetch=None):
         ''' Fetches all rows and gives them back as list of dictionarys. '''
         
-        return self.select()
+        return self.select(fetch=fetch)
     
     
     def check_content(self, pk_column='', content_lod=[], \
@@ -1045,7 +1051,7 @@ CREATE TABLE """ + self.name + """
         konstrukt = ('referenced_table_name, referenced_column_name, column_name')
         
         
-    def select(self, distinct=False, join=[], column_list=[], where='', listresult=False):
+    def select(self, distinct=False, join=[], column_list=[], where='', listresult=False, fetch=None):
         ''' SELECT order in SQL with transformation of output to python data types. '''
         
         #print self.name
@@ -1077,7 +1083,7 @@ CREATE TABLE """ + self.name + """
         
         try:
             if listresult == False:
-                content_lod = self.db_object.dictresult(sql_command)
+                content_lod = self.db_object.dictresult(sql_command, fetch)
                 has_attributes = dir(self)
                 if 'attributes' in has_attributes:
                     content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
@@ -1085,7 +1091,7 @@ CREATE TABLE """ + self.name + """
                     print has_attributes
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
-                content_lod = self.db_object.listresult(sql_command)
+                content_lod = self.db_object.listresult(sql_command, fetch)
         except:
             raise
         return content_lod
