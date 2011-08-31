@@ -4,7 +4,7 @@
 # See Python tutorial (section packages) for more information.
 
 #__all__ = ['Portlets']
-__version__ = '1.30'
+__version__ = '1.32'
 __year__ = '2011'
 __author__ = 'Mark Muzenhardt'
 __appname__ = 'BaseUI'
