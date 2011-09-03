@@ -572,6 +572,10 @@ class DatabaseFormBase(object):
         form_content = self.get_content()
         pk_column = self.db_table.get_primary_key_columns()[0]
         
+        for definition_dict in self.definition_lod:
+            if 'static' in definition_dict:
+                form_content[definition_dict['column_name']] = definition_dict.get('static')
+                
         try:
             if self.primary_key <> None:
                 form_content[pk_column] = self.primary_key
@@ -640,11 +644,12 @@ class DatabaseFormBase(object):
             fill_distinct = dic.get('fill_distinct')
             on_populate = dic.get('on_populate')
             
-            enable_list = self.permissions.get('enable')
-            if type(enable_list) == list:
-                if column_name not in enable_list:
-                    if widget_object <> None:
-                        widget_object.Enable(False)
+            if self.permissions <> None:
+                enable_list = self.permissions.get('enable')
+                if type(enable_list) == list:
+                    if column_name not in enable_list:
+                        if widget_object <> None:
+                            widget_object.Enable(False)
                     
             if fill_distinct == True:
                 result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
@@ -696,7 +701,7 @@ class DatabaseFormBase(object):
         form_content = self.form.get_content()
         return form_content
         
-        
+    
     def add_save_function(self, function):
         self.save_function_list.append(function)
         
