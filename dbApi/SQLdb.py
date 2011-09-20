@@ -467,7 +467,7 @@ class mysql_database(generic_database):
     def connect(self, **kwargs):
         self.connection = self.connector.connect(db=kwargs['database'], host=kwargs['host'], user=kwargs['user'], passwd=kwargs['password'])
         self.cursor = self.connection.cursor()
-        self.set_arguments(kwargs)
+        self.set_arguments(**kwargs)
         return self.connection
         
         
