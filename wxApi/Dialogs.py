@@ -108,4 +108,3 @@ class FormTablePreferences(wx.Dialog):
     def on_button_ok_clicked(self, event=None):
         self.Destroy()
 
-
