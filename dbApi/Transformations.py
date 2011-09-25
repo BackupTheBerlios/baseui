@@ -136,6 +136,9 @@ def normalize_content(attributes_lod, content_lod, db_object=None):
             if attributes_dic.has_key('data_type'):
                 data_type = attributes_dic['data_type']
                 for content_dic in content_lod:
+                    if '.' in column_name:
+                        # This is needed for foreign columns to appear right!
+                        column_name = column_name.split('.')[1]
                     if content_dic.has_key(column_name):
                         content = content_dic[column_name]
                         if data_type.startswith('bool'):
