@@ -1051,7 +1051,7 @@ CREATE TABLE """ + self.name + """
         konstrukt = ('referenced_table_name, referenced_column_name, column_name')
         
         
-    def select(self, distinct=False, join=[], column_list=[], where='', listresult=False, fetch=None):
+    def select(self, distinct=False, join=[], column_list=[], where='', order_by='', listresult=False, fetch=None):
         ''' SELECT order in SQL with transformation of output to python data types. '''
         
         #print self.name
@@ -1081,6 +1081,9 @@ CREATE TABLE """ + self.name + """
         if where <> '':
             sql_command += ' WHERE %s' % where
         
+        if order_by <> '':
+            sql_command += ' ORDER BY %s' % order_by
+            
         try:
             if listresult == False:
                 content_lod = self.db_object.dictresult(sql_command, fetch)
