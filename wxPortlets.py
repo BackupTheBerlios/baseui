@@ -563,7 +563,7 @@ class DatabaseFormBase(object):
         self.primary_key = None
         if self.remote_parent.primary_key <> None:
             self.primary_key = self.remote_parent.primary_key
-        
+            
         self.db_table = remote_parent.db_table
         self.db_object = self.db_table.db_object
         
