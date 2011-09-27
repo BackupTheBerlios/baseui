@@ -167,12 +167,12 @@ class DatabaseTableBase(TableContentBase):
     def populate(self, content_lod=None):
         if content_lod == None:
             if self.filter == None and self.search_string == None:
-                self.content_lod = self.db_table.get_content(fetch=self.fetch)
+                self.content_lod = self.db_table.get_content(order_by=self.primary_key_column + ' DESC', fetch=self.fetch)
             elif self.filter == False:
                 return
             else:
                 clause = self.build_where_clause()
-                self.content_lod = self.db_table.select(where=clause, fetch=self.fetch)
+                self.content_lod = self.db_table.select(order_by=self.primary_key_column + ' DESC', where=clause, fetch=self.fetch)
         else:
             self.content_lod = content_lod
             
@@ -468,10 +468,10 @@ class FormTable(DatabaseTableBase):
             parent=self.toolbar_parent, id=-1, choices=['<alle>', 'letzte 100', 'letzte 500', 'letzte 1000'],
             size=(150,-1), style=wx.CB_DROPDOWN)
         self.combobox_filter.SetToolTip(wx.ToolTip('Filter'))
-        self.combobox_filter.SetSelection(0)
+        self.combobox_filter.SetSelection(2)
+        self.fetch = 500
         self.combobox_filter.Bind(wx.EVT_COMBOBOX, self.on_combobox_filter_changed)
         self.toolbar_parent.AddControl(self.combobox_filter)
-        
         
         #if preferences == True or help == True:
         #self.toolbar_parent.AddSeparator()
