@@ -61,7 +61,6 @@ class TableContentBase(object):
                         attributes_dict['column_name'] = new_key
                         self.attributes_lod.append(attributes_dict)
             content_dict.update(new_foreign_content_dict)
-            # pprint(self.attributes_lod)
         
     
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
