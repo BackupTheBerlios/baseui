@@ -733,7 +733,7 @@ class FormFrame(wx.Frame, DatabaseFormBase):
                        permissions={}):
         
         ''' db_table is the the table in which this Form writes the data. The remote_parent
-            is triggered on save and close, so that the parent widget can be updated. parent
+            is triggered on save and close, so that it can be updated then. The parent
             is simply the wxWidgets-Parent, usually a Frame. title is the Frame-title, 
             panel_name is the name of the panel which is loaded from the file behind xrc_path.
             The help-path enables online help, if given. '''

@@ -417,7 +417,11 @@ class DayGrid(CalendarBase):
                 self._end_resize_appointment = self._end_resize_dict
                 
         if event.LeftDClick():
-            self.open_appointment(self._hovering_dict)
+            # Add an appointment if nothing hovered, else open the clicked appointment.
+            if self._hovering_dict == None:
+                self.add_appointment(title=None, start_datetime=self._clicked_datetime, end_datetime=self._clicked_datetime + datetime.timedelta(hours=1))
+            else:
+                self.open_appointment(self._hovering_dict)
             
         if event.LeftUp():
             self._left_down = False
