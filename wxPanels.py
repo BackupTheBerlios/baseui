@@ -242,14 +242,18 @@ class DatabaseLogin(wx.Panel):
         return self.portlet_login.combobox_user.GetClientData(selection)
         
         
+    def get_settings(self):
+        return self.db_table_system.get_content()
+    
+    
     def get_connection(self):
         return self.portlet_database.get_connection()
         
     
     def set_connected(self):
-        print 'SYSTEM_TABLE:', self.db_table_system_class
-        
-        
+        if self.db_table_system_class <> None:
+            self.db_table_system = self.db_table_system_class(self.get_database())
+            
         self.db_table_users = self.db_table_users_class(self.get_database())
         result = self.db_table_users.select()
         self.portlet_login.combobox_user.Clear()
