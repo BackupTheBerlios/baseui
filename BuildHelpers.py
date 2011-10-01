@@ -13,7 +13,7 @@ from pprint import pprint
 
 def get_winGTKdir():
     # Fetches gtk2 path from registry.
-	
+    
     import _winreg
     import msvcrt
 
@@ -33,26 +33,26 @@ def get_winGTKdir():
         
 
 def get_rpm(**kwargs):
-	# This stuff is simply a try to capture rpm-support, but not ready yet!
-	
-	rpm_text = """\
+    # This stuff is simply a try to capture rpm-support, but not ready yet!
+    
+    rpm_text = """\
 # This is a sample spec file for wget
 
-%define _topdir	 	/home/strike/mywget
-%define name			wget 
-%define release		1
-%define version 	1.12
+%define _topdir         /home/strike/mywget
+%define name            wget 
+%define release        1
+%define version     1.12
 %define buildroot %{_topdir}/%{name}-%{version}-root
 
-BuildRoot:	%{buildroot}
-Summary: 		GNU wget
-License: 		GPL
-Name: 			%{name}
-Version: 		%{version}
-Release: 		%{release}
-Source: 		%{name}-%{version}.tar.gz
-Prefix: 		/usr
-Group: 			Development/Tools
+BuildRoot:    %{buildroot}
+Summary:         GNU wget
+License:         GPL
+Name:             %{name}
+Version:         %{version}
+Release:         %{release}
+Source:         %{name}-%{version}.tar.gz
+Prefix:         /usr
+Group:             Development/Tools
 
 %description
 The GNU wget program downloads files from the Internet using the command-line.
@@ -72,13 +72,13 @@ make install prefix=$RPM_BUILD_ROOT/usr
 /usr/local/bin/wget
 
 %doc %attr(0444,root,root) /usr/local/share/man/man1/wget.1"""
-	return rpm_text
-	
-	
+    return rpm_text
+    
+    
 def get_deb(**kwargs):
-	# This stuff is simply a try to capture deb-support, but not yet ready!
-	
-	deb_text = """\
+    # This stuff is simply a try to capture deb-support, but not yet ready!
+    
+    deb_text = """\
 Package: acme
 Version: 1.0
 Section: web 
@@ -97,12 +97,12 @@ Provides: acme
 Description: The description can contain free-form text
              describing the function of the program, what
              kind of features it has, and so on..."""
-	return deb_text
-	
-	
+    return deb_text
+    
+    
 def get_nsi(**kwargs):
-	# This works fine to make an installer for windows with NSIS.
-	
+    # This works fine to make an installer for windows with NSIS.
+    
     python_version = sys.version[:3]
     
     nsi_text = """\
@@ -210,6 +210,10 @@ def get_revision():
     return app_revision
     
     
+def makeSourceZip():
+    pass
+
+
 def makeGTK(gtk_dir, pathname, build_dir, localized=False):
     if sys.platform.startswith('win'):
         os.system('xcopy ' + gtk_dir + 'bin\\*.dll "' + pathname + build_dir + '" /E /Y')
@@ -334,8 +338,9 @@ def makeNSI(pathname, build_dir, app_name, app_version, app_icon=''):
         print str(inst)
         
     ProgramFiles = os.getenv("ProgramFiles")
-    makeNSISw = '"' + ProgramFiles + '\\NSIS\\makensisw.exe" "build\\%s.nsi"' % app_name
-    os.popen('"%s"' % makeNSISw)
+    makeNSISw = '"' + ProgramFiles + '\\NSIS\\makensis.exe" "build\\%s.nsi"' % app_name
+    os.system('"%s"' % makeNSISw)
+    x=raw_input('press <RETURN> to exit...')
     
     
     

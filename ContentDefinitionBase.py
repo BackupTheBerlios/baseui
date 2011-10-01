@@ -45,7 +45,7 @@ class TableContentBase(object):
     
     def fill_foreign_columns(self, column_name, get_columns, referenced_table_object, referenced_column_name):
         for content_dict in self.content_lod:
-            foreign_key = content_dict[column_name]
+            foreign_key = content_dict.get(column_name)
             if foreign_key in [None, 'NULL']:
                 continue
             
