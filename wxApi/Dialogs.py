@@ -34,7 +34,7 @@ class Error(res.Dialogs.Error):
             detail = traceback.format_exc()
             self.entry_traceback.SetValue(detail)
         
-        self.m_staticText_text.SetLabel(message + '\n' + str(instance))
+        self.m_staticText_text.SetLabel(message + '\n\n' + str(instance))
         self.SetTitle(title)
         
         self.SetInitialSize()

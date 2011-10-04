@@ -116,10 +116,15 @@ def widget_initializator(definition_dict):
     data_type = definition_dict.get('data_type')
     character_maximum_length = definition_dict.get('character_maximum_length')
     
-    if widget_object.__class__ in [wx._controls.TextCtrl, wx._controls.ComboBox]:
+    # Handle the textctrl
+    if widget_object.__class__ in [wx._controls.TextCtrl]:
         if character_maximum_length <> None:
             widget_object.SetMaxLength(character_maximum_length)
-
+            
+        widget_object.SetValidator(ValidateDataType(data_type))
+        
+    # Handle the combobox
+    if widget_object.__class__ in [wx._controls.ComboBox]:
         widget_object.SetValidator(ValidateDataType(data_type))
 
 

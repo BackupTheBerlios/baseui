@@ -106,8 +106,7 @@ class DatabaseTableBase(TableContentBase):
                         delete_function(self.primary_key)
                     self.populate()
                 except Exception, inst:
-                    add_text = str(inst[0])
-                    self.ErrorDialog.show(title='Fehler', instance=inst, message=u'Fehler beim Löschen des Datensatzes!\n' + add_text)
+                    self.ErrorDialog.show(title='Fehler', instance=inst, message=u'Fehler beim Löschen des Datensatzes!')
 
         
     def add_delete_function(self, delete_function):
@@ -607,8 +606,7 @@ class DatabaseFormBase(object):
                 self.remote_parent.populate()
                 self.on_close()
             except Exception, inst:
-                add_text = str(inst[0])
-                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!\n' + add_text)
+                self.error_dialog.show(instance=inst, message='Beim löschen dieses Datensatzes ist ein Fehler aufgetreten!')
         
         
     def initialize(self, definition_lod=None, attributes_lod=None, portlets_lod=None):
@@ -656,7 +654,7 @@ class DatabaseFormBase(object):
                 for item in result:
                     if item == None:
                         continue
-                    widget_object.Append(item)
+                    widget_object.Append(str(item))
                 
             if on_populate <> None:
                 on_populate(dic)
