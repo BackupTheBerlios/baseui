@@ -44,14 +44,12 @@ class Error(res.Dialogs.Error):
         
     def on_togglebutton_detail_toggled(self, event):
         is_down = event.IsChecked() 
-        
         if is_down:
             self.entry_traceback.Show()
             self.staticline_bottom.Show()
         else:
             self.entry_traceback.Hide()
             self.staticline_bottom.Hide()
-            
         self.SetInitialSize()
         
         
