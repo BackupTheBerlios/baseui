@@ -351,7 +351,7 @@ class DayGrid(CalendarBase):
         self.delete_function_list = []
         self.right_click_function_list = []
         self.draw_function_list = []
-#        self.append_function_list = []
+        self.old_content = {}
         
         self._line_width = 1.0
         
@@ -627,6 +627,8 @@ class DayGrid(CalendarBase):
         starts = self._move_appointment.get('starts')
         ends = self._move_appointment.get('ends')
         
+        self.old_content = self._move_appointment.copy()
+        
         if self.check_overlap(starts + delta, ends + delta, self._move_appointment) and \
            (starts + delta).day == (ends + delta).day:
             self._move_appointment['starts'] += delta
@@ -647,6 +649,7 @@ class DayGrid(CalendarBase):
             starts = self._start_resize_appointment.get('starts')
             ends = self._start_resize_appointment.get('ends')
             if self.check_overlap(starts + delta, ends, self._start_resize_appointment):
+                self.old_content = self._start_resize_appointment.copy()
                 self._start_resize_appointment['starts'] += delta
                 appointment = self._start_resize_appointment                
                 
@@ -654,6 +657,7 @@ class DayGrid(CalendarBase):
             starts = self._end_resize_appointment.get('starts')
             ends = self._end_resize_appointment.get('ends')
             if self.check_overlap(starts, ends + delta, self._end_resize_appointment):
+                self.old_content = self._end_resize_appointment.copy()
                 self._end_resize_appointment['ends'] += delta
                 appointment = self._end_resize_appointment
                 
