@@ -351,6 +351,7 @@ class DayGrid(CalendarBase):
         self.delete_function_list = []
         self.right_click_function_list = []
         self.draw_function_list = []
+#        self.append_function_list = []
         
         self._line_width = 1.0
         
@@ -589,6 +590,8 @@ class DayGrid(CalendarBase):
                     #self.appointments_lod.append(appointment)
                     #self.UpdateDrawing()
                     self.open_appointment(appointment)
+#                    for append_function in self.append_function_list:
+#                        append_function(appointment)
                 else:
                     self.reset_marker()
             else:
@@ -631,8 +634,9 @@ class DayGrid(CalendarBase):
         
         for move_function in self.move_function_list:
             if move_function <> None:
-                move_function(self._move_appointment)
-                        
+                if delta <> datetime.timedelta(0):
+                    move_function(self._move_appointment)
+                    
         self.reset_tracker()
         self.reset_marker()
     
@@ -711,6 +715,10 @@ class DayGrid(CalendarBase):
         
     def add_draw_function(self, function):
         self.draw_function_list.append(function)
+        
+        
+#    def add_append_function(self, function):
+#        self.append_function_list.append(function)
         
         
     def Draw(self, dc):
