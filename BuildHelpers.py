@@ -210,8 +210,19 @@ def get_revision():
     return app_revision
     
     
-def makeSourceZip():
-    pass
+# def makeSourceZip():
+	# import zipfile
+	# from pprint import pprint
+	# from src.config import *
+
+	# print dir(config)
+
+	# src_zip = zipfile.ZipFile('dist/%s v%s src.zip' % (APP_NAME, APP_VERSION), 'w')
+	# src_zip.write('console.pyw')
+	# src_zip.close()
+
+	# raw_input('Source code of project packed. Give <RETURN> to exit...')
+
 
 
 def makeGTK(gtk_dir, pathname, build_dir, localized=False):
@@ -226,6 +237,7 @@ def makeGTK(gtk_dir, pathname, build_dir, localized=False):
         
 
 def makeResources(pathname, build_dir):
+	# TODO: This all should be pythonian, not os.system!
     if sys.platform.startswith('win'):
         os.system('xcopy "' + pathname + '\\res\\*" "' + pathname + build_dir + 'res\\" /E /Y')
         #usr is no ressource any longer, because database-config should not be uninstalled!
