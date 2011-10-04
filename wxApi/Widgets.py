@@ -116,7 +116,7 @@ def widget_initializator(definition_dict):
     data_type = definition_dict.get('data_type')
     character_maximum_length = definition_dict.get('character_maximum_length')
     
-    if widget_object.__class__ in [wx._controls.TextCtrl]:
+    if widget_object.__class__ in [wx._controls.TextCtrl, wx._controls.ComboBox]:
         if character_maximum_length <> None:
             widget_object.SetMaxLength(character_maximum_length)
 
@@ -145,7 +145,7 @@ class ValidateDataType(wx.PyValidator):
             return
 
         if self.data_type in ['integer', 'bigint']:
-            if chr(key) in string.digits:
+            if chr(key) in '-' + string.digits:
                 event.Skip()
                 return
         elif self.data_type in ['float', 'money']:

@@ -292,8 +292,9 @@ class Tree(hypertreelist.HyperTreeList):
                     if type(content) <> unicode:
                         content = str(content)
                     self.SetItemText(item, content, column_number)
-                    
-        self.SortChildren(self.root)
+        
+        # It's better the data comes pre-sorted from SQL (content_lod)!
+        #self.SortChildren(self.root)
 
 
     def build_definition(self, content_lod, column_list=None):
@@ -408,8 +409,9 @@ class Form(wx.Panel):
         self.loaded_content_dict = {}
         
 
-    def on_widget_changed(self, widget=None, widget_definition_dict=None):
-        self.validate_widget(widget_definition_dict)
+#    def on_widget_changed(self, widget=None, widget_definition_dict=None):
+#        print 'widget_changed!!!', widget, widget_definition_dict
+#        self.validate_widget(widget_definition_dict)
 
 
     def initialize(self, definition_lod=None, attributes_lod=None):
