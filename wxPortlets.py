@@ -972,7 +972,7 @@ class SearchFrame(wx.Dialog):
         
         
     def edit(self):
-        self.add_dataset(self.table.primary_key)
+        self.add_dataset(self.table.Table.get_selected_row_content())
         self.remote_parent.populate()
         self.Close()
         
