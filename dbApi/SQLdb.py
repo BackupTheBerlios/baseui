@@ -732,6 +732,18 @@ class generic_table(object):
         pass
     
     
+    def _after_insert(self, pk):
+        pass
+    
+    
+    def _before_update(self, where):
+        pass
+    
+    
+    def _before_delete(self, where):
+        pass
+    
+    
     def create(self, attributes_lod = None):
         ''' Creates an empty table in the given database and returnes the SQLcommand.
             attributes_lod is a list of dictionarys with this layout:
@@ -1133,7 +1145,7 @@ CREATE TABLE """ + self.name + """
                     
                     column_content = Transformations.write_transform(content_dict[column_name], self.db_object.engine)
                     column_content_list += '    %s,\n' % column_content
-
+                    
             column_names_list = column_names_list[0:len(column_names_list)-2]
             column_content_list = column_content_list[0:len(column_content_list)-2]
 
@@ -1142,9 +1154,10 @@ CREATE TABLE """ + self.name + """
             
             try:
                 self.db_object.execute(sql_command)
+                self._after_insert(actual_pk)
             except:
                 raise
-        return actual_pk
+        return
 
 
     def update(self, content_dict=None, column_list=None, where=''):
@@ -1169,7 +1182,9 @@ CREATE TABLE """ + self.name + """
         sql_command += 'WHERE %s' % where #% (key_column, content_dict[key_column])
         
         try:
+            self._before_update(where)
             self.db_object.execute(sql_command)
+            self._after_update(content_dict, column_list)
         except:
             raise
         return
@@ -1178,6 +1193,7 @@ CREATE TABLE """ + self.name + """
     def delete(self, where):
         sql_command = 'DELETE FROM %s WHERE %s' % (self.name, where)
         try:
+            self._before_delete(None)
             self.db_object.execute(sql_command)
         except:
             raise
