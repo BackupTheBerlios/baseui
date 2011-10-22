@@ -740,6 +740,10 @@ class generic_table(object):
         pass
     
     
+    def _after_update(self, content_dict, column_list):
+        pass
+    
+    
     def _before_delete(self, where):
         pass
     
@@ -1193,7 +1197,7 @@ CREATE TABLE """ + self.name + """
     def delete(self, where):
         sql_command = 'DELETE FROM %s WHERE %s' % (self.name, where)
         try:
-            self._before_delete(None)
+            self._before_delete(where)
             self.db_object.execute(sql_command)
         except:
             raise
