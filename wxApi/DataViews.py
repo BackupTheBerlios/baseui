@@ -51,23 +51,22 @@ class Tree(hypertreelist.HyperTreeList):
             a_data = '%s.%s.%s' % (a_datelist[2], a_datelist[1], a_datelist[0])
             b_data = '%s.%s.%s' % (b_datelist[2], b_datelist[1], b_datelist[0])
         
-        # TODO: There are no more column_numbers, this sucks therefore!
-        #print self.sort_data_type
-        
         if self.sort_data_type == 'bool':
             a_widget = self.GetItemWindow(a, self.sort_column_number)
             b_widget = self.GetItemWindow(b, self.sort_column_number)
             
             if a_widget <> None:
                 a_data = a_widget.GetValue()
+                a_widget.Hide()
             else:
                 a_data = None
                 
             if b_widget <> None:
                 b_data = b_widget.GetValue()
+                b_widget.Hide()
             else:
                 b_data = None
-        
+                
         if self.sort_ascending == True:
             result = cmp(a_data, b_data)
         else:
@@ -121,7 +120,7 @@ class Tree(hypertreelist.HyperTreeList):
         
         clicked_column = event.GetColumn()
         self.set_sort_column(column_number=clicked_column)
-    
+        
     
     # Actions -----------------------------------------------------------------
     def create(self):
@@ -144,7 +143,7 @@ class Tree(hypertreelist.HyperTreeList):
                 content_lod.append(self.get_selected_row_content(item))
         return content_lod
 
-
+    
     def get_selected_row_content(self, item=None):
         ''' Returns a dictionary which holds the row content like this:
                {'id': 1, 'name': 'Heinz Becker'} '''

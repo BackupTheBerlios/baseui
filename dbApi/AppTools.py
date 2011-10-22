@@ -25,7 +25,7 @@ class text_table:
         self.clear()
         line_list = text.split('\n')
         for content in enumerate(line_list):    
-            sql_command = "INSERT id, text VALUES (%i, '%s') INTO %s" % (content[0], content[1], self.table_name)
+            sql_command = "INSERT id, text VALUES (%i, '%s') INTO %s" % (content[0], str(content[1]), str(self.table_name))
             self.database.cursor.execute(sql_command)
         return
         
