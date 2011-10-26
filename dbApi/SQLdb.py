@@ -1161,7 +1161,7 @@ CREATE TABLE """ + self.name + """
                 self._after_insert(actual_pk)
             except:
                 raise
-        return
+        return content_dict
 
 
     def update(self, content_dict=None, column_list=None, where=''):
@@ -1183,7 +1183,7 @@ CREATE TABLE """ + self.name + """
                     column_content = Transformations.write_transform(content_dict[column_name], self.db_object.engine)
                     sql_command += '    %s = %s,\n' % (column_name, column_content)
             sql_command = sql_command[0:len(sql_command)-2] + '\n'
-        sql_command += 'WHERE %s' % where #% (key_column, content_dict[key_column])
+        sql_command += 'WHERE %s' % where
         
         try:
             self._before_update(where)
