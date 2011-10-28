@@ -1161,7 +1161,7 @@ CREATE TABLE """ + self.name + """
                 self._after_insert(actual_pk)
             except:
                 raise
-        return content_dict
+        return actual_pk
 
 
     def update(self, content_dict=None, column_list=None, where=''):
