@@ -163,7 +163,8 @@ def transform_string(content, encoding=None):
             if encoding <> None:
                 content = unicode(content, encoding)
         except Exception, inst:
-            pass
+            print 'encoding:', encoding, 'content:',content, 'type:', type(content)
+            raise
     return content
                           
 

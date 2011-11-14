@@ -86,7 +86,7 @@ def delegate_object(from_object, into_object):
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
 
-    def __init__(self, engine='', encoding='utf-8', debug=False):
+    def __init__(self, engine='', encoding='cp1252', debug=False):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
           
