@@ -677,6 +677,7 @@ class odbc_mssql_database(odbc_generic_database):
     
     def __init__(self, base_object):
         # Write from generic_odbc instance to self to get the cursor etc.
+        base_object.base_object.encoding = 'cp1252'
         delegate_object(base_object, self)
         
         
