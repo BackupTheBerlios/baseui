@@ -56,7 +56,7 @@ class JsonTable(wx.Panel):
         self.Table.populate(self.content_lod)
                 
     
-    def populate_portlet(self):
+    def create(self):
         # Just creates a panel to draw the Table on, that buttons or else can be 
         # attached near the Table!
         
@@ -96,9 +96,9 @@ class JsonTable(wx.Panel):
 
         self.Table.Show()       
         return self.panel_main
-    
-    
-    
+        
+        
+        
 class IniDialog(wx.Dialog):
     ''' used for PythonServer '''
     
@@ -199,8 +199,9 @@ class IniDialog(wx.Dialog):
             definition_dict['value'] = value
             
         self.iniFile.save_lod(self.definition_lod)
-
-
+        
+        
+        
 class ConfigDialog(wx.Dialog):
     def __init__(self, parent, db_object):
         self.db_object = db_object
@@ -215,7 +216,7 @@ class ConfigDialog(wx.Dialog):
         sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
         self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_MULTILINE )
-
+        
         
         #self.panel_globals = form_globals(parent=self.notebook, xrc_path=RESOURCE_DIR + 'forms.xrc', panel_name='panel_globals')
         #self.notebook.AddPage(self.panel_globals, 'Allgemein', False)
@@ -237,12 +238,12 @@ class ConfigDialog(wx.Dialog):
         self.Layout()
         
         self.Centre(wx.BOTH)
-    
-    
+        
+        
     def __del__( self ):
         pass
-    
-    
+        
+        
     def on_button_ok_clicked(self, event=None):
         self.Close()
         
@@ -252,7 +253,7 @@ class ConfigDialog(wx.Dialog):
         panel = wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         table_object = table(db_table=db_table_object, form_object=form, portlet_parent=panel)
         
-        table_object.populate_portlet()
+        table_object.create()
         panel.Layout()
         self.notebook.AddPage(panel, title, False)
         
