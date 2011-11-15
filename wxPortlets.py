@@ -641,6 +641,7 @@ class DatabaseFormBase(object):
             column_name = dic.get('column_name')
             fill_distinct = dic.get('fill_distinct')
             on_populate = dic.get('on_populate')
+            sort_by = dic.get('sort_by')
             
             if self.permissions <> None:
                 enable_list = self.permissions.get('enable')
@@ -670,6 +671,9 @@ class DatabaseFormBase(object):
             populate_from.append(referenced_column_name)
             result = referenced_table_object.select(column_list=populate_from)
             
+            if sort_by <> None:
+                result = sorted(result, key=lambda result: result[sort_by])
+                
             if widget_object.__class__ ==  wx._controls.ComboBox:
                 for item in result:
                     widget_object.Append(mask % item, item.get(referenced_column_name))
