@@ -1047,18 +1047,6 @@ CREATE TABLE """ + self.name + """
                     if key == 'name':
                         column_list.append(attributes_dic[key])
         return column_list
-
-
-    def get_tree(self, attributes_lod):
-        ''' Returns a tree definition. '''
-        
-        print 'This does not work, right now!'
-        referenced_table_lod = []
-        
-        for attribute_dict in attributes_lod:
-            if attribute_dict.has_key('referenced_table_name'):
-                referenced_table_lod.append({'referenced_table_name':  attribute_dict['referenced_table_name'], 
-                                             'referenced_column_name': attribute_dict['referenced_column_name']})
         
         
     def join(self, primary_key_column='', referenced_table_name='', referenced_column_name='', mode='outer', where=''):

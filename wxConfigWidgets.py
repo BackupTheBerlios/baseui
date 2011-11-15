@@ -15,6 +15,8 @@ from pprint import pprint
 
 
 class JsonTable(wx.Panel):
+    ''' used for PythonServer '''
+    
     def __init__(self, json_filepath, form=None, portlet_parent=None, editable=True, permissions={}):
         self.json_filepath = json_filepath
         self.form = form
@@ -98,6 +100,8 @@ class JsonTable(wx.Panel):
     
     
 class IniDialog(wx.Dialog):
+    ''' used for PythonServer '''
+    
     ID_CANCEL = 101
     ID_OK = 102
     
@@ -197,4 +201,4 @@ class IniDialog(wx.Dialog):
         self.iniFile.save_lod(self.definition_lod)
 
 
-
+#class ConfigDialog(
