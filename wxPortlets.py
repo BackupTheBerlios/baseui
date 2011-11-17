@@ -189,7 +189,7 @@ class DatabaseTableBase(TableContentBase):
                 definition_dic['populate_function'](definition_dic)
                 
                 
-    def populate_portlet(self):
+    def create(self):
         # Just creates a panel to draw the Table on, that buttons or else can be 
         # attached near the Table!
         self.main_panel = wx.Panel(self.portlet_parent)
@@ -274,8 +274,8 @@ class SubTable(DatabaseTableBase):
         #print 'delete'
         
         
-    def populate_portlet(self):
-        super(SubTable, self).populate_portlet()
+    def create(self):
+        super(SubTable, self).create()
         self.sizer_buttons = wx.BoxSizer( wx.VERTICAL )
         
         if self.permissions == None:
@@ -419,7 +419,7 @@ class FormTable(DatabaseTableBase):
         self.populate()
 
 
-    def populate_toolbar(self):
+    def create_toolbar(self):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
         
         if self.permissions == None:

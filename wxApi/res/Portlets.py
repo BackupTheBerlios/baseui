@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version Sep  8 2010)
+## Python code generated with wxFormBuilder (version May  4 2010)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO "NOT" EDIT THIS FILE!
@@ -384,6 +384,112 @@ class TableConfig ( wx.Panel ):
 		m_checkList1Choices = [ u"Wee", u"Zee" ];
 		self.m_checkList1 = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices, 0 )
 		fgSizer8.Add( self.m_checkList1, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		sbSizer4.Add( fgSizer8, 1, wx.EXPAND, 5 )
+		
+		fgSizer4.Add( sbSizer4, 1, wx.EXPAND, 5 )
+		
+		self.SetSizer( fgSizer4 )
+		self.Layout()
+	
+	def __del__( self ):
+		pass
+	
+
+###########################################################################
+## Class panel_communication
+###########################################################################
+
+class panel_communication ( wx.Panel ):
+	
+	def __init__( self, parent ):
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 647,394 ), style = wx.TAB_TRAVERSAL )
+		
+		fgSizer4 = wx.FlexGridSizer( 2, 2, 0, 0 )
+		fgSizer4.AddGrowableCol( 0 )
+		fgSizer4.AddGrowableCol( 1 )
+		fgSizer4.AddGrowableRow( 0 )
+		fgSizer4.SetFlexibleDirection( wx.BOTH )
+		fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Spaltenlayout" ), wx.VERTICAL )
+		
+		fgSizer8 = wx.FlexGridSizer( 2, 1, 0, 0 )
+		fgSizer8.AddGrowableCol( 0 )
+		fgSizer8.AddGrowableRow( 1 )
+		fgSizer8.SetFlexibleDirection( wx.BOTH )
+		fgSizer8.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.choisebook_type = wx.Choicebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.CHB_DEFAULT )
+		self.panel_phone = wx.Panel( self.choisebook_type, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		fgSizer22 = wx.FlexGridSizer( 2, 2, 0, 0 )
+		fgSizer22.AddGrowableCol( 1 )
+		fgSizer22.SetFlexibleDirection( wx.BOTH )
+		fgSizer22.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		self.m_staticText27 = wx.StaticText( self.panel_phone, wx.ID_ANY, u"Land / Region", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText27.Wrap( -1 )
+		fgSizer22.Add( self.m_staticText27, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		fgSizer23 = wx.FlexGridSizer( 2, 2, 0, 0 )
+		fgSizer23.AddGrowableCol( 1 )
+		fgSizer23.SetFlexibleDirection( wx.BOTH )
+		fgSizer23.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		combobox_region_codeChoices = []
+		self.combobox_region_code = wx.ComboBox( self.panel_phone, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 80,-1 ), combobox_region_codeChoices, 0 )
+		fgSizer23.Add( self.combobox_region_code, 0, wx.ALL, 5 )
+		
+		combobox_region_nameChoices = []
+		self.combobox_region_name = wx.ComboBox( self.panel_phone, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, combobox_region_nameChoices, 0 )
+		fgSizer23.Add( self.combobox_region_name, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		fgSizer22.Add( fgSizer23, 1, wx.EXPAND, 5 )
+		
+		self.m_staticText25 = wx.StaticText( self.panel_phone, wx.ID_ANY, u"Vorwahl / Ort", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText25.Wrap( -1 )
+		fgSizer22.Add( self.m_staticText25, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		fgSizer231 = wx.FlexGridSizer( 2, 2, 0, 0 )
+		fgSizer231.AddGrowableCol( 1 )
+		fgSizer231.SetFlexibleDirection( wx.BOTH )
+		fgSizer231.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+		
+		combobox_region_code1Choices = []
+		self.combobox_region_code1 = wx.ComboBox( self.panel_phone, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 80,-1 ), combobox_region_code1Choices, 0 )
+		fgSizer231.Add( self.combobox_region_code1, 0, wx.ALL, 5 )
+		
+		combobox_region_name1Choices = []
+		self.combobox_region_name1 = wx.ComboBox( self.panel_phone, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, combobox_region_name1Choices, 0 )
+		fgSizer231.Add( self.combobox_region_name1, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		fgSizer22.Add( fgSizer231, 1, wx.EXPAND, 5 )
+		
+		self.m_staticText26 = wx.StaticText( self.panel_phone, wx.ID_ANY, u"Ortsanschluss", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText26.Wrap( -1 )
+		fgSizer22.Add( self.m_staticText26, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_textCtrl12 = wx.TextCtrl( self.panel_phone, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer22.Add( self.m_textCtrl12, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		self.m_staticText261 = wx.StaticText( self.panel_phone, wx.ID_ANY, u"Durchwahl", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText261.Wrap( -1 )
+		fgSizer22.Add( self.m_staticText261, 0, wx.ALL|wx.ALIGN_CENTER_VERTICAL, 5 )
+		
+		self.m_textCtrl13 = wx.TextCtrl( self.panel_phone, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer22.Add( self.m_textCtrl13, 0, wx.ALL|wx.EXPAND, 5 )
+		
+		self.panel_phone.SetSizer( fgSizer22 )
+		self.panel_phone.Layout()
+		fgSizer22.Fit( self.panel_phone )
+		self.choisebook_type.AddPage( self.panel_phone, u"Telefon", False )
+		self.panel_email = wx.Panel( self.choisebook_type, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.choisebook_type.AddPage( self.panel_email, u"a page", False )
+		self.panel_website = wx.Panel( self.choisebook_type, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.choisebook_type.AddPage( self.panel_website, u"a page", False )
+		self.panel_facebook = wx.Panel( self.choisebook_type, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.choisebook_type.AddPage( self.panel_facebook, u"a page", False )
+		fgSizer8.Add( self.choisebook_type, 1, wx.EXPAND |wx.ALL, 5 )
 		
 		sbSizer4.Add( fgSizer8, 1, wx.EXPAND, 5 )
 		

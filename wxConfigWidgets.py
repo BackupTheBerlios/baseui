@@ -15,6 +15,8 @@ from pprint import pprint
 
 
 class JsonTable(wx.Panel):
+    ''' used for PythonServer '''
+    
     def __init__(self, json_filepath, form=None, portlet_parent=None, editable=True, permissions={}):
         self.json_filepath = json_filepath
         self.form = form
@@ -54,7 +56,7 @@ class JsonTable(wx.Panel):
         self.Table.populate(self.content_lod)
                 
     
-    def populate_portlet(self):
+    def create(self):
         # Just creates a panel to draw the Table on, that buttons or else can be 
         # attached near the Table!
         
@@ -94,10 +96,12 @@ class JsonTable(wx.Panel):
 
         self.Table.Show()       
         return self.panel_main
-    
-    
-    
+        
+        
+        
 class IniDialog(wx.Dialog):
+    ''' used for PythonServer '''
+    
     ID_CANCEL = 101
     ID_OK = 102
     
@@ -195,6 +199,63 @@ class IniDialog(wx.Dialog):
             definition_dict['value'] = value
             
         self.iniFile.save_lod(self.definition_lod)
-
-
-
+        
+        
+        
+class ConfigDialog(wx.Dialog):
+    def __init__(self, parent, db_object):
+        self.db_object = db_object
+        
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = 'Einstellungen', pos = wx.DefaultPosition, size = wx.Size(600, 400), style = wx.DEFAULT_DIALOG_STYLE )
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        
+        sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
+        sizer_main.AddGrowableCol( 0 )
+        sizer_main.AddGrowableRow( 0 )
+        sizer_main.SetFlexibleDirection( wx.BOTH )
+        sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        
+        self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_MULTILINE )
+        
+        
+        #self.panel_globals = form_globals(parent=self.notebook, xrc_path=RESOURCE_DIR + 'forms.xrc', panel_name='panel_globals')
+        #self.notebook.AddPage(self.panel_globals, 'Allgemein', False)
+        
+        # Do the buttons and the rest
+        sizer_main.Add( self.notebook, 1, wx.EXPAND |wx.ALL, 5 )
+        
+        sizer_buttons = wx.FlexGridSizer( 2, 2, 0, 0 )
+        sizer_buttons.SetFlexibleDirection( wx.BOTH )
+        sizer_buttons.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        
+        self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked, id=wx.ID_ANY)
+        sizer_buttons.Add( self.button_ok, 0, wx.ALL, 5 )
+        
+        sizer_main.Add( sizer_buttons, 0, wx.ALIGN_RIGHT, 5 )
+        
+        self.SetSizer(sizer_main)
+        self.Layout()
+        
+        self.Centre(wx.BOTH)
+        
+        
+    def __del__( self ):
+        pass
+        
+        
+    def on_button_ok_clicked(self, event=None):
+        self.Close()
+        
+        
+    def add_panel(self, title, db_table, table, form):
+        db_table_object = db_table(self.db_object)
+        panel = wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        table_object = table(db_table=db_table_object, form_object=form, portlet_parent=panel)
+        
+        table_object.create()
+        panel.Layout()
+        self.notebook.AddPage(panel, title, False)
+        
+        
+        

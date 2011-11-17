@@ -603,4 +603,200 @@
 			</object>
 		</object>
 	</object>
+	<object class="wxPanel" name="panel_communication">
+		<style>wxTAB_TRAVERSAL</style>
+		<size>647,394</size>
+		<object class="wxFlexGridSizer">
+			<rows>2</rows>
+			<cols>2</cols>
+			<vgap>0</vgap>
+			<hgap>0</hgap>
+			<growablecols>0,1</growablecols>
+			<growablerows>0</growablerows>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxStaticBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<label>Spaltenlayout</label>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxFlexGridSizer">
+							<rows>2</rows>
+							<cols>1</cols>
+							<vgap>0</vgap>
+							<hgap>0</hgap>
+							<growablecols>0</growablecols>
+							<growablerows>1</growablerows>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND | wxALL</flag>
+								<border>5</border>
+								<object class="wxChoicebook" name="choisebook_type">
+									<style>wxCHB_DEFAULT</style>
+									<object class="choicebookpage">
+										<label>Telefon</label>
+										<selected>0</selected>
+										<object class="wxPanel" name="panel_phone">
+											<style>wxTAB_TRAVERSAL</style>
+											<object class="wxFlexGridSizer">
+												<rows>2</rows>
+												<cols>2</cols>
+												<vgap>0</vgap>
+												<hgap>0</hgap>
+												<growablecols>1</growablecols>
+												<growablerows></growablerows>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="m_staticText27">
+														<label>Land / Region</label>
+														<wrap>-1</wrap>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxEXPAND</flag>
+													<border>5</border>
+													<object class="wxFlexGridSizer">
+														<rows>2</rows>
+														<cols>2</cols>
+														<vgap>0</vgap>
+														<hgap>0</hgap>
+														<growablecols>1</growablecols>
+														<growablerows></growablerows>
+														<object class="sizeritem">
+															<option>0</option>
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxComboBox" name="combobox_region_code">
+																<size>80,-1</size>
+																<value></value>
+																<content />
+															</object>
+														</object>
+														<object class="sizeritem">
+															<option>0</option>
+															<flag>wxALL|wxEXPAND</flag>
+															<border>5</border>
+															<object class="wxComboBox" name="combobox_region_name">
+																<value></value>
+																<content />
+															</object>
+														</object>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="m_staticText25">
+														<label>Vorwahl / Ort</label>
+														<wrap>-1</wrap>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>1</option>
+													<flag>wxEXPAND</flag>
+													<border>5</border>
+													<object class="wxFlexGridSizer">
+														<rows>2</rows>
+														<cols>2</cols>
+														<vgap>0</vgap>
+														<hgap>0</hgap>
+														<growablecols>1</growablecols>
+														<growablerows></growablerows>
+														<object class="sizeritem">
+															<option>0</option>
+															<flag>wxALL</flag>
+															<border>5</border>
+															<object class="wxComboBox" name="combobox_region_code1">
+																<size>80,-1</size>
+																<value></value>
+																<content />
+															</object>
+														</object>
+														<object class="sizeritem">
+															<option>0</option>
+															<flag>wxALL|wxEXPAND</flag>
+															<border>5</border>
+															<object class="wxComboBox" name="combobox_region_name1">
+																<value></value>
+																<content />
+															</object>
+														</object>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="m_staticText26">
+														<label>Ortsanschluss</label>
+														<wrap>-1</wrap>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL|wxEXPAND</flag>
+													<border>5</border>
+													<object class="wxTextCtrl" name="m_textCtrl12">
+														<value></value>
+														<maxlength>0</maxlength>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL|wxALIGN_CENTER_VERTICAL</flag>
+													<border>5</border>
+													<object class="wxStaticText" name="m_staticText261">
+														<label>Durchwahl</label>
+														<wrap>-1</wrap>
+													</object>
+												</object>
+												<object class="sizeritem">
+													<option>0</option>
+													<flag>wxALL|wxEXPAND</flag>
+													<border>5</border>
+													<object class="wxTextCtrl" name="m_textCtrl13">
+														<value></value>
+														<maxlength>0</maxlength>
+													</object>
+												</object>
+											</object>
+										</object>
+									</object>
+									<object class="choicebookpage">
+										<label>a page</label>
+										<selected>0</selected>
+										<object class="wxPanel" name="panel_email">
+											<style>wxTAB_TRAVERSAL</style>
+										</object>
+									</object>
+									<object class="choicebookpage">
+										<label>a page</label>
+										<selected>0</selected>
+										<object class="wxPanel" name="panel_website">
+											<style>wxTAB_TRAVERSAL</style>
+										</object>
+									</object>
+									<object class="choicebookpage">
+										<label>a page</label>
+										<selected>0</selected>
+										<object class="wxPanel" name="panel_facebook">
+											<style>wxTAB_TRAVERSAL</style>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
 </resource>

@@ -2,7 +2,7 @@
 
 #===============================================================================
 # DBapi Transformations module.
-# by Mark Muzenhardt, published under BSD-License.
+# by Mark Muzenhardt, published under LGPL-License.
 #===============================================================================
 
 import datetime
@@ -151,7 +151,7 @@ def normalize_content(attributes_lod, content_lod, db_object=None):
                             #print 'DEVIL:', content_dic[column_name]
                         if data_type.lower() == 'date':
                             content_dic[column_name] = transform_date(content)
-                        if data_type in ['varchar', 'nvarchar', 'char', 'nchar']:
+                        if data_type in ['varchar', 'nvarchar', 'char', 'nchar', 'text', 'ntext']:
                             content_dic[column_name] = transform_string(content, encoding)
     return content_lod
 
@@ -160,7 +160,7 @@ def transform_string(content, encoding=None):
     if content <> None:
         content = content.rstrip()
         try:
-            if encoding <> None:
+            if encoding <> None and type(content) == str:
                 content = unicode(content, encoding)
         except Exception, inst:
             print 'encoding:', encoding, 'content:',content, 'type:', type(content)
