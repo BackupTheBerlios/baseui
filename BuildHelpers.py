@@ -181,10 +181,11 @@ SectionEnd
     return nsi_text % kwargs
       
         
-def get_revision():
+def get_revision(rev_dir='.'):
     # The easiest way to get the revision control system is to look up the directorys!
     # os.getcwd()
-    dir_list = os.listdir('.')
+    dir_list = os.listdir(rev_dir)
+    app_revision = None
     try:
         if '.hg' in dir_list:
             out = os.popen('hg log')
@@ -201,12 +202,12 @@ def get_revision():
             import pysvn
 
             client = pysvn.Client()
-            entry = client.info('.')
+            entry = client.info(rev_dir)
             app_revision = str(entry.revision.number)
     except Exception, inst:
         print str(inst)
-        raw_input('>')
-        app_revision = ''
+        raw_input('give <RETURN> to exit...')
+        app_revision = None
     return app_revision
     
     
