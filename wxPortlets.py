@@ -699,8 +699,10 @@ class DatabaseFormBase(object):
         return widget
     
     
-    def get_content(self):
+    def get_content(self, primary_key_column=None):
         form_content = self.form.get_content()
+        if primary_key_column <> None:
+            form_content[primary_key_column] = self.primary_key
         return form_content
         
     
@@ -972,7 +974,7 @@ class SearchFrame(wx.Dialog):
         self.table.edit = self.edit
         
         self.table.initialize(self.definition)
-        self.table.populate_portlet()
+        self.table.create()
         
         
     def edit(self):
