@@ -45,4 +45,6 @@ gute, alte Forderung nach einem Report-Editor zu Tage.
 
 Version 4.0
 -----------
-Die Darstellung korrekter SVG-Grafiken wäre ein erstrebenswertes Ziel.
+- Die Darstellung korrekter SVG-Grafiken wäre ein erstrebenswertes Ziel.
+- Datenbank-Administrations-Tool ist neben Report-Tool natürlich phat.
+- Der Python-Server könnte eine BaseUI-App werden!
