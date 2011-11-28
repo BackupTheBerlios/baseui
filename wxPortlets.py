@@ -233,14 +233,11 @@ class DatabaseTableBase(TableContentBase):
         
 
     def set_search_string(self, search_string):
-        self.search_string = search_string #str(self.entry_search.GetValue())
-        # print self.search_string, self.search_columns
+        self.search_string = search_string
         self.populate()
         
-
-
-            
-    
+        
+        
 class SubTable(DatabaseTableBase):
     def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None, editable=True, permissions={}):
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent, editable, permissions)
@@ -249,7 +246,6 @@ class SubTable(DatabaseTableBase):
         self.parent_form = parent_form
         self.permissions = permissions
         
-        #print 'subtable_perms:', self.permissions
         self.sizer = wx.FlexGridSizer(1, 4, 0, 0)
         self.sizer.AddGrowableCol(0)
         self.sizer.AddGrowableRow(0)
@@ -261,17 +257,14 @@ class SubTable(DatabaseTableBase):
         
     def on_add_clicked(self, event=None):
         self.new()
-        #print 'add'
     
     
     def on_edit_clicked(self, event=None):
         self.edit()
-        #print 'edit'
     
     
     def on_delete_clicked(self, event=None):
         self.delete()
-        #print 'delete'
         
         
     def create(self):
@@ -323,7 +316,6 @@ class FormTable(DatabaseTableBase):
     ID_NEW = 101
     ID_EDIT = 102
     ID_DELETE = 103
-    
     ID_PRINT = 201
     ID_EXPORT_TABLE = 202
     #ID_PREFERENCES = 401
@@ -699,8 +691,10 @@ class DatabaseFormBase(object):
         return widget
     
     
-    def get_content(self):
+    def get_content(self, primary_key_column=None):
         form_content = self.form.get_content()
+        if primary_key_column <> None:
+            form_content[primary_key_column] = self.primary_key
         return form_content
         
     
@@ -972,7 +966,7 @@ class SearchFrame(wx.Dialog):
         self.table.edit = self.edit
         
         self.table.initialize(self.definition)
-        self.table.populate_portlet()
+        self.table.create()
         
         
     def edit(self):
