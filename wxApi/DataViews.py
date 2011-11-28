@@ -57,13 +57,11 @@ class Tree(hypertreelist.HyperTreeList):
             
             if a_widget <> None:
                 a_data = a_widget.GetValue()
-                a_widget.Hide()
             else:
                 a_data = None
                 
             if b_widget <> None:
                 b_data = b_widget.GetValue()
-                b_widget.Hide()
             else:
                 b_data = None
                 
@@ -121,7 +119,20 @@ class Tree(hypertreelist.HyperTreeList):
         clicked_column = event.GetColumn()
         self.set_sort_column(column_number=clicked_column)
         
-    
+        # Cleanup bool-widgets on sorting!
+        item = self.GetRootItem()
+        while item <> None:
+            item = self.GetNext(item)
+            if item <> None:
+                for definition_dict in self.definition_lod:
+                    data_type = definition_dict.get('data_type')
+                    column_number = definition_dict.get('column_number')
+                    if data_type == 'bool':
+                        widget = self.GetItemWindow(item, column_number)
+                        if widget <> None:
+                            widget.Hide()
+                        
+                
     # Actions -----------------------------------------------------------------
     def create(self):
         pass
