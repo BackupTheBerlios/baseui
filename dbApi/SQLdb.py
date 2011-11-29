@@ -1005,7 +1005,20 @@ CREATE TABLE """ + self.name + """
             max_primary_key = 0
         return max_primary_key
 
-
+    
+    def get_primary_key_columns(self):
+        ''' Returns the list of primary keys of this table '''
+        
+        attributes_lod = self.get_attributes()
+        pk_list = []
+        for attribute_dict in attributes_lod:
+            is_primary_key = attribute_dict.get('is_primary_key')
+            if is_primary_key in [1, True]:
+                column_name = attribute_dict.get('column_name')
+                pk_list.append(column_name)
+        return pk_list
+    
+        
     def get_foreign_key_columns(self):
         ''' Returns a list of dictionarys containing this layout:
                 column_name            = name of the column.
