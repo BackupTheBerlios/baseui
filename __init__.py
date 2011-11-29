@@ -1,7 +1,7 @@
 # -*- coding: cp1252 -*-
 
 #__all__ = ['Portlets']
-__version__ = '1.42'
+__version__ = '1.43'
 __year__ = '2011'
 __author__ = 'Mark Muzenhardt'
 __appname__ = 'BaseUI'
