@@ -852,10 +852,10 @@ class DayGrid(CalendarBase):
                         y=app_starts_pos[3] + 5)
             
             if title <> None:
-                dc.DrawLabel(text='%s' % str(title), rect=(app_starts_pos[0] + 5,
-                                                           app_starts_pos[3] + 25,
-                                                           app_ends_pos[2] - app_starts_pos[0] + self._line_width - 5,
-                                                           app_ends_pos[3] - app_starts_pos[3] + self._line_width - 5))
+                dc.DrawLabel(text=u'%s' % title, rect=(app_starts_pos[0] + 5,
+                                                       app_starts_pos[3] + 25,
+                                                       app_ends_pos[2] - app_starts_pos[0] + self._line_width - 5,
+                                                       app_ends_pos[3] - app_starts_pos[3] + self._line_width - 5))
             
             dc.SetPen(wx.Pen(FOREGROUND_COLOR, self._line_width)) #, wx.DOT))
                 
