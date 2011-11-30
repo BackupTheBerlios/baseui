@@ -802,15 +802,15 @@ CREATE TABLE """ + self.name + """
 
 
     def alter(self, old_attributes_dict, new_attributes_dict):
-        # TODO: Alter: Excuse me, but this does nothing really right!
-        old_column_name = old_attributes_dict.get('column_name')
-        # old_data_type = old_attributes_dict.get('data_type')
-        
-        new_column_name = new_attributes_dict.get('column_name')
-        new_data_type = new_attributes_dict.get('data_type')
-        
-        sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
-        self.db_object.execute(sql_command)
+        if not 'sqlite' in self.db_object.engine.lower():
+            # TODO: Alter: Excuse me, but this does nothing really right!
+            old_column_name = old_attributes_dict.get('column_name')
+            
+            new_column_name = new_attributes_dict.get('column_name')
+            new_data_type = new_attributes_dict.get('data_type')
+            
+            sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
+            self.db_object.execute(sql_command)
         
         
     def get_attributes(self):
@@ -1006,6 +1006,18 @@ CREATE TABLE """ + self.name + """
         return max_primary_key
 
 
+    def get_primary_key_columns(self):
+        ''' This works at least on SQLite. Please move it there, if we have to
+            change it for the most other dbs. '''
+        
+        pk_columns_list = []
+        attributes_lod = self.get_attributes()
+        for attribute_dict in attributes_lod:
+            if attribute_dict.get('is_primary_key') in [1, True]:
+                pk_columns_list.append(attribute_dict.get('column_name'))
+        return pk_columns_list   
+        
+        
     def get_foreign_key_columns(self):
         ''' Returns a list of dictionarys containing this layout:
                 column_name            = name of the column.
