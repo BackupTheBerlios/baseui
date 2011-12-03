@@ -93,9 +93,15 @@ class JsonTable(wx.Panel):
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:
             self.populate()
-
+        
         self.Table.Show()       
         return self.panel_main
+        
+        
+        
+class JsonForm(DataViews.Form):
+    def __init__(self, parent, xrc_path, panel_name):
+        DataViews.Form.__init__(self, parent, xrc_path, panel_name)
         
         
         

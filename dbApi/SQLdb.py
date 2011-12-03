@@ -802,15 +802,15 @@ CREATE TABLE """ + self.name + """
 
 
     def alter(self, old_attributes_dict, new_attributes_dict):
-        # TODO: Alter: Excuse me, but this does nothing really right!
-        old_column_name = old_attributes_dict.get('column_name')
-        # old_data_type = old_attributes_dict.get('data_type')
-        
-        new_column_name = new_attributes_dict.get('column_name')
-        new_data_type = new_attributes_dict.get('data_type')
-        
-        sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
-        self.db_object.execute(sql_command)
+        if not 'sqlite' in self.db_object.engine.lower():
+            # TODO: Alter: Excuse me, but this does nothing really right!
+            old_column_name = old_attributes_dict.get('column_name')
+            
+            new_column_name = new_attributes_dict.get('column_name')
+            new_data_type = new_attributes_dict.get('data_type')
+            
+            sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
+            self.db_object.execute(sql_command)
         
         
     def get_attributes(self):
