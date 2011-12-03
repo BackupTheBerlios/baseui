@@ -1025,11 +1025,14 @@ CREATE TABLE """ + self.name + """
                 referenced_table_name  = foreign table_name which holds the primary_key.
                 referenced_column_name = foreign column_name which holds the primary key. '''
 
-        # TODO: Foreign keys are not implemented. DoIt.
-        
-        print "Foreign keys are not implemented now!"
-        fk_columns_list = []
-        return fk_columns_list
+        attributes_lod = self.get_attributes()
+        fk_list = []
+        for attribute_dict in attributes_lod:
+            is_foreign_key = attributes_dict.get('is_foreign_key')
+            if is_foreign_key in [1, True]:
+                column_name = attribute_dict.get('column_name')
+                fk_list.append(column_name)
+        return fk_list
 
 
     def get_foreign_key_column_name(self, attributes_lod, primary_key_column, referenced_table_name):

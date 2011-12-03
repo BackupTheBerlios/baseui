@@ -78,6 +78,7 @@ class DatabaseTableBase(TableContentBase):
         
         try:
             self.primary_key = None
+            print self.form
             form_instance = self.form(parent=self.portlet_parent, remote_parent=self, permissions=self.form_permissions)
             form_instance.populate()
         except Exception, inst:
