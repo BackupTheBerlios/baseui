@@ -237,8 +237,7 @@ class generic_database(object):
             print sql_command
             print str(inst)
         finally:
-            if self.engine == 'mysql' or \
-               'psycopg2' in self.engine:
+            if self.engine in ['mysql', 'psycopg2']:
                 self.commit()
         return
         
@@ -274,7 +273,7 @@ class generic_database(object):
                 for content_dict in content_lod:
                     csv_writer.writerow(content_dict)
                     
-                # Just a bunch of death-knocking-time-wasting memory cleanup!
+                # Memory cleanup, needed for big tables to prevent memory explosion!
                 del(content_lod)
                 del(column_list)
         
@@ -292,7 +291,7 @@ class sqlite_database(generic_database):
         'date':     'DATE',
         'time':     'TIME',
         'datetime': 'TIMESTAMP',
-        'blob': 'BLOB',
+        'blob':     'BLOB',
         }
         
     def __init__(self, base_object, engine='sqlite'):
@@ -307,6 +306,12 @@ class sqlite_database(generic_database):
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
         return self.connection
+        
+        
+    def execute(self, sql_command):
+        # No autocommit on sqlite thus, do it manually!
+        super(sqlite_database, self).execute(sql_command)
+        self.connection.commit()
         
         
     def get_tables(self):
