@@ -6,4 +6,4 @@ import BuildHelpers
 
 
 print 'BaseUI is at Revision:', BuildHelpers.get_revision('..')
-raw_input('give <RETURN> to exit...'
+raw_input('give <RETURN> to exit...')
