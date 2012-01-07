@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 
 #===============================================================================
-# BaseUI.wxPortlets module.
+# BaseUI.wxPanels module.
 # published under LGPL license by Mark Muzenhardt.
 #===============================================================================
 

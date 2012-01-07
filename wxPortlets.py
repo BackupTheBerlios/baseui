@@ -6,6 +6,7 @@
 #===============================================================================
 
 import wx, wx.aui
+#import wx.lib.newevent
 
 from misc import FileSystem, HelpFile, FileTransfer
 from wxApi import Panels, Dialogs, DataViews, Toolbars
@@ -78,7 +79,7 @@ class DatabaseTableBase(TableContentBase):
         
         try:
             self.primary_key = None
-            print self.form
+            # print self.form
             form_instance = self.form(parent=self.portlet_parent, remote_parent=self, permissions=self.form_permissions)
             form_instance.populate()
         except Exception, inst:
@@ -530,6 +531,8 @@ class FormTablePreferences(Dialogs.FormTablePreferences):
         
 # Form frames ------------------------------------------------------------------
 class DatabaseFormBase(object):
+    #save_event, EVT_SAVE = wx.lib.newevent.NewEvent()
+    
     def __init__(self, parent=None,
                        icon_path=None,
                        title='',
@@ -574,7 +577,8 @@ class DatabaseFormBase(object):
                 self.db_table.update(form_content, where='%s = %s' % (pk_column, self.primary_key))
             else:
                 self.primary_key = self.db_table.insert(key_column=pk_column, content=form_content)
-        
+            
+            #self.save_event
             for function in self.save_function_list:
                 function(self.primary_key)
                 
