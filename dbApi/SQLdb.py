@@ -16,15 +16,8 @@ def get_engines():
     
     engine_list = []
     try:
-        import pgdb
-        engine_list.append('PostgreSQL via PyGreSQL')
-    except:
-        pass
-    
-    engine_list = []
-    try:
         import psycopg2
-        engine_list.append('PostgreSQL via Psycopg2')
+        engine_list.append('PostgreSQL')
     except:
         pass
         
@@ -36,7 +29,7 @@ def get_engines():
     
     try:
         import pymssql
-        engine_list.append('msSQL')
+        engine_list.append('MS SQL')
     except:
         pass
     
@@ -63,7 +56,8 @@ def get_engines():
         engine_list.append('ODBC')
     except:
         pass
-    return engine_list
+        
+    return sorted(engine_list)
 
 
 
@@ -94,8 +88,7 @@ class database(object):
         self.encoding = encoding
         self.debug = debug
         
-        if 'pygresql' in self.engine or \
-           'psycopg2' in self.engine:
+        if self.engine == 'postgresql':
             __database = postgresql_database(self, self.engine)
         if self.engine == "mysql":
             __database = mysql_database(self)
@@ -349,18 +342,13 @@ class postgresql_database(generic_database):
     def __init__(self, base_object, engine='psycopg2'):
         generic_database.__init__(self, base_object, engine)
         
-        if 'psycopg2' in self.engine:
-            import psycopg2
-            self.connector = psycopg2
-        if 'pygresql' in self.engine:
-            import pgdb
-            self.connector = pgdb
+        import psycopg2
+        self.connector = psycopg2
         
-            
+        
     def connect(self, **kwargs):
         super(postgresql_database, self).connect(**kwargs)
-        if 'pscopg2' in self.engine:
-            self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         return self.connection
     
     
@@ -432,7 +420,7 @@ class mssql_database(generic_database):
         'blob':     'IMAGE',
         }
         
-    def __init__(self, base_object, engine='mssql'):
+    def __init__(self, base_object, engine='ms sql'):
         generic_database.__init__(self, base_object, engine)
         
         import pymssql
@@ -807,14 +795,24 @@ CREATE TABLE """ + self.name + """
 
 
     def alter(self, old_attributes_dict, new_attributes_dict):
+        # TODO: Override this function from the SQLite-table-class and do it right!
         if not 'sqlite' in self.db_object.engine.lower():
-            # TODO: Alter: Excuse me, but this does nothing really right!
             old_column_name = old_attributes_dict.get('column_name')
             
             new_column_name = new_attributes_dict.get('column_name')
             new_data_type = new_attributes_dict.get('data_type')
+            new_character_maximum_length = new_attributes_dict.get('character_maximum_length')
             
-            sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
+            if new_character_maximum_length <> None:
+                new_character_maximum_length = '(%i)' % new_character_maximum_length
+            else:
+                new_character_maximum_length = ''
+            
+            # TODO: Still no numeric-style included!
+                
+            # TODO: ALTER COLUMN works for MS SQL, perhaps not for other db's (maybe MODIFY COLUMN would be right)!
+            sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s%s;' % (self.name, new_column_name, new_data_type, new_character_maximum_length)
+            print sql_command
             self.db_object.execute(sql_command)
         
         
@@ -913,18 +911,29 @@ CREATE TABLE """ + self.name + """
             for db_attributes_dict in db_attributes_lod:
                 db_column_name = db_attributes_dict.get('column_name')
                 db_data_type = db_attributes_dict.get('data_type')
+                db_character_maximum_length = db_attributes_dict.get('character_maximum_length')
                 for attributes_dict in self.attributes:
                     column_name = attributes_dict.get('column_name')
                     data_type = attributes_dict.get('data_type')
+                    data_type = self.db_object.data_types.get(data_type)
+                    character_maximum_length = attributes_dict.get('character_maximum_length')
                     if column_name == db_column_name:
-                        data_type = self.db_object.data_types.get(data_type)
+                        old_column_dict={'column_name': db_column_name}
+                        new_column_dict = {'column_name': column_name, 'data_type': data_type}
+                        
+                        do_alter = False
                         if data_type <> None:
                             data_type = data_type.lower()
                         if db_data_type <> data_type:    
-                            old_column_dict={'column_name': db_column_name}
-                            new_column_dict={'column_name': column_name, 'data_type': data_type}
+                            do_alter = True
+                        if db_character_maximum_length <> character_maximum_length:
+                            new_column_dict['character_maximum_length'] = character_maximum_length
+                            if character_maximum_length <> None:
+                                do_alter = True
+                        
+                        if do_alter:
                             self.alter(old_column_dict, new_column_dict)
-            
+        
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
         for attributes_dic in attributes_lod:

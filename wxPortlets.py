@@ -79,7 +79,7 @@ class DatabaseTableBase(TableContentBase):
         
         try:
             self.primary_key = None
-            print self.form
+            # print self.form
             form_instance = self.form(parent=self.portlet_parent, remote_parent=self, permissions=self.form_permissions)
             form_instance.populate()
         except Exception, inst:
@@ -102,6 +102,7 @@ class DatabaseTableBase(TableContentBase):
             answer = dialog.ShowModal()
             if answer == wx.ID_YES:
                 pk_column = self.db_table.get_primary_key_columns()[0]
+                
                 try:
                     self.db_table.delete(where='%s = %s' % (pk_column, self.primary_key))
                     for delete_function in self.delete_function_list:
