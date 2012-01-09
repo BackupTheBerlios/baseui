@@ -795,8 +795,8 @@ CREATE TABLE """ + self.name + """
 
 
     def alter(self, old_attributes_dict, new_attributes_dict):
+        # TODO: Override this function from the SQLite-table-class and do it right!
         if not 'sqlite' in self.db_object.engine.lower():
-            # TODO: Alter: Excuse me, but this does nothing really right!
             old_column_name = old_attributes_dict.get('column_name')
             
             new_column_name = new_attributes_dict.get('column_name')
@@ -807,7 +807,10 @@ CREATE TABLE """ + self.name + """
                 new_character_maximum_length = '(%i)' % new_character_maximum_length
             else:
                 new_character_maximum_length = ''
+            
+            # TODO: Still no numeric-style included!
                 
+            # TODO: ALTER COLUMN works for MS SQL, perhaps not for other db's (maybe MODIFY COLUMN would be right)!
             sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s%s;' % (self.name, new_column_name, new_data_type, new_character_maximum_length)
             print sql_command
             self.db_object.execute(sql_command)
@@ -926,12 +929,11 @@ CREATE TABLE """ + self.name + """
                         if db_character_maximum_length <> character_maximum_length:
                             new_column_dict['character_maximum_length'] = character_maximum_length
                             if character_maximum_length <> None:
-                                print column_name, db_character_maximum_length, character_maximum_length
                                 do_alter = True
                         
                         if do_alter:
                             self.alter(old_column_dict, new_column_dict)
-            
+        
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
         for attributes_dic in attributes_lod:
