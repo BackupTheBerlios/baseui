@@ -801,8 +801,15 @@ CREATE TABLE """ + self.name + """
             
             new_column_name = new_attributes_dict.get('column_name')
             new_data_type = new_attributes_dict.get('data_type')
+            new_character_maximum_length = new_attributes_dict.get('character_maximum_length')
             
-            sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s' % (self.name, new_column_name, new_data_type)
+            if new_character_maximum_length <> None:
+                new_character_maximum_length = '(%i)' % new_character_maximum_length
+            else:
+                new_character_maximum_length = ''
+                
+            sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s%s;' % (self.name, new_column_name, new_data_type, new_character_maximum_length)
+            print sql_command
             self.db_object.execute(sql_command)
         
         
@@ -901,16 +908,28 @@ CREATE TABLE """ + self.name + """
             for db_attributes_dict in db_attributes_lod:
                 db_column_name = db_attributes_dict.get('column_name')
                 db_data_type = db_attributes_dict.get('data_type')
+                db_character_maximum_length = db_attributes_dict.get('character_maximum_length')
                 for attributes_dict in self.attributes:
                     column_name = attributes_dict.get('column_name')
                     data_type = attributes_dict.get('data_type')
+                    data_type = self.db_object.data_types.get(data_type)
+                    character_maximum_length = attributes_dict.get('character_maximum_length')
                     if column_name == db_column_name:
-                        data_type = self.db_object.data_types.get(data_type)
+                        old_column_dict={'column_name': db_column_name}
+                        new_column_dict = {'column_name': column_name, 'data_type': data_type}
+                        
+                        do_alter = False
                         if data_type <> None:
                             data_type = data_type.lower()
                         if db_data_type <> data_type:    
-                            old_column_dict={'column_name': db_column_name}
-                            new_column_dict={'column_name': column_name, 'data_type': data_type}
+                            do_alter = True
+                        if db_character_maximum_length <> character_maximum_length:
+                            new_column_dict['character_maximum_length'] = character_maximum_length
+                            if character_maximum_length <> None:
+                                print column_name, db_character_maximum_length, character_maximum_length
+                                do_alter = True
+                        
+                        if do_alter:
                             self.alter(old_column_dict, new_column_dict)
             
         # Compare given attributes with attributes in database. To do that, get attributes first.
