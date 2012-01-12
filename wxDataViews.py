@@ -532,8 +532,6 @@ class FormTablePreferences(Dialogs.FormTablePreferences):
         
 # Form frames ------------------------------------------------------------------
 class DatabaseFormBase(object):
-    #save_event, EVT_SAVE = wx.lib.newevent.NewEvent()
-    
     def __init__(self, parent=None,
                        icon_path=None,
                        title='',
@@ -550,7 +548,7 @@ class DatabaseFormBase(object):
         
         self.remote_parent = remote_parent
         self.permissions = permissions
-                
+        
         # This lists are made to get portlets going.
         self.save_function_list = []
         self.delete_function_list = []
@@ -579,7 +577,6 @@ class DatabaseFormBase(object):
             else:
                 self.primary_key = self.db_table.insert(key_column=pk_column, content=form_content)
             
-            #self.save_event
             for function in self.save_function_list:
                 function(self.primary_key)
                 
@@ -875,18 +872,6 @@ class SubForm(wx.Frame, DatabaseFormBase):
         
     def on_close(self, event=None):
         self.Destroy()
-        
-        
-    def add_save_function(self, function):
-        self.save_function_list.append(function)
-        
-    
-    def add_delete_function(self, function):
-        self.delete_function_list.append(function)
-        
-        
-    def add_populate_function(self, function):
-        self.populate_function_list.append(function)
 
 
 

@@ -446,7 +446,7 @@ class Form(wx.Panel):
         # Just bail out for good if no definition_lod is given.
         if self.definition_lod == None:
             return
-
+        
         # Iterate over the definition_lod
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
@@ -535,9 +535,9 @@ class Form(wx.Panel):
     
     def get_widget(self, widget_name):
         return wx.xrc.XRCCTRL(self, widget_name)
-        
 
-        
+
+
 if __name__ == "__main__":
     dummy = raw_input('press <RETURN> to exit...')
     
