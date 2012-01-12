@@ -13,12 +13,12 @@ class XrcBase(object):
         self.parent = parent
         self.xrc_path = xrc_path
         self.xrc_name = xrc_name
-            
         self.xrc_resource = wx.xrc.XmlResource(self.xrc_path)
 
 
     def get_widget(self, widget_name):
-        return wx.xrc.XRCCTRL(self, widget_name)
+        widget = wx.xrc.XRCCTRL(self, widget_name)
+        return widget
         
 
 
