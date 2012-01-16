@@ -6,7 +6,6 @@
 #===============================================================================
 
 import wx, wx.aui
-#import wx.lib.newevent
 
 from misc import FileSystem, HelpFile, FileTransfer
 from wxApi import Panels, Dialogs, DataViews, Toolbars
@@ -644,7 +643,7 @@ class DatabaseFormBase(object):
                     if column_name not in enable_list:
                         if widget_object <> None:
                             widget_object.Enable(False)
-                    
+            
             if fill_distinct == True:
                 result = self.db_table.select(distinct=True, column_list=[column_name], listresult=True)
                 for item in result:
@@ -818,7 +817,7 @@ class FormFrame(wx.Frame, DatabaseFormBase):
         
     def add_print_function(self, function):
         self.print_function_list.append(function)
-                
+        
         
 
 class SubForm(wx.Frame, DatabaseFormBase):
@@ -841,7 +840,6 @@ class SubForm(wx.Frame, DatabaseFormBase):
         sizer_main.SetFlexibleDirection( wx.BOTH )
         sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        #self.panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
         sizer_main.Add( self.form, 1, wx.EXPAND |wx.ALL, 5 )
         
@@ -875,6 +873,56 @@ class SubForm(wx.Frame, DatabaseFormBase):
 
 
 
+class CustomFormDialog(wx.Dialog, DatabaseFormBase):
+    def __init__(self, parent=None,
+                       icon_path=None,
+                       title='',
+                       xrc_path=None,
+                       panel_name=None,
+                       remote_parent=None,
+                       permissions={}):
+        
+        DatabaseFormBase.__init__(self, parent, icon_path, title, xrc_path, panel_name, remote_parent, permissions)
+        wx.Dialog.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        if icon_path <> None:
+            self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
+        
+        sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
+        sizer_main.AddGrowableCol( 0 )
+        sizer_main.AddGrowableRow( 0 )
+        sizer_main.SetFlexibleDirection( wx.BOTH )
+        sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        sizer_main.Add( self.form, 1, wx.EXPAND |wx.ALL, 5 )
+        
+        sizer_buttons = wx.BoxSizer( wx.HORIZONTAL )
+        sizer_buttons.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+        
+        self.button_save = wx.Button( self, wx.ID_ANY, u"Speichern", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_save.Bind(wx.EVT_BUTTON, self.on_save)
+        sizer_buttons.Add( self.button_save, 0, wx.ALL, 5 )
+        
+        self.button_delete = wx.Button( self, wx.ID_ANY, u"Löschen", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete)
+        sizer_buttons.Add( self.button_delete, 0, wx.ALL, 5 )
+        
+        self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.button_cancel.Bind(wx.EVT_BUTTON, self.on_close)
+        sizer_buttons.Add( self.button_cancel, 0, wx.ALL, 5 )
+        
+        sizer_main.Add( sizer_buttons, 1, wx.EXPAND, 5 )
+        
+        self.SetSizer( sizer_main )
+        self.error_dialog = Dialogs.Error(self)
+        
+        self.Layout()
+        self.Centre( wx.BOTH )
+        
+        
+    def on_close(self, event=None):
+        self.Destroy()
+
+
+
 class SearchFrame(wx.Dialog):
     ID_OK = 101
     
@@ -893,7 +941,6 @@ class SearchFrame(wx.Dialog):
         self.remote_parent = remote_parent
         
         wx.Dialog.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
-        #wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title, size=(800, 480))
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
