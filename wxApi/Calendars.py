@@ -209,8 +209,9 @@ class CalendarBase(BufferedWindow):
     
         
 class DayChart(object):
-    def __init__(self, parent, id=wx.ID_ANY):
+    def __init__(self, parent, id=wx.ID_ANY, permissions=None):
         self.parent = parent
+        self.permissions = permissions
         
         sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
         sizer_main.AddGrowableCol( 0 )
@@ -230,7 +231,7 @@ class DayChart(object):
         self.sizer_panel_grid = wx.BoxSizer(wx.VERTICAL)
         self.panel_grid.SetSizer(self.sizer_panel_grid)
         
-        self.day_grid = DayGrid(self.panel_grid)
+        self.day_grid = DayGrid(self.panel_grid, permissions)
         self.sizer_panel_grid.Add(self.day_grid, 1, wx.EXPAND)
         sizer_main.Add( self.panel_grid, 1, wx.EXPAND) # |wx.ALL, 5 )
 
@@ -247,8 +248,9 @@ class DayChart(object):
         
         
     def populate(self, content_lod):
-        print 'löddöl:', content_lod
-        
+        #print 'löddöl:', content_lod
+        pass
+    
 
 
 class DayHeader(CalendarBase):
@@ -340,9 +342,10 @@ class DayGrid(CalendarBase):
     ID_EDIT = 101
     ID_DELETE = 102
     
-    def __init__(self, parent):
+    def __init__(self, parent, permissions={}):
         CalendarBase.__init__(self, parent)
         
+        print 'perms from DAYGRID:', permissions
         self.start_date = None
         self.end_date = None
         

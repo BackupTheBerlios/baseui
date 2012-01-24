@@ -11,8 +11,8 @@ from pprint import pprint
 
 
 class DayChart(Calendars.DayChart, TableContentBase):
-    def __init__(self, parent, db_table=None, form_class=None, remote_parent=None):
-        Calendars.DayChart.__init__(self, parent)
+    def __init__(self, parent, db_table=None, form_class=None, remote_parent=None, permissions={}):
+        Calendars.DayChart.__init__(self, parent, permissions)
         
         self.day_grid.open_appointment = self.on_open_appointment
         self.day_grid.add_move_function(self.update_appointment)
@@ -24,6 +24,7 @@ class DayChart(Calendars.DayChart, TableContentBase):
         
         self.form = form_class
         self.remote_parent = remote_parent
+        
         self.primary_key = None
         
     
