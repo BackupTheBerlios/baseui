@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 
 #===============================================================================
-# BaseUI.wxPortlets module.
+# BaseUI.wxConfigWidgets module.
 # by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 

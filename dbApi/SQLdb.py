@@ -279,6 +279,7 @@ class sqlite_database(generic_database):
         'varchar':  'CHAR',
         'text':     'TEXT',
         'integer':  'INTEGER',
+        'bigint':   'INTEGER',
         'float':    'DOUBLE',
         'numeric':  'DOUBLE',
         'date':     'DATE',
@@ -348,7 +349,7 @@ class postgresql_database(generic_database):
         
     def connect(self, **kwargs):
         super(postgresql_database, self).connect(**kwargs)
-        self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        self.connection.set_isolation_level(self.connector.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         return self.connection
     
     
@@ -686,8 +687,7 @@ class table(object):
         engine = self.db_object.engine
         driver = self.db_object.driver
         
-        if 'pygresql' in engine or \
-           'psycopg2' in engine:
+        if engine == 'postgresql':
             __table = postgresql_table(self, db_object, table_name)
         if engine == "mysql":
             __table = mysql_table(self, db_object, table_name)
@@ -1256,7 +1256,20 @@ class sqlite_table(generic_table):
                         new_attributes_dic['character_maximum_length'] = int(data_types_list[1][1:len(data_types_list[1])-1])
             new_attributes_lod.append(new_attributes_dic)
         return new_attributes_lod
-        
+    
+    
+    def select(self, distinct=False, join=[], column_list=[], where='', order_by='', listresult=False, fetch=None):
+        # Bool fields only. True is 0 and False is 1 in SQLite.
+        where_replace = \
+        [
+            {'True': '1'},
+            {'False': '0'}
+        ]
+        for value in where_replace:
+            where = where.replace(value.keys()[0], value.get(value.keys()[0]))
+            
+        content_lod = super(sqlite_table, self).select(distinct, join, column_list, where, order_by, listresult, fetch)
+        return content_lod
         
         
 class postgresql_table(generic_table):    

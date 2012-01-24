@@ -164,7 +164,7 @@ class ValidateDataType(wx.PyValidator):
         if not wx.Validator_IsSilent():
             wx.Bell()
 
-        # Returning without calling even.Skip eats the event before it
+        # Returning without calling event.Skip eats the event before it
         # gets to the text control
         return
 
@@ -263,8 +263,8 @@ def widget_getter(widget_object, data_type=None):
     
     # Combobox ---------------------------------------------------------
     if widget_object.__class__ == wx._controls.ComboBox:
-        # If this widget has a foreign relation, get client data. Else get Value.
-        #if dic.get('referenced_column_name') <> None:
+        # If this widget has a foreign relation, get client data, else get Value.
+        # if dic.get('referenced_column_name') <> None:
         # client_data = None
         selection = widget_object.GetSelection()
         widget_content = widget_object.GetValue()
@@ -273,7 +273,6 @@ def widget_getter(widget_object, data_type=None):
             try:
                 client_data = widget_object.GetClientData(selection)
                 widget_content = client_data
-                #print '...', widget_object, data_type, type(widget_content), widget_content
             except Exception, inst:
                 pass
         

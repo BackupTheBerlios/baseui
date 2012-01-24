@@ -6,15 +6,16 @@
 #===============================================================================
 
 import os
-import wx, wx.xrc
+import wx #, wx.xrc
 
 #from wx.gizmos import TreeListCtrl
 from wx.lib.agw import hypertreelist
 from res import IconSet16
 
-from pprint import pprint
 from Transformations import *
+from XRC import XrcPanel
 from Widgets import widget_populator, widget_getter, widget_initializator
+from pprint import pprint
 
 
 class Tree(hypertreelist.HyperTreeList):
@@ -247,8 +248,8 @@ class Tree(hypertreelist.HyperTreeList):
                 self.SetColumnWidth(column_number, width)   
             column_number += 1 
         self.number_of_columns = column_number
-                
-
+        
+        
     def populate(self, content_lod=None):
         ''' content_lod = [{'id': 1, #bg_colour, #fg_colour}] '''
         
@@ -396,19 +397,14 @@ class Tree(hypertreelist.HyperTreeList):
 
 
 
-class Form(wx.Panel):
+class Form(XrcPanel):
     ''' If data has to be inserted in a database, a input form is needed. This
         class defines a form from a JSON-Definition for easy access. '''
 
     def __init__(self, parent, xrc_path, panel_name):
         # Preload a panel to subclass it from this class!
-        
-        pre_panel = wx.PrePanel()
-        self.xrc_resource = wx.xrc.XmlResource(xrc_path)
-        self.xrc_resource.LoadOnPanel(pre_panel, parent, panel_name)
-        self.PostCreate(pre_panel)
+        XrcPanel.__init__(self, parent, xrc_path, panel_name)
         self.Layout()
-        
         parent.SetSize(self.GetSize()) 
         
         self.content_edited = False
@@ -446,7 +442,7 @@ class Form(wx.Panel):
         # Just bail out for good if no definition_lod is given.
         if self.definition_lod == None:
             return
-
+        
         # Iterate over the definition_lod
         for definition_row in enumerate(self.definition_lod):
             row = definition_row[0]
@@ -465,7 +461,7 @@ class Form(wx.Panel):
             
             # Get the widget_objects and pack them into definition_lod.
             if widget_name <> None:
-                widget_object = wx.xrc.XRCCTRL(self, widget_name)
+                widget_object = self.get_widget(widget_name)
                 self.definition_lod[row]['widget_object'] = widget_object
                 widget_initializator(self.definition_lod[row])
                 
@@ -531,13 +527,8 @@ class Form(wx.Panel):
             
             self.content_dict[column_name] = widget_getter(widget_object, data_type)
         return self.content_dict
-    
-    
-    def get_widget(self, widget_name):
-        return wx.xrc.XRCCTRL(self, widget_name)
-        
 
-        
+
 if __name__ == "__main__":
     dummy = raw_input('press <RETURN> to exit...')
     
