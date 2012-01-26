@@ -23,23 +23,24 @@ class XrcBase(object):
 
 
 class XrcDialog(XrcBase, wx.Dialog):
-    def __init__(self, parent, xrc_path, xrc_name):
+    def __init__(self, parent, xrc_path, xrc_name, size=wx.DefaultSize):
         self.pre_widget = wx.PreDialog()
         XrcBase.__init__(self, parent, xrc_path, xrc_name)
         
         self.xrc_resource.LoadOnDialog(self.pre_widget, self.parent, self.xrc_name)
         self.PostCreate(self.pre_widget)
+        self.SetSize(size)
         
         
 
 class XrcFrame(XrcBase, wx.Frame):
-    def __init__(self, parent, xrc_path, xrc_name):
+    def __init__(self, parent, xrc_path, xrc_name, size=wx.DefaultSize):
         self.pre_widget = wx.PreFrame()
         XrcBase.__init__(self, parent, xrc_path, xrc_name)
         
         self.xrc_resource.LoadOnFrame(self.pre_widget, self.parent, self.xrc_name)
         self.PostCreate(self.pre_widget)
-        
+        self.SetSize(size)
         
 
 class XrcPanel(XrcBase, wx.Panel):
