@@ -218,7 +218,6 @@ class DayChart(object):
         sizer_main.AddGrowableRow( 1 )
         self.parent.SetSizer( sizer_main )
         
-        
         self.panel_header = wx.Panel( self.parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.sizer_panel_header = wx.BoxSizer(wx.VERTICAL)
         self.panel_header.SetSizer(self.sizer_panel_header)
@@ -345,7 +344,9 @@ class DayGrid(CalendarBase):
     def __init__(self, parent, permissions={}):
         CalendarBase.__init__(self, parent)
         self.permissions = permissions
-        
+        if self.permissions == None:
+            self.permissions = {}
+            
         self.start_date = None
         self.end_date = None
         

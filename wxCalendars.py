@@ -12,7 +12,6 @@ from pprint import pprint
 
 class DayChart(Calendars.DayChart, TableContentBase):
     def __init__(self, parent, db_table=None, form_class=None, remote_parent=None, permissions={}):
-        print 'DayChart', permissions
         Calendars.DayChart.__init__(self, parent, permissions=permissions)
         
         self.day_grid.open_appointment = self.on_open_appointment

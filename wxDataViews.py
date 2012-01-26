@@ -307,6 +307,13 @@ class SubTable(DatabaseTableBase):
                     self.button_edit.Enable(False)
         else:
             self.populate()
+            
+            
+    def edit(self):
+        if self.permissions.get('edit') == False:
+            return
+        
+        super(SubTable, self).edit()
         
         
         
@@ -416,9 +423,6 @@ class FormTable(DatabaseTableBase):
 
     def create_toolbar(self):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
-        
-        if self.permissions == None:
-            self.permissions = {}
         
         if self.form <> None:
             if self.permissions.get('new') <> False:
