@@ -209,14 +209,14 @@ class CalendarBase(BufferedWindow):
     
         
 class DayChart(object):
-    def __init__(self, parent, id=wx.ID_ANY):
+    def __init__(self, parent, id=wx.ID_ANY, permissions={}):
         self.parent = parent
+        self.permissions = permissions
         
         sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
         sizer_main.AddGrowableCol( 0 )
         sizer_main.AddGrowableRow( 1 )
         self.parent.SetSizer( sizer_main )
-        
         
         self.panel_header = wx.Panel( self.parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.sizer_panel_header = wx.BoxSizer(wx.VERTICAL)
@@ -230,7 +230,7 @@ class DayChart(object):
         self.sizer_panel_grid = wx.BoxSizer(wx.VERTICAL)
         self.panel_grid.SetSizer(self.sizer_panel_grid)
         
-        self.day_grid = DayGrid(self.panel_grid)
+        self.day_grid = DayGrid(self.panel_grid, permissions=permissions)
         self.sizer_panel_grid.Add(self.day_grid, 1, wx.EXPAND)
         sizer_main.Add( self.panel_grid, 1, wx.EXPAND) # |wx.ALL, 5 )
 
@@ -247,8 +247,9 @@ class DayChart(object):
         
         
     def populate(self, content_lod):
-        print 'löddöl:', content_lod
-        
+        #print 'löddöl:', content_lod
+        pass
+    
 
 
 class DayHeader(CalendarBase):
@@ -340,9 +341,12 @@ class DayGrid(CalendarBase):
     ID_EDIT = 101
     ID_DELETE = 102
     
-    def __init__(self, parent):
+    def __init__(self, parent, permissions={}):
         CalendarBase.__init__(self, parent)
-        
+        self.permissions = permissions
+        if self.permissions == None:
+            self.permissions = {}
+            
         self.start_date = None
         self.end_date = None
         
@@ -405,6 +409,9 @@ class DayGrid(CalendarBase):
         self.check_hovering()
         
         if event.LeftDown():
+            if self.permissions.get('edit') == False:
+                return
+            
             self._left_down = True
             self._clicked_datetime = self.get_datetime(self._mouse_pos)
             
@@ -418,6 +425,9 @@ class DayGrid(CalendarBase):
                 self._end_resize_appointment = self._end_resize_dict
                 
         if event.LeftDClick():
+            if self.permissions.get('edit') == False:
+                return
+            
             # Add an appointment if nothing hovered, else open the clicked appointment.
             if self._hovering_dict == None:
                 self.add_appointment(title=None, start_datetime=self._clicked_datetime, end_datetime=self._clicked_datetime + datetime.timedelta(hours=1))
@@ -425,6 +435,9 @@ class DayGrid(CalendarBase):
                 self.open_appointment(self._hovering_dict)
             
         if event.LeftUp():
+            if self.permissions.get('edit') == False:
+                return
+            
             self._left_down = False
             self._released_datetime = self.get_datetime(self._mouse_pos)
                 
@@ -449,12 +462,18 @@ class DayGrid(CalendarBase):
                 self._end_resize_appointment = None
                 
         if event.RightDown():
+            if self.permissions.get('context_menu') == False:
+                return
+            
             if self._hovering_dict <> None:
                 self.on_appointment_right_clicked()
             for function in self.right_click_function_list:
                 function(event)
                     
         if event.Dragging() and self._left_down:
+            if self.permissions.get('edit') == False:
+                return
+            
             self._dragging_datetime = self.get_datetime(self._mouse_pos)
             
             delta = self._dragging_datetime - self._clicked_datetime

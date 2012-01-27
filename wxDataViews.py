@@ -306,6 +306,13 @@ class SubTable(DatabaseTableBase):
                     self.button_edit.Enable(False)
         else:
             self.populate()
+            
+            
+    def edit(self):
+        if self.permissions.get('edit') == False:
+            return
+        
+        super(SubTable, self).edit()
         
         
         
@@ -338,6 +345,8 @@ class FormTable(DatabaseTableBase):
             help_path is the path to the helpfile opened if help pressed. '''
         
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent, permissions=permissions)
+        if self.permissions == None:
+            self.permissions = {}
         
         toplevel_frame = self.portlet_parent.GetTopLevelParent()
         self.frame_preferences = FormTablePreferences(parent=toplevel_frame, title='Einstellungen', remote_parent=self)
@@ -415,10 +424,7 @@ class FormTable(DatabaseTableBase):
 
     def create_toolbar(self):
         self.toolbar_parent.SetToolBitmapSize(wx.Size(22, 22))
-        
-        if self.permissions == None:
-            self.permissions = {}
-        
+            
         if self.form <> None:
             if self.permissions.get('new') <> False:
                 self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap(), 'neu')
