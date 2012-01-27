@@ -5,8 +5,6 @@
 # published under LGPL license by Mark Muzenhardt.
 #===============================================================================
 
-# For now, empty... but at least the drive serial getter comes here!
-
 import os
 
 
@@ -21,5 +19,5 @@ def get_volume_serial(drive_letter):
         drive_serial = ''
     return drive_serial
     
-    
-def 
+
+
