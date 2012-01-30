@@ -21,3 +21,8 @@ def get_volume_serial(drive_letter):
     
 
 
+if __name__ == "__main__":
+    dl = raw_input('drive letter > ')
+    print get_volume_serial(dl)
+    raw_input('give <RETURN> to exit...')
+
