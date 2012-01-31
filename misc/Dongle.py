@@ -15,7 +15,7 @@ class KeyDrive(object):
         try:
             key_file = open(self.filepath, 'w')        
             timestamp = self.get_timestamp()
-            key_file.write(self.hash_drive_serial(salt + timestamp))
+            key_file.write(self.hash_drive_serial(salt)) # + timestamp))
             key_file.close()
         except:
             raise
@@ -23,25 +23,30 @@ class KeyDrive(object):
         
     def verify(self, salt=''):
         try:
-            key_file = open(self.filepath, 'r')
-            timestamp = self.get_timestamp()
-            saved_hash = key_file.readline()
-            key_file.close()
+            saved_hash = self.get_saved_hash()
         except:
             raise
             return
             
-        drive_hash = self.hash_drive_serial(salt + timestamp)
+        drive_hash = self.hash_drive_serial(salt) # + timestamp)
         if drive_hash == saved_hash:
             return True
         return False
             
         
-    def set_text(self, text):
-        key_file = open(self.filepath, 'r')
-        hash = key_file.readline().replace('\n', '')
-        key_file.close()
+    def get_saved_hash(self):
+        try:
+            key_file = open(self.filepath, 'r')
+            saved_hash = key_file.readline().replace('\n', '')
+            key_file.close()
+        except:
+            raise
+            return
+        return saved_hash
         
+        
+    def set_text(self, text):
+        hash = self.get_saved_hash()
         key_file = open(self.filepath, 'w')
         new_content = hash + '\n\n' + text
         key_file.write(new_content)
@@ -50,9 +55,10 @@ class KeyDrive(object):
         
     def get_text(self):
         key_file = open(self.filepath, 'r')
-        hash = key_file.readline().replace('\n', '')
-        key_file.readline()
+        key_file.readline() #
+        key_file.readline() #
         text = key_file.read()
+        key_file.close()
         return text
         
         
