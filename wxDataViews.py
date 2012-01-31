@@ -855,11 +855,15 @@ class SubForm(wx.Frame, DatabaseFormBase):
         self.button_save = wx.Button( self, wx.ID_ANY, u"Speichern", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.button_save.Bind(wx.EVT_BUTTON, self.on_save)
         sizer_buttons.Add( self.button_save, 0, wx.ALL, 5 )
-        
+        if permissions.get('edit') == False:
+            self.button_save.Enable(False)
+            
         self.button_delete = wx.Button( self, wx.ID_ANY, u"Löschen", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete)
         sizer_buttons.Add( self.button_delete, 0, wx.ALL, 5 )
-        
+        if permissions.get('delete') == False:
+            self.button_delete.Enable(False)
+            
         self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.button_cancel.Bind(wx.EVT_BUTTON, self.on_close)
         sizer_buttons.Add( self.button_cancel, 0, wx.ALL, 5 )
