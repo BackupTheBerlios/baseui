@@ -520,7 +520,7 @@ class Form(XrcPanel):
             widget_name = self.definition_lod[row].get('widget_name')
             column_name = self.definition_lod[row].get('column_name')
             data_type = self.definition_lod[row].get('data_type')
-
+            
             if widget_object == None or \
                column_name == None:
                 continue

@@ -20,8 +20,8 @@ class XrcBase(object):
         widget = wx.xrc.XRCCTRL(self, widget_name)
         return widget
         
-
-
+        
+        
 class XrcDialog(XrcBase, wx.Dialog):
     def __init__(self, parent, xrc_path, xrc_name, size=wx.DefaultSize):
         self.pre_widget = wx.PreDialog()
@@ -32,7 +32,7 @@ class XrcDialog(XrcBase, wx.Dialog):
         self.SetSize(size)
         
         
-
+        
 class XrcFrame(XrcBase, wx.Frame):
     def __init__(self, parent, xrc_path, xrc_name, size=wx.DefaultSize):
         self.pre_widget = wx.PreFrame()
@@ -42,7 +42,8 @@ class XrcFrame(XrcBase, wx.Frame):
         self.PostCreate(self.pre_widget)
         self.SetSize(size)
         
-
+        
+        
 class XrcPanel(XrcBase, wx.Panel):
     def __init__(self, parent, xrc_path, xrc_name):
         self.pre_widget = wx.PrePanel()
@@ -50,7 +51,8 @@ class XrcPanel(XrcBase, wx.Panel):
         
         self.xrc_resource.LoadOnPanel(self.pre_widget, self.parent, self.xrc_name)
         self.PostCreate(self.pre_widget)
-
-
+        
+        
+        
 
 
