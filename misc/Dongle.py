@@ -1,7 +1,4 @@
-import os, sys
-sys.path.append("..")
-
-import md5, time
+import os, sys, md5, time
 import Windows
 
 
@@ -55,8 +52,8 @@ class KeyDrive(object):
         
     def get_text(self):
         key_file = open(self.filepath, 'r')
-        key_file.readline() #
-        key_file.readline() #
+        key_file.readline()
+        key_file.readline()
         text = key_file.read()
         key_file.close()
         return text
