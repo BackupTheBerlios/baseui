@@ -42,8 +42,7 @@ class XrcFrame(XrcBase, wx.Frame):
         self.PostCreate(self.pre_widget)
         self.SetSize(size)
         
-        
-        
+
 class XrcPanel(XrcBase, wx.Panel):
     def __init__(self, parent, xrc_path, xrc_name):
         self.pre_widget = wx.PrePanel()
