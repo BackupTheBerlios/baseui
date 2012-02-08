@@ -65,12 +65,8 @@ def delegate_object(from_object, into_object):
     ''' This delegates all attributes from_object to into_object. '''
     
     into_arguments = dir(into_object)
-    
     arguments = dir(from_object)
     
-    #print into_arguments
-    #print '... ', arguments
-    #
     for argument in arguments:
         if not argument.startswith('__') and argument not in into_arguments:
             into_object.__setattr__(argument, from_object.__getattribute__(argument))
@@ -298,6 +294,7 @@ class sqlite_database(generic_database):
     def connect(self, **kwargs):
         self.connection = self.connector.connect(kwargs['filepath'])
         self.cursor = self.connection.cursor()
+        self.execute('PRAGMA foreign_keys = ON')
         self.set_arguments(**kwargs)
         return self.connection
         
@@ -311,7 +308,7 @@ class sqlite_database(generic_database):
     def get_tables(self):
         ''' Returns a list of table names held by given database. '''
 
-        sqlite_master = self.dictresult("SELECT * FROM sqlite_master")
+        sqlite_master = self.dictresult('SELECT * FROM sqlite_master;')
         lof_table_names = []
 
         for dict in sqlite_master:
@@ -356,7 +353,7 @@ class postgresql_database(generic_database):
     def get_tables(self):
         ''' Returns a list of table names held by given database. '''
         
-        lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        lof_table_names = self.listresult("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';")
         return lof_table_names
         
         
@@ -364,7 +361,7 @@ class postgresql_database(generic_database):
         ''' Returns a list containing the database users. '''
 
         # PostgreSQL works like this:
-        lod_users = self.dictresult("SELECT * FROM pg_user")
+        lod_users = self.dictresult("SELECT * FROM pg_user;")
 
         # Translate list of lists to simple list
         lof_users = []
