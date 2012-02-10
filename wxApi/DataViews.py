@@ -414,12 +414,12 @@ class Form(XrcPanel):
         
         self.loaded_content_dict = {}
         
-
+        
 #    def on_widget_changed(self, widget=None, widget_definition_dict=None):
 #        print 'widget_changed!!!', widget, widget_definition_dict
 #        self.validate_widget(widget_definition_dict)
-
-
+        
+        
     def initialize(self, definition_lod=None, attributes_lod=None):
         ''' This initializes the Form. Following Data exchanges are to met:
 
@@ -438,7 +438,7 @@ class Form(XrcPanel):
 
         self.definition_lod = definition_lod
         self.attributes_lod = attributes_lod
-
+        
         # Just bail out for good if no definition_lod is given.
         if self.definition_lod == None:
             return
@@ -501,7 +501,7 @@ class Form(XrcPanel):
             widget_populator(widget_object, widget_content, data_type)
             self.loaded_content_dict = self.get_content()
             
-    
+            
     def clear(self):
         pass
 

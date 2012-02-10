@@ -746,7 +746,7 @@ class FormFrame(wx.Frame, DatabaseFormBase):
         self.print_function_list = []
         
         DatabaseFormBase.__init__(self, parent, icon_path, title, xrc_path, panel_name, remote_parent, permissions)
-        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title) #, size=(640,480))
+        wx.Frame.__init__(self, self.parent, wx.ID_ANY, self.title)
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
@@ -897,29 +897,14 @@ class CustomFormDialog(wx.Dialog, DatabaseFormBase):
         if icon_path <> None:
             self.SetIcon(wx.Icon(self.icon_path, wx.BITMAP_TYPE_ICO))
         
+        self.form = DataViews.Form(self, self.xrc_path, self.panel_name)
+        
         sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
         sizer_main.AddGrowableCol( 0 )
         sizer_main.AddGrowableRow( 0 )
         sizer_main.SetFlexibleDirection( wx.BOTH )
         sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         sizer_main.Add( self.form, 1, wx.EXPAND |wx.ALL, 5 )
-        
-        sizer_buttons = wx.BoxSizer( wx.HORIZONTAL )
-        sizer_buttons.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
-        
-        self.button_save = wx.Button( self, wx.ID_ANY, u"Speichern", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.button_save.Bind(wx.EVT_BUTTON, self.on_save)
-        sizer_buttons.Add( self.button_save, 0, wx.ALL, 5 )
-        
-        self.button_delete = wx.Button( self, wx.ID_ANY, u"Löschen", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete)
-        sizer_buttons.Add( self.button_delete, 0, wx.ALL, 5 )
-        
-        self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.button_cancel.Bind(wx.EVT_BUTTON, self.on_close)
-        sizer_buttons.Add( self.button_cancel, 0, wx.ALL, 5 )
-        
-        sizer_main.Add( sizer_buttons, 1, wx.EXPAND, 5 )
         
         self.SetSizer( sizer_main )
         self.error_dialog = Dialogs.Error(self)
@@ -933,6 +918,13 @@ class CustomFormDialog(wx.Dialog, DatabaseFormBase):
 
 
 
+class DummyRemoteParent(object):
+    def __init__(self, db_table, primary_key):
+        self.db_table = db_table
+        self.primary_key = primary_key
+    
+    
+    
 class SearchFrame(wx.Dialog):
     ID_OK = 101
     
