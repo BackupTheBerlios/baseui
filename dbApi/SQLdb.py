@@ -225,6 +225,7 @@ class generic_database(object):
         except Exception, inst:
             print sql_command
             print str(inst)
+            raise
         finally:
             if self.engine in ['mysql', 'psycopg2']:
                 self.commit()
