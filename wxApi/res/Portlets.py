@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version May  4 2010)
+## Python code generated with wxFormBuilder (version Sep  8 2010)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO "NOT" EDIT THIS FILE!
@@ -19,6 +19,8 @@ class Database ( wx.Panel ):
 		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 340,108 ), style = wx.TAB_TRAVERSAL )
 		
 		self.SetMinSize( wx.Size( 200,-1 ) )
+		
+		bSizer4 = wx.BoxSizer( wx.VERTICAL )
 		
 		frame_database = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Datenbank" ), wx.VERTICAL )
 		
@@ -111,7 +113,9 @@ class Database ( wx.Panel ):
 		
 		frame_database.Add( sizer_content, 1, wx.EXPAND, 5 )
 		
-		self.SetSizer( frame_database )
+		bSizer4.Add( frame_database, 1, wx.ALL|wx.EXPAND, 5 )
+		
+		self.SetSizer( bSizer4 )
 		self.Layout()
 	
 	def __del__( self ):
@@ -128,6 +132,8 @@ class Login ( wx.Panel ):
 		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,100 ), style = wx.TAB_TRAVERSAL )
 		
 		self.SetMinSize( wx.Size( 200,100 ) )
+		
+		bSizer3 = wx.BoxSizer( wx.VERTICAL )
 		
 		frame_login = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Login" ), wx.VERTICAL )
 		
@@ -153,7 +159,9 @@ class Login ( wx.Panel ):
 		
 		frame_login.Add( sizer_content, 1, wx.EXPAND, 5 )
 		
-		self.SetSizer( frame_login )
+		bSizer3.Add( frame_login, 1, wx.ALL|wx.EXPAND, 5 )
+		
+		self.SetSizer( bSizer3 )
 		self.Layout()
 	
 	def __del__( self ):
