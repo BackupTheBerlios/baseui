@@ -129,9 +129,9 @@ class Database ( wx.Panel ):
 class Login ( wx.Panel ):
 	
 	def __init__( self, parent ):
-		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,100 ), style = wx.TAB_TRAVERSAL )
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,120 ), style = wx.TAB_TRAVERSAL )
 		
-		self.SetMinSize( wx.Size( 200,100 ) )
+		self.SetMinSize( wx.Size( 200,110 ) )
 		
 		bSizer3 = wx.BoxSizer( wx.VERTICAL )
 		

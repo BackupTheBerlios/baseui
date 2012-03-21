@@ -186,7 +186,7 @@
 	</object>
 	<object class="wxPanel" name="Login">
 		<style>wxTAB_TRAVERSAL</style>
-		<size>200,100</size>
+		<size>200,120</size>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
 			<object class="sizeritem">
