@@ -24,7 +24,7 @@ class Database ( wx.Panel ):
 		
 		frame_database = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Datenbank" ), wx.VERTICAL )
 		
-		sizer_content = wx.FlexGridSizer( 5, 2, 0, 0 )
+		sizer_content = wx.FlexGridSizer( 9, 2, 0, 0 )
 		sizer_content.AddGrowableCol( 1 )
 		sizer_content.SetFlexibleDirection( wx.BOTH )
 		sizer_content.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
@@ -129,9 +129,9 @@ class Database ( wx.Panel ):
 class Login ( wx.Panel ):
 	
 	def __init__( self, parent ):
-		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,120 ), style = wx.TAB_TRAVERSAL )
+		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 200,130 ), style = wx.TAB_TRAVERSAL )
 		
-		self.SetMinSize( wx.Size( 200,110 ) )
+		self.SetMinSize( wx.Size( 200,130 ) )
 		
 		bSizer3 = wx.BoxSizer( wx.VERTICAL )
 		
@@ -320,7 +320,7 @@ class TableExport ( wx.Panel ):
 		fgSizer81.SetFlexibleDirection( wx.BOTH )
 		fgSizer81.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 		
-		fgSizer61 = wx.FlexGridSizer( 1, 2, 0, 0 )
+		fgSizer61 = wx.FlexGridSizer( 2, 2, 0, 0 )
 		fgSizer61.AddGrowableCol( 1 )
 		fgSizer61.SetFlexibleDirection( wx.BOTH )
 		fgSizer61.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )

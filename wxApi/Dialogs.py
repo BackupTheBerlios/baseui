@@ -68,7 +68,7 @@ class FormTablePreferences(wx.Dialog):
     
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
-        sizer_main = wx.FlexGridSizer( 1, 1, 0, 0 )
+        sizer_main = wx.FlexGridSizer( 2, 1, 0, 0 )
         sizer_main.AddGrowableCol( 0 )
         sizer_main.AddGrowableRow( 0 )
         sizer_main.SetFlexibleDirection( wx.BOTH )
