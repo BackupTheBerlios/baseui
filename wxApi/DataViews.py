@@ -25,9 +25,10 @@ class Tree(hypertreelist.HyperTreeList):
     def __init__(self, parent=None):
         hypertreelist.HyperTreeList.__init__(self, parent=parent, id=wx.ID_ANY,
                                      agwStyle=(wx.TR_NO_LINES | wx.TR_HIDE_ROOT | wx.TR_FULL_ROW_HIGHLIGHT | wx.TR_NO_BUTTONS))    
-    
         
         self.Hide()
+        self.SetBackgroundColour('#FFFFFF')
+        
         self.row_activate_function = None
         self.row_right_click_function = None
         self.cursor_change_function = None

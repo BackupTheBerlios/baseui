@@ -10,7 +10,7 @@ import wx, wx.aui
 from misc import FileSystem, HelpFile, FileTransfer
 from wxApi import Panels, Dialogs, DataViews, Toolbars
 from wxApi import Transformations as WxTransformations
-from wxApi.res import IconSet16
+from wxApi.res import IconSet22, IconSet16
 from dbApi import SQLdb, Tools as dbTools
 from ContentDefinitionBase import TableContentBase
 from config import *
@@ -427,15 +427,15 @@ class FormTable(DatabaseTableBase):
             
         if self.form <> None:
             if self.permissions.get('new') <> False:
-                self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet16.getfilenew_16Bitmap(), 'neu')
+                self.toolbar_parent.AddTool(self.ID_NEW,     "Neu",        IconSet22.getfilenew_22Bitmap(), 'neu')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.new, id=self.ID_NEW)
                 
             if self.permissions.get('edit') <> False:    
-                self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet16.getedit_16Bitmap(), 'bearbeiten')
+                self.toolbar_parent.AddTool(self.ID_EDIT,    "Bearbeiten", IconSet22.getedit_22Bitmap(), 'bearbeiten')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.edit, id=self.ID_EDIT)
                 
             if self.permissions.get('delete') <> False:    
-                self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet16.getdelete_16Bitmap(), u'löschen')
+                self.toolbar_parent.AddTool(self.ID_DELETE, u"Löschen",    IconSet22.getdelete_22Bitmap(), u'löschen')
                 self.toolbar_parent.Bind(wx.EVT_TOOL, self.delete, id=self.ID_DELETE)
                 
         if (self.permissions.get('new') or \
@@ -448,7 +448,7 @@ class FormTable(DatabaseTableBase):
 #            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         if self.permissions.get('export') <> False:
-            self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet16.getspreadsheet_16Bitmap(), 'Tabelle exportieren')
+            self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet22.getspreadsheet_22Bitmap(), 'Tabelle exportieren')
             self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_export, id=self.ID_EXPORT_TABLE)
         
         #if search == True:
