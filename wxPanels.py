@@ -133,6 +133,7 @@ class DatabaseLogin(wx.Panel):
         wx.Panel.__init__(self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL)
         self.ErrorDialog = Dialogs.Error(parent=self)
         
+        self.parent = parent
         self.image_path = image_path
         self.ini_path = ini_path
         self.ini_section = ini_section
@@ -145,7 +146,7 @@ class DatabaseLogin(wx.Panel):
         
         self.sizer = wx.FlexGridSizer( 3, 1, 0, 0 )
         self.sizer.AddGrowableCol( 0 )
-        self.sizer.AddGrowableRow( 0, 1 )
+        self.sizer.AddGrowableRow( 1 )
         
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
@@ -253,15 +254,15 @@ class DatabaseLogin(wx.Panel):
     def set_connected(self):
         if self.db_table_system_class <> None:
             self.db_table_system = self.db_table_system_class(self.get_database())
-            
-        self.db_table_users = self.db_table_users_class(self.get_database())
-        result = self.db_table_users.select()
-        self.portlet_login.combobox_user.Clear()
-        for dict in result:
-            choise = dict.get('username')
-            if choise == None:
-                choise = ''
-            self.portlet_login.combobox_user.Append(choise, dict)
+            self.db_table_users = self.db_table_users_class(self.get_database())
+            result = self.db_table_users.select()
+        
+            self.portlet_login.combobox_user.Clear()
+            for dict in result:
+                choise = dict.get('username')
+                if choise == None:
+                    choise = ''
+                self.portlet_login.combobox_user.Append(choise, dict)
             
         self.portlet_login.combobox_user.Enable(True)
         self.portlet_login.entry_password.Enable(True)
