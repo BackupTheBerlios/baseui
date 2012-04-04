@@ -112,7 +112,7 @@ class IniDialog(wx.Dialog):
     ID_OK = 102
     
     def __init__(self, parent, ini_path='', xrc_path='', xrc_panel=''):
-        wx.Dialog.__init__ (self, parent, wx.ID_ANY, 'Einstellungen', size=(600,400))
+        wx.Dialog.__init__ (self, parent, wx.ID_ANY, 'Einstellungen', size=(600,400), style = wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
         
         self.iniFile = iniFile(ini_path)
         
