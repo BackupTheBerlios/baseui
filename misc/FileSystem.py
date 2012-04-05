@@ -11,18 +11,11 @@ import os, ConfigParser
 class Base:
     ''' This Base is the parent class of all file objects. '''
     
-    def __init__(self, path='', filename=''):
-        self.path = path
-        self.filename = filename
-        
-        self.path = self.path.replace('\\', '/')
-        if self.path <> '':
-            if self.path.endswith('/'):
-                self.path += '/'
-        self.filepath = self.path + self.filename
+    def __init__(self):
+        pass
         
         
-    
+        
 class iniFile(ConfigParser.RawConfigParser):
     def __init__(self, filepath):
         ConfigParser.RawConfigParser.__init__(self)

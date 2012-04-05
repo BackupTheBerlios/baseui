@@ -8,7 +8,7 @@
 import wx, wx.xrc
 import json
 
-from wxApi import DataViews
+from wxApi import DataViews, XRC
 from misc.FileSystem import iniFile
 from wxApi.Widgets import widget_populator, widget_getter
 from pprint import pprint
@@ -122,9 +122,9 @@ class IniDialog(wx.Dialog):
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        self.xrc_resource = wx.xrc.XmlResource(xrc_path)
-        panel = self.xrc_resource.LoadPanel(self, xrc_panel)
-        self.sizer.Add(panel, 0, wx.ALL|wx.EXPAND)
+        #self.xrc_resource = wx.xrc.XmlResource(xrc_path)
+        self.panel_main = XRC.XrcPanel(self, xrc_path, xrc_panel) #self.xrc_resource.LoadPanel(self, xrc_panel)
+        self.sizer.Add(self.panel_main, 0, wx.ALL|wx.EXPAND)
         
         # Bottom panel --------------------------------------------------------
         bottom_panel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -164,7 +164,6 @@ class IniDialog(wx.Dialog):
         
         
     def on_cancel(self, event=None):
-        self.save()
         self.Close()
         
     
