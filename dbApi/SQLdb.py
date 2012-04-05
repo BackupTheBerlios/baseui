@@ -56,6 +56,12 @@ def get_engines():
         engine_list.append('ODBC')
     except:
         pass
+    
+    try:
+        import kinterbasdb
+        engine_list.append('Firebird')
+    except:
+        pass
         
     return sorted(engine_list)
 
@@ -88,6 +94,10 @@ class database(object):
             __database = postgresql_database(self, self.engine)
         if self.engine == "mysql":
             __database = mysql_database(self)
+        if self.engine == "firebird":
+            __database = firebird_database(self)
+        if self.engine == "informix":
+            __database = informix_database(self)
         if self.engine == "mssql":
             __database = mssql_database(self)
         if self.engine == "oracle":
