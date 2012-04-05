@@ -124,6 +124,7 @@ class Database(Panels.Database):
         
         
     def save_settings(self):
+        self.section_dict = self.get_content()
         self.ini_file.save_section(self.ini_section, self.section_dict)
 
         
