@@ -416,11 +416,6 @@ class Form(XrcPanel):
         self.loaded_content_dict = {}
         
         
-#    def on_widget_changed(self, widget=None, widget_definition_dict=None):
-#        print 'widget_changed!!!', widget, widget_definition_dict
-#        self.validate_widget(widget_definition_dict)
-        
-        
     def initialize(self, definition_lod=None, attributes_lod=None):
         ''' This initializes the Form. Following Data exchanges are to met:
 
@@ -528,6 +523,7 @@ class Form(XrcPanel):
             
             self.content_dict[column_name] = widget_getter(widget_object, data_type)
         return self.content_dict
+
 
 
 if __name__ == "__main__":
