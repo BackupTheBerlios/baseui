@@ -443,9 +443,9 @@ class FormTable(DatabaseTableBase):
             self.permissions.get('delete')) <> False:
             self.toolbar_parent.AddSeparator()
         
-#        if self.permissions.get('print') <> False:
-#            self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet16.getprint_16Bitmap(), 'drucken')
-#            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
+        if self.permissions.get('print') <> False:
+            self.toolbar_parent.AddTool(self.ID_PRINT, "Drucken",          IconSet22.getprint_22Bitmap(), 'drucken')
+            self.toolbar_parent.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         if self.permissions.get('export') <> False:
             self.toolbar_parent.AddTool(self.ID_EXPORT_TABLE, "Tabelle exportieren", IconSet22.getspreadsheet_22Bitmap(), 'Tabelle exportieren')
