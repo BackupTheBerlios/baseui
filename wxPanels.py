@@ -16,7 +16,7 @@ class Database(Panels.Database):
     def __init__(self, parent, ini_path, ini_section, autosave=False, 
                  db_table_users_class=None):
         Panels.Database.__init__(self, parent)
-        self.ErrorDialog = Dialogs.Error(self)
+        self.ErrorDialog = Dialogs.Error()
         
         self.ini_file = iniFile(ini_path)
         self.ini_section = ini_section
@@ -80,7 +80,7 @@ class Database(Panels.Database):
         
         super(Database, self).set_connected()
         for function in self.connect_functions_list:    
-            function()
+            function(self.database)
                 
                 
     def set_disconnected(self):
@@ -88,7 +88,7 @@ class Database(Panels.Database):
         
         super(Database, self).set_disconnected()
         for function in self.disconnect_functions_list:
-            function()
+            function(self.database)
             
             
     def connect(self):

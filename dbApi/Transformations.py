@@ -195,8 +195,8 @@ def transform_bool(content):
                      't': True,
                      '0': False,
                      '1': True,
-                     0: False,
-                     1: True}
+                     0:   False,
+                     1:   True}
     
     if type(content) == str:
         content = content.lower()
@@ -270,5 +270,6 @@ class FieldTransformer:
 
         store += intend_str + '</%s>\n' % node_name
         return store
-
-
+        
+        
+        

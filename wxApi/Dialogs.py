@@ -19,7 +19,7 @@ class Help(wx.Frame):
 
 
 class Error(res.Dialogs.Error):
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         res.Dialogs.Error.__init__(self, parent)
         
         self.m_bitmap_icon.SetBitmap(IconSet32.geterror_32Bitmap())
@@ -39,6 +39,7 @@ class Error(res.Dialogs.Error):
         
         self.SetInitialSize()
         self.Centre()
+        self.Raise()
         self.ShowModal()
         
         

@@ -116,10 +116,12 @@ class generic_database(object):
         self.base_object = base_object
         self.engine = engine.lower()
         self.driver = None
+        #self.connection_dict = {}
         self.debug = debug
         
         
     def connect(self, **kwargs):
+        self.connection_dict = kwargs
         self.connection = self.connector.connect(database=kwargs['database'], host=kwargs['host'], user=kwargs['user'], password=kwargs['password'])
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
@@ -276,6 +278,10 @@ class generic_database(object):
                 # Memory cleanup, needed for big tables to prevent memory explosion!
                 del(content_lod)
                 del(column_list)
+    
+    
+    def get_table(self, table_name):
+        return table(self, table_name)
         
 
 
@@ -303,6 +309,7 @@ class sqlite_database(generic_database):
         
         
     def connect(self, **kwargs):
+        self.connection_dict = kwargs
         self.connection = self.connector.connect(kwargs['filepath'])
         self.cursor = self.connection.cursor()
         self.execute('PRAGMA foreign_keys = ON')
@@ -467,6 +474,7 @@ class mysql_database(generic_database):
         
         
     def connect(self, **kwargs):
+        self.connection_dict = kwargs
         self.connection = self.connector.connect(db=kwargs['database'], host=kwargs['host'], user=kwargs['user'], passwd=kwargs['password'])
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
@@ -552,8 +560,8 @@ class firebird_database(generic_database):
     def __init__(self, base_object, engine='mysql'):
         generic_database.__init__(self, engine)
         
-        # import MySQLdb
-        # self.connector = MySQLdb
+        import kinterbasdb
+        self.connector = kinterbasdb
         
         
         
@@ -580,6 +588,7 @@ class informix_database(generic_database):
         self.connector = informixdb
         
         
+    
 class db2_database(generic_database):
     data_types = {
         'bool':     'CHAR(1)',
@@ -599,8 +608,8 @@ class db2_database(generic_database):
     def __init__(self, base_object, engine='mysql'):
         generic_database.__init__(self, base_object, engine)
         
-        # import MySQLdb
-        # self.connector = MySQLdb
+        # import db2
+        # self.connector = db2
         
     
     
@@ -614,6 +623,8 @@ class odbc_generic_database(generic_database):
     
     
     def connect(self, **kwargs):
+        self.connection_dict = kwargs
+        
         # This creates the odbc-connection string, which can have different parameters.
         connection_string = 'DRIVER={%(driver)s}'
         if kwargs.get('host') not in [None, '']:
@@ -631,7 +642,6 @@ class odbc_generic_database(generic_database):
         self.connection = self.connector.connect(connection_string, autocommit=True)
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
-        #print 'ODBC driver is:', kwargs.get('driver')
         
         if kwargs.get('driver').lower() == 'sql server':
             __database = odbc_mssql_database(self)
@@ -683,6 +693,13 @@ class odbc_mssql_database(odbc_generic_database):
         delegate_object(base_object, self)
         
         
+    def decode_error(self, inst):
+        inst_str = str(inst)
+        start = inst_str[inst_str.rfind(']')+1:]
+        error = start[:start.rfind('(')].rstrip()
+        return error
+        
+        
         
 # Database Tables --------------------------------------------------------------
 class table(object):
@@ -709,8 +726,8 @@ class table(object):
             __table = odbc_generic_table(self, db_object, table_name)
             
         delegate_object(__table, self)
-
-
+        
+        
 
 class generic_table(object):
     def __init__(self, base_object, db_object, table_name):
@@ -1134,7 +1151,11 @@ CREATE TABLE """ + self.name + """
                 if 'attributes' in has_attributes:
                     content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
                 else:
-                    print has_attributes
+                    #print has_attributes
+                    # This occurs, if no attributes are initialized for the Table.
+                    # The problem here is, that an existing db has already attrs,
+                    # Which are not readed and transformed yet! 
+                    pass
             else:
                 # TODO: Here should be a transformation for LOL and lists, too!
                 content_lod = self.db_object.listresult(sql_command, fetch)
