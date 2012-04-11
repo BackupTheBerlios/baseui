@@ -40,9 +40,9 @@ def get_rpm(**kwargs):
 
 %define _topdir         /home/strike/mywget
 %define name            wget 
-%define release        1
-%define version     1.12
-%define buildroot %{_topdir}/%{name}-%{version}-root
+%define release         1
+%define version        1.12
+%define buildroot      %{_topdir}/%{name}-%{version}-root
 
 BuildRoot:    %{buildroot}
 Summary:         GNU wget
@@ -121,7 +121,7 @@ OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
 InstallDir "$PROGRAMFILES\%(APP_NAME)s"
 
 ; Request application privileges for Windows Vista
-RequestExecutionLevel highest
+RequestExecutionLevel admin
 
 ; This makes the Installer-Icon.
 !define MUI_ICON "../res/%(APP_ICON)s"
@@ -356,5 +356,34 @@ def makeNSI(pathname, build_dir, app_name, app_version, app_icon=''):
     x=raw_input('press <RETURN> to exit...')
     
     
+def makeManifest(pathname, app_name, app_description):
+    manifest = """\
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"> 
+  <assemblyIdentity version="1.0.0.0"
+     processorArchitecture="X86"
+     name="IsUserAdmin"
+     type="win32"/> 
+  <description>%s</description> 
+  <!-- Identify the application security requirements. -->
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel
+          level="requireAdministrator"
+          uiAccess="false"/>
+        </requestedPrivileges>
+       </security>
+  </trustInfo>
+</assembly>
+""" % app_description
+    
+    python_version = sys.version[:3]
+    build_dir = "build/exe.""" + "%s-%s" % (sys.platform, python_version)
+    
+    manifest_file = open(os.path.join(pathname, build_dir, app_name + '.manifest'), 'wb')
+    manifest_file.write(manifest)
+    manifest_file.close()
     
     
+
