@@ -111,11 +111,13 @@ def get_nsi(**kwargs):
   !include "MUI2.nsh"
 
 ;------------------------------------------------------------------------------
-Name "%(APP_NAME)s"
+ Name "%(APP_NAME)s"
+ SetCompressor lzma
+ 
 ; Icon "../res/%(APP_ICON)s"
 
 ; The file to write
-OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
+ OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
 
 ; The default installation directory
 InstallDir "$PROGRAMFILES\%(APP_NAME)s"
