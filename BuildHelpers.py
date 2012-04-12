@@ -126,8 +126,12 @@ RequestExecutionLevel admin
 ; This makes the Installer-Icon.
 !define MUI_ICON "../res/%(APP_ICON)s"
 
-; Pages -----------------------------------------------------------------------
-  !insertmacro MUI_PAGE_LICENSE "..\doc\source\license.rst"
+; Pages -----------------------------------------------------------------------"""
+    if kwargs.get('DOCUMENTATION_DIR') <> None:
+        nsi_text += """\
+  !insertmacro MUI_PAGE_LICENSE "..\%(DOCUMENTATION_DIR)s\source\license.rst" """
+    
+    nsi_text += """\
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
 
@@ -183,7 +187,6 @@ SectionEnd
         
 def get_revision(rev_dir='.'):
     # The easiest way to get the revision control system is to look up the directorys!
-    # os.getcwd()
     dir_list = os.listdir(rev_dir)
     app_revision = None
     try:
@@ -198,7 +201,6 @@ def get_revision(rev_dir='.'):
                     change_list.append(int(changeset[1]))
             app_revision = str(max(change_list))
         elif '.svn' in dir_list:
-        
             import pysvn
 
             client = pysvn.Client()
@@ -206,7 +208,7 @@ def get_revision(rev_dir='.'):
             app_revision = str(entry.revision.number)
     except Exception, inst:
         print str(inst)
-        raw_input('give <RETURN> to exit...')
+        raw_input('Looks like there is just no revision. Give <RETURN> to continue/exit...')
         app_revision = None
     return app_revision
     
@@ -261,13 +263,15 @@ def makeAbout(tpl_path, svg_path, author, version, revision, license, make_png=F
         
     file_content = image_file.read()
     image_file.close()
-
+    
     replacement_dict = {'%APP_AUTHOR%': author,
                         '%APP_VERSION%': version,
                         '%APP_REVISION%': revision,
                         '%APP_LICENSE%': license}
                         
     for key in replacement_dict:
+        if replacement_dict[key] == None:
+            replacement_dict[key] = ''
         file_content = file_content.replace(key, replacement_dict[key])
     
     output_file = open(svg_path, 'w')
