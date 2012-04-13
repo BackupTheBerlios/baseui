@@ -104,20 +104,20 @@ def get_nsi(**kwargs):
     # This works fine to make an installer for windows with NSIS.
     
     python_version = sys.version[:3]
-    
     nsi_text = """\
 ;------------------------------------------------------------------------------
 
-  !include "MUI2.nsh"
+!include "MUI2.nsh"
 
 ;------------------------------------------------------------------------------
- Name "%(APP_NAME)s"
- SetCompressor lzma
+Name "%(APP_NAME)s"
+SetCompressor lzma
+ShowInstDetails show
  
 ; Icon "../res/%(APP_ICON)s"
 
 ; The file to write
- OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
+OutFile "../dist/%(APP_NAME)s v%(APP_VERSION)s.exe"
 
 ; The default installation directory
 InstallDir "$PROGRAMFILES\%(APP_NAME)s"
@@ -128,26 +128,28 @@ RequestExecutionLevel admin
 ; This makes the Installer-Icon.
 !define MUI_ICON "../res/%(APP_ICON)s"
 
-; Pages -----------------------------------------------------------------------"""
+; Pages -----------------------------------------------------------------------
+"""
+    print '********** DOC DIR', kwargs.get('DOCUMENTATION_DIR'), '*********'
     if kwargs.get('DOCUMENTATION_DIR') <> None:
         nsi_text += """\
-  !insertmacro MUI_PAGE_LICENSE "..\%(DOCUMENTATION_DIR)s\source\license.rst" """
+!insertmacro MUI_PAGE_LICENSE "..\%(DOCUMENTATION_DIR)ssource\license.rst" 
+"""
     
     nsi_text += """\
-  !insertmacro MUI_PAGE_DIRECTORY
-  !insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
 
-  !insertmacro MUI_UNPAGE_CONFIRM
-  !insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
 
 
 ; Languages -------------------------------------------------------------------
-  !insertmacro MUI_LANGUAGE "German"
-
+!insertmacro MUI_LANGUAGE "German"
+  
 
 ; The stuff to install --------------------------------------------------------
 Section "Installer Section" ;No components page, name is not important
-
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
 
@@ -169,7 +171,7 @@ Section "Installer Section" ;No components page, name is not important
                    "DisplayIcon" "$INSTDIR\\res\\%(APP_ICON)s"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\%(APP_NAME)s" \\
                    "UninstallString" "$INSTDIR\uninstaller.exe"
-SectionEnd ; end the section
+SectionEnd
 
 
 ; The stuff to uninstall ------------------------------------------------------
@@ -183,7 +185,8 @@ Section "un.Uninstaller Section"
   ; Remove from the software dialog of windows
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\%(APP_NAME)s"
 SectionEnd
-;------------------------------------------------------------------------------"""
+;------------------------------------------------------------------------------
+"""
     return nsi_text % kwargs
       
         
@@ -311,10 +314,21 @@ ShellExecute=startup\start.exe
 UseAutoplay=1"""
     
     
-def makeNSI(pathname, build_dir, app_name, app_version, app_icon=''):
+def makeNSI(pathname, build_dir, app_name, app_version, app_icon='', doc_dir=''):
     # Make installer with NSIS ------------------------------------------------
     nsi_file = open("%s\\build\\%s.nsi" % (pathname, app_name), 'w')
-    nsi_file.write(get_nsi(APP_NAME=app_name, APP_VERSION=app_version, APP_ICON=app_icon))
+    nsi_dict = \
+    {
+        'APP_NAME': app_name,
+        'APP_VERSION': app_version,
+    }
+    
+    if app_icon <> '':
+        nsi_dict['APP_ICON'] = app_icon
+    if doc_dir <> '':
+        nsi_dict['DOCUMENTATION_DIR'] = doc_dir
+    
+    nsi_file.write(get_nsi(**nsi_dict))
     nsi_file.close()
 
     # Make uninstaller first --------------------------------------------------   
