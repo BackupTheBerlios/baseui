@@ -329,3 +329,29 @@ def widget_getter(widget_object, data_type=None):
     return widget_content
 
 
+
+class RedirectText(object):
+    def __init__(self, entry):
+        self.out = entry
+ 
+ 
+    def write(self, string):
+        self.out.SetStyle(self.out.GetLastPosition(), self.out.GetLastPosition(), wx.TextAttr(wx.BLACK, wx.WHITE))
+        self.out.WriteText(string)
+        self.out.ShowPosition(self.out.GetLastPosition())
+        
+        
+
+class RedirectError:
+    """ Class to redirect stderr text """    
+    def __init__(self, entry):
+        self.out=entry
+        
+
+    def write(self, string):
+        self.out.SetStyle(self.out.GetLastPosition(), self.out.GetLastPosition(), wx.TextAttr(wx.RED, wx.WHITE))
+        self.out.WriteText(string)
+        self.out.ShowPosition(self.out.GetLastPosition())
+        
+        
+        
