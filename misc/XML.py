@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-1 -*-
+
 from pprint import pprint
 
 from xml.sax.handler import ContentHandler
@@ -19,12 +21,12 @@ class XMLelement(object):
         self.attributes_text = ''
         if self.attributes <> None:
             self.attributes_text = self.get_attributes_text(self.attributes)
-            
-    
+        
+        
     def add_child_dict(self, child):
         self.content.append(child)
-
-
+        
+        
     def get_child_dict(self, tag):
         for tag_dict in self.content:
             curr_tag = tag_dict.get('tag')
@@ -39,39 +41,6 @@ class XMLelement(object):
                     #print 'MADE TO', curr_tag, 'EQUALS', tag
             if curr_tag == tag:
                 return tag_dict
-
-
-#    def set_node(self, node, tag=None, content=None, attributes=None):
-#        node = self.get_node(node)
-#        if tag <> None:
-#            node['tag'] = tag
-#        if content <> None:
-#            node['content'] = content
-#        if attributes <> None:
-#            node['attributes'] = attributes
-#        
-#                
-#    def get_tag_dict(self, tag):
-#        #print 'TAG', tag
-#        #if isinstance(tag, XMLelement):
-#        #    print 'YEAH'
-#        
-#        for tag_dict in self.content:
-#            read_tag = tag_dict.get('tag')
-#            if read_tag == tag:
-#                return tag_dict
-#            
-#            
-#    def get_content(self, tag):
-#        return self.get_tag_dict(tag).get('content')
-#
-#
-#    def get_attributes(self, tag):
-#        return self.get_tag_dict(tag).get('attributes')
-        
-        
-#    def set_level(self, level):
-#        self.level = level
         
         
     def get_attributes_text(self, attributes):
@@ -89,22 +58,24 @@ class XMLelement(object):
         return s
 
     
-    def generate_xml(self, level=0):
+    def generate_xml(self, level=0, depth=0, header=False):
+        ''' Generates pretty xml for this object and all subobjects. The ``level``
+            tells, which intendation level is needed, ``depth`` stands for the
+            depth of the xml-tree-scan, where 0 stands für infinite. If ``header``
+            is true, the xml standard-header will be on top of the xml output. '''
+        
+        text = ''
+        if level == 0 and header == True:
+            text += '<?xml version="1.0" encoding="utf-8"?>\n'
+            
         self.level = level
-        text = '<%s%s>\n' % (self.tag, self.attributes_text)
+        text += '<%s%s>\n' % (self.tag, self.attributes_text)
         self.level += 1
         
-        #print self.content
         for content_obj in self.content:
             tag = content_obj.tag
             attributes = content_obj.attributes
             content = content_obj.content
-            
-            #print tag, attributes, content
-#            tag = tag_dict.get('tag')
-#            content = tag_dict.get('content')
-#            attributes = tag_dict.get('attributes')
-#            comment = tag_dict.get('comment')
             
             if attributes == None:
                 attributes_text = ''
@@ -168,13 +139,20 @@ class XML_to_dict(ContentHandler):
             self.dict_str += "'%s'" % content
             print 'content:', content,
 
+
+
+if __name__ == '__main__':
+    pass
+
+    #order = XML_to_dict()
+    #saxparser = make_parser()
+    #saxparser.setContentHandler(order)
     
-order = XML_to_dict()
-saxparser = make_parser()
-saxparser.setContentHandler(order)
-
-datasource = open("xml/order_7845.xml","r")
-saxparser.parse(datasource)
-
-pprint(order.dict)
-#print order.dict_str
+    #datasource = open("xml/order_7845.xml","r")
+    #saxparser.parse(datasource)
+    
+    #pprint(order.dict)
+    #print order.dict_str
+   
+    
+    
