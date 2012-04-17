@@ -44,9 +44,10 @@ class XMLelement(object):
         
         
     def get_attributes_text(self, attributes):
+        #print attributes
         text = ' '
         for key in attributes.keys():
-            text += key + '="' + attributes.get(key) + '" '
+            text += key + '="' + str(attributes.get(key)) + '" '
         text = text[:len(text)-1]
         return text
         
@@ -72,7 +73,10 @@ class XMLelement(object):
         text += '<%s%s>\n' % (self.tag, self.attributes_text)
         self.level += 1
         
+        pprint(self.content)
+        
         for content_obj in self.content:
+            print content_obj
             tag = content_obj.tag
             attributes = content_obj.attributes
             content = content_obj.content
