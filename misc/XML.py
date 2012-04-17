@@ -73,10 +73,8 @@ class XMLelement(object):
         text += '<%s%s>\n' % (self.tag, self.attributes_text)
         self.level += 1
         
-        pprint(self.content)
-        
         for content_obj in self.content:
-            print content_obj
+            #print content_obj
             tag = content_obj.tag
             attributes = content_obj.attributes
             content = content_obj.content
@@ -108,16 +106,18 @@ class XMLelement(object):
 class XML_to_dict(ContentHandler):    
     def __init__(self):
         self.end_tag = False
+
         
     def startDocument(self):
         self.dict_str = ""
+
         
     def endDocument(self):
         self.dict_str = self.dict_str[0:len(self.dict_str)-1]
         self.dict_str += '}'
         self.dict = eval(self.dict_str)
-        pass
         
+
     def startElement(self, name, attrs):
         self.name = name
         if self.end_tag:
@@ -125,6 +125,7 @@ class XML_to_dict(ContentHandler):
             self.dict_str += "'%s':" % name
         else:
             self.dict_str += "{'%s':" % name
+        
         
     def endElement(self, name):
         if name == self.name:
@@ -136,6 +137,7 @@ class XML_to_dict(ContentHandler):
             self.dict_str = self.dict_str[0:len(self.dict_str)-1]
             self.dict_str += "},"
         print 'end:', name
+
     
     def characters(self, content):
         content = content.replace('\t', '').replace('\n', '')
@@ -146,7 +148,7 @@ class XML_to_dict(ContentHandler):
 
 
 if __name__ == '__main__':
-    pass
+    raw_input('give <RETURN> to exit...')
 
     #order = XML_to_dict()
     #saxparser = make_parser()
