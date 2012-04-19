@@ -11,7 +11,7 @@ class XMLelement(object):
         self.tag = tag
         self.attributes = attributes
         self.content = content
-        self.level = 0
+        self._intend_level = 0
         
         if isinstance(content, XMLelement):
             # If the content is an instance of an XMLelement, get tag, content 
@@ -33,7 +33,7 @@ class XMLelement(object):
         return tag_list
     
                 
-    def get_attributes_text(self, attributes):
+    def _attributes_to_str(self, attributes):
         if attributes == None:
             return ''
         
@@ -44,12 +44,12 @@ class XMLelement(object):
         return text
         
         
-    def spaces(self):
+    def _intend(self):
         s = ''
-        for i in xrange(0, self.level):
+        for i in xrange(0, self._intend_level):
             s += '  '
         return s
-
+        
         
     def generate_xml(self, level=0, depth=0, header=False):
         ''' Generates pretty xml for this object and all subobjects. The ``level``
@@ -61,9 +61,9 @@ class XMLelement(object):
         if level == 0 and header == True:
             text += '<?xml version="1.0" encoding="utf-8"?>\n'
             
-        self.level = level
-        text += '<%s%s>\n' % (self.tag, self.get_attributes_text(self.attributes))
-        self.level += 1
+        self._intend_level = level
+        text += '<%s%s>\n' % (self.tag, self._attributes_to_str(self.attributes))
+        self._intend_level += 1
         nointend = False
         if type(self.content) == list:
             # Content can be a list.
@@ -72,13 +72,13 @@ class XMLelement(object):
                 attributes = element.attributes
                 content = element.content
                 
-                text += '%s<%s%s>\n' % (self.spaces(), tag, self.get_attributes_text(attributes))
+                text += '%s<%s%s>\n' % (self._intend(), tag, self._attributes_to_str(attributes))
                 if type(content) == list:
-                    self.level += 1
+                    self._intend_level += 1
                     for element in content:
-                        text += '%s%s' % (self.spaces(), element.generate_xml(level=self.level)) + '\n'
-                    self.level -= 1
-                    text += self.spaces()
+                        text += '%s%s' % (self._intend(), element.generate_xml(level=self._intend_level)) + '\n'
+                    self._intend_level -= 1
+                    text += self._intend()
                 else:
                     text = text[:len(text)-1] + '%s' % content
                 text += '</%s>\n' % tag
@@ -92,8 +92,8 @@ class XMLelement(object):
             text += '</%s>' % self.tag
             nointend = False
         else:
-            self.level -= 1
-            text += '%s</%s>' % (self.spaces(), self.tag)
+            self._intend_level -= 1
+            text += '%s</%s>' % (self._intend(), self.tag)
         return text
 
         
