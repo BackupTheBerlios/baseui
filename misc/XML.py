@@ -64,7 +64,7 @@ class XMLelement(object):
         self.level = level
         text += '<%s%s>\n' % (self.tag, self.get_attributes_text(self.attributes))
         self.level += 1
-        
+        nointend = False
         if type(self.content) == list:
             # Content can be a list.
             for element in self.content:
@@ -72,7 +72,7 @@ class XMLelement(object):
                 attributes = element.attributes
                 content = element.content
                 
-                text += '%s<%s>\n' % (self.spaces(), tag)
+                text += '%s<%s%s>\n' % (self.spaces(), tag, self.get_attributes_text(attributes))
                 if type(content) == list:
                     self.level += 1
                     for element in content:
@@ -85,9 +85,15 @@ class XMLelement(object):
         else:
             # Content can be a value.
             text = text[:len(text)-1] + '%s' % self.content
+            nointend = True
         
         # Close the Tag at the end.
-        text += '</%s>' % self.tag
+        if nointend == True:
+            text += '</%s>' % self.tag
+            nointend = False
+        else:
+            self.level -= 1
+            text += '%s</%s>' % (self.spaces(), self.tag)
         return text
 
         
