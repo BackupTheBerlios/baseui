@@ -18,21 +18,21 @@ class XMLelement(object):
             # and attributes from that object below.
             self.tag = content.tag
             self.attributes = content.attributes
-        
-        
+            
+            
     def get_child(self, tag=None):
         for child_obj in self.content:
             if tag == child_obj.tag:
                 return child_obj
-
-
+            
+            
     def get_child_tags(self):
         tag_list = []
         for child_obj in self.content:
             tag_list.append(child_obj.tag)
         return tag_list
-    
-                
+        
+        
     def _attributes_to_str(self, attributes):
         if attributes == None:
             return ''
@@ -103,11 +103,11 @@ class XMLelement(object):
 #    def __init__(self):
 #        self.end_tag = False
 #
-#        
+#
 #    def startDocument(self):
 #        self.dict_str = ""
 #
-#        
+#
 #    def endDocument(self):
 #        self.dict_str = self.dict_str[0:len(self.dict_str)-1]
 #        self.dict_str += '}'

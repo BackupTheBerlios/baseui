@@ -217,7 +217,7 @@ class DatabaseTableBase(TableContentBase):
         # Just populate immideately if this is not a child-table of a form!
         if self.parent_form == None:
             self.populate()
-
+            
         self.Table.Show()       
         return self.main_panel
         

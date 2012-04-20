@@ -626,20 +626,20 @@ class odbc_generic_database(generic_database):
         self.connection_dict = kwargs
         
         # This creates the odbc-connection string, which can have different parameters.
-        connection_string = 'DRIVER={%(driver)s}'
+        self.connection_string = 'DRIVER={%(driver)s}'
         if kwargs.get('host') not in [None, '']:
-            connection_string += ';SERVER=%(host)s'
+            self.connection_string += ';SERVER=%(host)s'
         if kwargs.get('database') not in [None, '']:
-            connection_string += ';DATABASE=%(database)s'
+            self.connection_string += ';DATABASE=%(database)s'
         if kwargs.get('user') not in [None, '']:
-            connection_string += ';UID=%(user)s'
+            self.connection_string += ';UID=%(user)s'
         if kwargs.get('password') not in [None, '']:
-            connection_string += ';PWD=%(password)s'
+            self.connection_string += ';PWD=%(password)s'
         if kwargs.get('filepath') not in [None, '']:
-            connection_string += ';DBQ=%(filepath)s;'
+            self.connection_string += ';DBQ=%(filepath)s;'
             
-        connection_string = connection_string % kwargs
-        self.connection = self.connector.connect(connection_string, autocommit=True)
+        self.connection_string = self.connection_string % kwargs
+        self.connection = self.connector.connect(self.connection_string, autocommit=True)
         self.cursor = self.connection.cursor()
         self.set_arguments(**kwargs)
         
@@ -655,6 +655,10 @@ class odbc_generic_database(generic_database):
         return self.connection
         
         
+    def get_connection_string(self):
+        return self.connection_string
+    
+    
     def get_tables(self):
         ''' Returns a list of table names held by given database. '''
 
@@ -1426,11 +1430,12 @@ class odbc_excel_table(odbc_generic_table):
         
 # Database Table Columns -------------------------------------------------------
 class column:
-    def __init__(self, table_object, column_name):
+    def __init__(self, table_object, column_name, **attributes):
         ''' This initializes a database columns where:
             db_conn = Database connector from class db.
-            table_name = String which gives the name of the table. '''
-
+            table_name = String which gives the name of the table. 
+            **attributes can be: data_type, character_maximum_length, etc.'''
+            
         self.table_object = table_object
         self.db_object = table_object.db_object
         self.db_cursor = table_object.db_cursor
@@ -1488,7 +1493,6 @@ class column:
                 referenced_table.check_attributes(referenced_table_attributes, add=True)
                 
         column_layout = column_layout.rstrip()
-        #print column_layout
         return column_layout
 
 
@@ -1510,13 +1514,13 @@ class column:
 
             if attributes_lod is not given, this function creates a table with one
             primary key column named "id". '''
-
+        
         column_layout = self.get_attribute_layout(attributes_dic)
         # Does not work for msSQL, check out if it works for other DBs!
         # sql_command = 'ALTER TABLE %s ADD COLUMN %s' % (self.table_object.name, column_layout)
         # Note: Seems to work fine for PostgreSQL
         sql_command = 'ALTER TABLE %s ADD %s' % (self.table_object.name, column_layout)
-
+        
         try:
             self.db_object.execute(sql_command)
         except:
@@ -1524,39 +1528,36 @@ class column:
 
 
     def drop(self):
-        pass
-
-    
-    def alter(self):
+        ''' Drops this column in the Database of the containing table.'''
+        
+        sql_command = 'DROP COLUMN %s FROM %s;' % (self.name, self.table_object.name)
+        try:
+            self.db_object.execute(sql_command)
+        except:
+            raise
+        
+        
+    def alter(self, **arguments):
         #TODO: Alter should be possible on colums, too.
-        pass
-    
-    
+        pprint(arguments)
+        
+        
     def get_content(self):
         ''' Fetches all rows and gives them back as list. '''
-
-        sql_command = 'SELECT %s FROM %s' % (self.name, self.table_object.name)
+        
+        sql_command = 'SELECT %s FROM %s;' % (self.name, self.table_object.name)
         try:
             content = self.db_object.listresult(sql_command)
         except:
             raise
         return content
-
-
-
-# Database Table Rows ----------------------------------------------------------
-class row:
-    ''' This handles single table-rows. '''
-    
-    def __init__(self, table_object):
-        pass
-
-
+        
+        
 
 # Database Users ---------------------------------------------------------------
 class user:
     ''' This handles all user-related SQL orders. '''
-
+    
     def __init__(self, db_object, user_name):
         ''' This initializes a database table where:
                 db_object = Database connector from class db.
@@ -1565,22 +1566,22 @@ class user:
         self.db_object = db_object
         self.db_cursor = db_object.cursor
         self.name = user_name
-
-
+        
+        
     def create(self, password):
         ''' Creates a user with given password. '''
 
         self.password = password
         sql_command = "CREATE USER " + self.name + "PASSWORD " + self.password
         return sql_command
-
-
+        
+        
     def drop(self):
         ''' Drops a user in the given database and returns the SQLcommand. '''
 
         sql_command = "DROP USER %s" % self.name
         self.db_object.execute(sql_command)
         return sql_command
-
-
+        
+        
 
