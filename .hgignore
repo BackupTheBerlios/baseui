@@ -8,3 +8,6 @@ glob:*.db
 glob:misc/*.png
 syntax: glob
 wxApi/wxpsvg/svg/compliance/svg/*.svg
+.project
+.pydevproject
+.settings/*

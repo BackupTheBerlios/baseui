@@ -252,7 +252,7 @@ class DatabaseLogin(wx.Panel):
         return self.portlet_database.get_connection()
         
     
-    def set_connected(self):
+    def set_connected(self, database=None):
         if self.db_table_system_class <> None:
             self.db_table_system = self.db_table_system_class(self.get_database())
             self.db_table_users = self.db_table_users_class(self.get_database())
@@ -270,7 +270,7 @@ class DatabaseLogin(wx.Panel):
         self.on_login_changed()
         
     
-    def set_disconnected(self):
+    def set_disconnected(self, database=None):
         self.portlet_login.combobox_user.Enable(False)
         self.portlet_login.entry_password.Enable(False)
         self.button_ok.Enable(False)

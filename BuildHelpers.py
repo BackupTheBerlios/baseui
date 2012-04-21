@@ -130,7 +130,6 @@ RequestExecutionLevel admin
 
 ; Pages -----------------------------------------------------------------------
 """
-    print '********** DOC DIR', kwargs.get('DOCUMENTATION_DIR'), '*********'
     if kwargs.get('DOCUMENTATION_DIR') <> None:
         nsi_text += """\
 !insertmacro MUI_PAGE_LICENSE "..\%(DOCUMENTATION_DIR)ssource\license.rst" 
