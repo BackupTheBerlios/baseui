@@ -46,9 +46,9 @@ class XrcFrame(XrcBase, wx.Frame):
 
 class XrcPanel(XrcBase, wx.Panel):
     def __init__(self, parent, xrc_path, xrc_name):
-        self.pre_widget = wx.PrePanel()
         XrcBase.__init__(self, parent, xrc_path, xrc_name)
         
+        self.pre_widget = wx.PrePanel()
         self.xrc_resource.LoadOnPanel(self.pre_widget, self.parent, self.xrc_name)
         self.PostCreate(self.pre_widget)
         

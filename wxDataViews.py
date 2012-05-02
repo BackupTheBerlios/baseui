@@ -83,7 +83,7 @@ class DatabaseTableBase(TableContentBase):
             form_instance.populate()
         except Exception, inst:
             self.ErrorDialog.show('Fehler', inst, message='Beim öffnen des Formulars ist ein Fehler aufgetreten!')
-            
+        
             
     def edit(self, *args, **kwargs):
         if self.form == None:
