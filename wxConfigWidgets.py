@@ -122,8 +122,7 @@ class IniDialog(wx.Dialog):
         self.sizer.SetFlexibleDirection( wx.BOTH )
         self.sizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
-        #self.xrc_resource = wx.xrc.XmlResource(xrc_path)
-        self.panel_main = XRC.XrcPanel(self, xrc_path, xrc_panel) #self.xrc_resource.LoadPanel(self, xrc_panel)
+        self.panel_main = IniPanel(self, xrc_path, xrc_panel)
         self.sizer.Add(self.panel_main, 0, wx.ALL|wx.EXPAND)
         
         # Bottom panel --------------------------------------------------------
@@ -168,6 +167,24 @@ class IniDialog(wx.Dialog):
         
     
     def initialize(self, definition_lod):
+        self.panel_main.initialize(definition_lod)
+        
+
+    def populate(self):
+        self.panel_main.populate()
+        
+        
+    def save(self):
+        self.panel_main.save()
+        
+        
+
+class IniPanel(XRC.XrcPanel):
+    def __init__(self, parent, xrc_path, xrc_panel):
+        XRC.XrcPanel.__init__(self, xrc_path, xrc_panel)
+        
+
+    def initialize(self, definition_lod):
         self.definition_lod = definition_lod
         
         for definition_dict in self.definition_lod:
@@ -178,7 +195,7 @@ class IniDialog(wx.Dialog):
                 definition_dict['widget_object'] = widget_object
         self.populate()
         
-
+        
     def populate(self):
         for definition_dict in self.definition_lod:
             widget_object = definition_dict.get('widget_object')
@@ -190,8 +207,8 @@ class IniDialog(wx.Dialog):
             value = self.iniFile.get_option(section, option, default)
             widget_object = definition_dict.get('widget_object')
             widget_populator(widget_object, value, None)
-        
-                
+            
+                    
     def save(self):
         for definition_dict in self.definition_lod:
             value = widget_getter(definition_dict.get('widget_object'))
@@ -206,10 +223,14 @@ class IniDialog(wx.Dialog):
         self.iniFile.save_lod(self.definition_lod)
         
         
-        
+
 class ConfigDialog(wx.Dialog):
-    def __init__(self, parent, db_object):
+    def __init__(self, parent, db_object, buttons=['ok']):
+        ''' buttons can be cancel, apply and ok. This dialog is needed when 
+            different panels and subtables are mixed together (like Flight Lookout).'''
+        
         self.db_object = db_object
+        self.content_lod = []
         
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = 'Einstellungen', pos = wx.DefaultPosition, size = wx.Size(600, 400), style = wx.DEFAULT_DIALOG_STYLE )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -221,23 +242,28 @@ class ConfigDialog(wx.Dialog):
         sizer_main.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
         
         self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_MULTILINE )
-        
-        
-        #self.panel_globals = form_globals(parent=self.notebook, xrc_path=RESOURCE_DIR + 'forms.xrc', panel_name='panel_globals')
-        #self.notebook.AddPage(self.panel_globals, 'Allgemein', False)
-        
-        # Do the buttons and the rest
         sizer_main.Add( self.notebook, 1, wx.EXPAND |wx.ALL, 5 )
         
-        sizer_buttons = wx.FlexGridSizer( 2, 2, 0, 0 )
-        sizer_buttons.SetFlexibleDirection( wx.BOTH )
-        sizer_buttons.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        # Do the buttons and the rest
+        sizer_buttons = wx.BoxSizer( wx.HORIZONTAL )
+        sizer_buttons.AddSpacer( ( 0, 0), 1, 0, 5 )
         
-        self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok_clicked, id=wx.ID_ANY)
-        sizer_buttons.Add( self.button_ok, 0, wx.ALL, 5 )
+        if 'ok' in buttons:
+            self.button_ok = wx.Button( self, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+            self.button_ok.Bind(wx.EVT_BUTTON, self.on_button_ok)
+            sizer_buttons.Add( self.button_ok, 0, wx.BOTTOM|wx.RIGHT, 5 )
         
-        sizer_main.Add( sizer_buttons, 0, wx.ALIGN_RIGHT, 5 )
+        if 'apply' in buttons:
+            self.button_apply = wx.Button( self, wx.ID_ANY, u"Übernehmen", wx.DefaultPosition, wx.DefaultSize, 0 )
+            self.button_apply.Bind(wx.EVT_BUTTON, self.on_button_apply)
+            sizer_buttons.Add( self.button_apply, 0, wx.BOTTOM|wx.RIGHT, 5 )
+        
+        if 'cancel' in buttons:
+            self.button_cancel = wx.Button( self, wx.ID_ANY, u"Abbruch", wx.DefaultPosition, wx.DefaultSize, 0 )
+            self.button_cancel.Bind(wx.EVT_BUTTON, self.on_button_cancel)
+            sizer_buttons.Add( self.button_cancel, 0, wx.BOTTOM|wx.RIGHT, 5 )
+        
+        sizer_main.Add( sizer_buttons, 0, wx.ALIGN_RIGHT|wx.EXPAND, 5 )
         
         self.SetSizer(sizer_main)
         self.Layout()
@@ -249,18 +275,33 @@ class ConfigDialog(wx.Dialog):
         pass
         
         
-    def on_button_ok_clicked(self, event=None):
+    def on_button_ok(self, event=None):
         self.Close()
         
         
-    def add_panel(self, title, db_table, table, form):
+    def on_button_cancel(self, event=None):
+        self.Close()
+        
+        
+    def on_button_apply(self, event=None):
+        # override this!
+        print 'please override on_button_apply'
+        for content_dict in self.content_lod:
+            print content_dict
+            portlet_object = content_dict.get('portlet_object')
+            if 'on_save' in dir(portlet_object):
+                portlet_object.on_save()
+        
+        
+    def add_panel(self, title, db_table, portlet, form=None, save_function=None):
         db_table_object = db_table(self.db_object)
         panel = wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        table_object = table(db_table=db_table_object, form_object=form, portlet_parent=panel)
+        portlet_object = portlet(db_table=db_table_object, form_object=form, portlet_parent=panel)
         
-        table_object.create()
+        portlet_object.create()
         panel.Layout()
         self.notebook.AddPage(panel, title, False)
+        self.content_lod.append({'title': title, 'portlet_object': portlet_object})
         
         
         

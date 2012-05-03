@@ -17,6 +17,13 @@ class Base:
         
         
 class iniFile(ConfigParser.RawConfigParser):
+    ''' This handles an iniFile in a way that a section is given as a dictionary
+        or a list of dictionarys with default values in there. It also creates
+        options with default values in given sections rather than raising an 
+        error. NOTE: BaseUI.dbApi.AppTools.iniTable works the same, just with
+        SQL-Tables!'''
+    
+    
     def __init__(self, filepath):
         ConfigParser.RawConfigParser.__init__(self)
         
@@ -30,6 +37,7 @@ class iniFile(ConfigParser.RawConfigParser):
         option_error = False
         value = default
         
+        # If section or option not existing, create them with default value.
         try:
             value = self.get(section, option)
         except ConfigParser.NoSectionError:
@@ -54,6 +62,7 @@ class iniFile(ConfigParser.RawConfigParser):
         section_dict = {}
         
         for option in option_dict:
+            # TODO: Should work if just get_option is called here!
             section_error = False
             option_error = False
             

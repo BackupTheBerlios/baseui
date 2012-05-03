@@ -127,7 +127,7 @@ if __name__ == "__main__":
             {'column_name': 'landing_loc',  'label': 'Landeort',    'column_number': 4, 'row_number': 2},
             {'column_name': 'duration',     'label': 'Dauer',       'column_number': 5, 'row_number': 2}
         ]
-                                                                                  
+    
     content = \
         [
             {'id': '7781', 'pattern': 'Technam P91', '#child':

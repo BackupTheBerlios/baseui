@@ -5,7 +5,7 @@
 # by Mark Muzenhardt, published under LGPL license.
 #===============================================================================
 
-import wx, wx.xrc
+import os, wx, wx.xrc
 
 
 class XrcBase(object):
@@ -14,8 +14,10 @@ class XrcBase(object):
         self.xrc_path = xrc_path
         self.xrc_name = xrc_name
         self.xrc_resource = wx.xrc.XmlResource(self.xrc_path)
-
-
+        #print self.xrc_path, os.path.dirname(self.xrc_path)
+        #print os.path.join(os.getcwd(), 'modules', self.__class__.__module__, 'res')
+        
+        
     def get_widget(self, widget_name):
         widget = wx.xrc.XRCCTRL(self, widget_name)
         return widget
@@ -46,9 +48,9 @@ class XrcFrame(XrcBase, wx.Frame):
 
 class XrcPanel(XrcBase, wx.Panel):
     def __init__(self, parent, xrc_path, xrc_name):
+        self.pre_widget = wx.PrePanel()
         XrcBase.__init__(self, parent, xrc_path, xrc_name)
         
-        self.pre_widget = wx.PrePanel()
         self.xrc_resource.LoadOnPanel(self.pre_widget, self.parent, self.xrc_name)
         self.PostCreate(self.pre_widget)
         

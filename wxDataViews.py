@@ -278,17 +278,17 @@ class SubTable(DatabaseTableBase):
             
         if self.permissions.get('new') <> False:
             self.button_add = wx.Button( self.portlet_parent, wx.ID_ANY, u"Hinzufügen", wx.DefaultPosition, wx.DefaultSize, 0 )       
-            self.sizer_buttons.Add(self.button_add, 0, wx.ALL, 5 )
+            self.sizer_buttons.Add(self.button_add, 0, wx.BOTTOM|wx.LEFT|wx.EXPAND, 5 )
             self.button_add.Bind(wx.EVT_BUTTON, self.on_add_clicked)
             
         if self.editable == True and self.permissions.get('edit') <> False:
             self.button_edit = wx.Button( self.portlet_parent, wx.ID_ANY, u"Bearbeiten", wx.DefaultPosition, wx.DefaultSize, 0 )
-            self.sizer_buttons.Add(self.button_edit, 0, wx.ALL, 5 )
+            self.sizer_buttons.Add(self.button_edit, 0, wx.BOTTOM|wx.LEFT|wx.EXPAND, 5 )
             self.button_edit.Bind(wx.EVT_BUTTON, self.on_edit_clicked)
         
         if self.permissions.get('delete') <> False:
             self.button_delete = wx.Button( self.portlet_parent, wx.ID_ANY, u"Entfernen", wx.DefaultPosition, wx.DefaultSize, 0 )
-            self.sizer_buttons.Add(self.button_delete, 0, wx.ALL, 5 )
+            self.sizer_buttons.Add(self.button_delete, 0, wx.BOTTOM|wx.LEFT|wx.EXPAND, 5 )
             self.button_delete.Bind(wx.EVT_BUTTON, self.on_delete_clicked)
         
         self.sizer.Add( self.sizer_buttons, 1, wx.EXPAND, 5 )
@@ -796,15 +796,15 @@ class FormFrame(wx.Frame, DatabaseFormBase):
             self.permissions = {}
             
         if self.permissions.get('save') <> False:
-            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet16.getfilesave_16Bitmap(), 'speichern')
+            self.toolbar_standard.AddTool(self.ID_SAVE, "Speichern", IconSet22.getfilesave_22Bitmap(), 'speichern')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_save, id=self.ID_SAVE)
         
         if self.permissions.get('delete') <> False:
-            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet16.getdelete_16Bitmap(), u'löschen')
+            self.toolbar_standard.AddTool(self.ID_DELETE, "Löschen", IconSet22.getdelete_22Bitmap(), u'löschen')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_delete, id=self.ID_DELETE)
         
         if self.permissions.get('print') <> False:
-            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet16.getprint_16Bitmap(), u'drucken')
+            self.toolbar_standard.AddTool(self.ID_PRINT, "Drucken", IconSet22.getprint_22Bitmap(), u'drucken')
             self.toolbar_standard.Bind(wx.EVT_TOOL, self.on_print, id=self.ID_PRINT)
         
         # If no primary key is there, just deactivate delete and print!

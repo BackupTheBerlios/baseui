@@ -45,7 +45,7 @@ class Database(Panels.Database):
                   'database': '', 
                   'host': '', 
                   'user': '', 
-                  'password': '', 
+                  'password': '',
                   'filepath': ''}
         
         self.section_dict = self.ini_file.get_section(section=self.ini_section, option_dict=options)
