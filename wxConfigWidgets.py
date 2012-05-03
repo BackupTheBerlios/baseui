@@ -181,7 +181,7 @@ class IniDialog(wx.Dialog):
 
 class IniPanel(XRC.XrcPanel):
     def __init__(self, parent, xrc_path, xrc_panel):
-        XRC.XrcPanel.__init__(self, xrc_path, xrc_panel)
+        XRC.XrcPanel.__init__(self, parent, xrc_path, xrc_panel)
         
 
     def initialize(self, definition_lod):
@@ -204,7 +204,7 @@ class IniPanel(XRC.XrcPanel):
             option = definition_dict.get('option')
             default = definition_dict.get('default')
             
-            value = self.iniFile.get_option(section, option, default)
+            value = self.parent.iniFile.get_option(section, option, default)
             widget_object = definition_dict.get('widget_object')
             widget_populator(widget_object, value, None)
             
@@ -220,7 +220,7 @@ class IniPanel(XRC.XrcPanel):
                 value = 1
             definition_dict['value'] = value
             
-        self.iniFile.save_lod(self.definition_lod)
+        self.parent.iniFile.save_lod(self.definition_lod)
         
         
 
