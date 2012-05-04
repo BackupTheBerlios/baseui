@@ -841,7 +841,6 @@ CREATE TABLE """ + self.name + """
                 
             # TODO: ALTER COLUMN works for MS SQL, perhaps not for other db's (maybe MODIFY COLUMN would be right)!
             sql_command = 'ALTER TABLE %s ALTER COLUMN %s %s%s;' % (self.name, new_column_name, new_data_type, new_character_maximum_length)
-            print sql_command
             self.db_object.execute(sql_command)
         
         
@@ -886,7 +885,7 @@ CREATE TABLE """ + self.name + """
 
             attributes_dict['column_name'] = column_name_list[iter]
             attributes_dict['data_type']   = data_type_list[iter]
-
+            
             # Only add keys, which are containing data.
             if character_maximum_length_list[iter] <> None:
                 attributes_dict['character_maximum_length'] = character_maximum_length_list[iter]
@@ -903,8 +902,8 @@ CREATE TABLE """ + self.name + """
 
             attributes_lod.append(attributes_dict)
         return attributes_lod
-
-
+        
+        
     def check_attributes(self, attributes_lod, add=False, drop=False, alter=False):
         ''' Returns differences_lod, if attributes_lod differ from the real database table definition.
             See function 'create' for key description of attributes_lod.

@@ -14,7 +14,7 @@ class Database(res.Portlets.Database):
     def __init__(self, parent):
         """ If autosave = False, there is a save-button appearing! """
         
-        # TODO: Save button for autosave has to be implemented! 
+        #TODO: Save button for autosave has to be implemented! 
         res.Portlets.Database.__init__(self, parent)
         
         self.engines_list = []

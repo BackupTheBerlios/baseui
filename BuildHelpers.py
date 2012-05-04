@@ -216,21 +216,6 @@ def get_revision(rev_dir='.'):
         app_revision = None
     return app_revision
     
-    
-# def makeSourceZip():
-	# import zipfile
-	# from pprint import pprint
-	# from src.config import *
-
-	# print dir(config)
-
-	# src_zip = zipfile.ZipFile('dist/%s v%s src.zip' % (APP_NAME, APP_VERSION), 'w')
-	# src_zip.write('console.pyw')
-	# src_zip.close()
-
-	# raw_input('Source code of project packed. Give <RETURN> to exit...')
-
-
 
 def makeGTK(gtk_dir, pathname, build_dir, localized=False):
     if sys.platform.startswith('win'):
@@ -244,7 +229,7 @@ def makeGTK(gtk_dir, pathname, build_dir, localized=False):
         
 
 def makeResources(pathname, build_dir, dir_list=[]):
-	# TODO: This all should be pythonian, not os.system!
+    # TODO: This all should be pythonian, not os.system!
     if sys.platform.startswith('win'):
         os.system('xcopy "' + pathname + '\\res\\*" "' + pathname + build_dir + 'res\\" /E /Y')
         os.system('xcopy "' + pathname + '\\bin\\*" "' + pathname + build_dir + 'bin\\" /E /Y')

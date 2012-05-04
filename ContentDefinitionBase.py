@@ -66,7 +66,7 @@ class TableContentBase(object):
     def do_column_substitutions(self, column_name, populate_from, mask, referenced_table_object, referenced_column_name):
         ''' Substitute foreign keys with content from the foreign tables. '''
         
-        #TODO: This is bullshit, because it steals the foreign keys from the dict!
+        # TODO: This is bullshit, because it steals the foreign keys from the dict!
         # Make it work, so that the content of the content_lod will not be changed.
         # This is only possible, if the following code moved nearly entirely to the
         # populate function!
