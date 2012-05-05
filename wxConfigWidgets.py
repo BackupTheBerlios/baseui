@@ -10,7 +10,7 @@ import json
 
 from wxApi import DataViews, XRC
 from misc.FileSystem import iniFile
-from wxApi.Widgets import widget_populator, widget_getter
+from wxApi.Widgets import populate_widget, widget_getter
 from pprint import pprint
 
 
@@ -206,9 +206,9 @@ class IniPanel(XRC.XrcPanel):
             
             value = self.parent.iniFile.get_option(section, option, default)
             widget_object = definition_dict.get('widget_object')
-            widget_populator(widget_object, value, None)
+            populate_widget(widget_object, value, None)
             
-                    
+            
     def save(self):
         for definition_dict in self.definition_lod:
             value = widget_getter(definition_dict.get('widget_object'))
@@ -219,7 +219,7 @@ class IniPanel(XRC.XrcPanel):
             if value == True:
                 value = 1
             definition_dict['value'] = value
-            
+        
         self.parent.iniFile.save_lod(self.definition_lod)
         
         
@@ -276,6 +276,7 @@ class ConfigDialog(wx.Dialog):
         
         
     def on_button_ok(self, event=None):
+        self.save()
         self.Close()
         
         
@@ -284,19 +285,36 @@ class ConfigDialog(wx.Dialog):
         
         
     def on_button_apply(self, event=None):
-        # override this!
-        print 'please override on_button_apply'
+        self.save()
+        
+        
+    def save(self):
         for content_dict in self.content_lod:
-            print content_dict
+            #print content_dict
             portlet_object = content_dict.get('portlet_object')
-            if 'on_save' in dir(portlet_object):
-                portlet_object.on_save()
+            if 'save' in dir(portlet_object):
+                portlet_object.save()
         
-        
-    def add_panel(self, title, db_table, portlet, form=None, save_function=None):
+    
+    def add_panel(self, title, db_table, portlet, form=None, into_sb=False):
         db_table_object = db_table(self.db_object)
         panel = wx.Panel( self.notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        portlet_object = portlet(db_table=db_table_object, form_object=form, portlet_parent=panel)
+        
+        if into_sb == True:
+            box_sizer = wx.BoxSizer( wx.VERTICAL )
+            sb_sizer = wx.StaticBoxSizer( wx.StaticBox( panel, wx.ID_ANY, title ), wx.VERTICAL )
+            
+            inner_panel = wx.Panel( panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+            sb_sizer.Add( inner_panel, 1, wx.EXPAND |wx.ALL, 5 )
+            box_sizer.Add( sb_sizer, 1, wx.ALL|wx.EXPAND, 5 )
+            panel.SetSizer( box_sizer )
+            used_panel = inner_panel
+        else:
+            used_panel = panel
+        
+        
+        
+        portlet_object = portlet(db_table=db_table_object, form_object=form, portlet_parent=used_panel)
         
         portlet_object.create()
         panel.Layout()

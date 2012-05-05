@@ -77,32 +77,6 @@ class SQLtoPythonTransformer(object):
         pass
 
 
-
-#def DataType_to_SQL(data_type, mssql=False, oracle=False, length=40):
-#    ''' Opposite of other '''
-#
-#    if data_type == datetime.datetime:
-#        sql_data_type = 'datetime'
-#    elif data_type == datetime.date:
-#        sql_data_type = 'date'
-#    elif data_type == datetime.time:
-#        sql_data_type = 'time'
-#    elif data_type == str and length <= 255:
-#        if mssql == True:
-#            sql_data_type = 'nvarchar'
-#        else:
-#            sql_data_type = 'varchar'
-#    elif data_type == int:
-#        sql_data_type = 'int'
-#    elif data_type == long:
-#        sql_data_type = 'bigint'
-#    elif data_type == bool:
-#        sql_data_type = 'boolean'
-#    elif data_type == float:
-#        sql_data_type = 'float'
-#    return sql_data_type
-
-
 def write_transform(content, engine):
     #print 'WRITE TRANSFORMING', content, type(content)
     if content == None:

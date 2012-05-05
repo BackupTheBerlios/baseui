@@ -170,9 +170,15 @@ class ValidateDataType(wx.PyValidator):
 
 
 
-def widget_populator(widget_object, widget_content, data_type=None):
-    #print 'pop:', widget_object, widget_content, data_type
-    
+def populate_widget(widget_object, widget_content, data_type=None):
+    ''' This function checks, which widget the widget_object is. Then, it populates
+        the given widget with the widget_content by converting it to a fitting
+        type. If data_type is given, it also formats the widget_content depending
+        on the data_type. 
+        
+        This function is especially used for populating the widgets of a form
+        with database content or other external data.'''
+        
     # FilePickerCtrl ---------------------------------------------------
     if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
         if widget_content <> None:
@@ -256,7 +262,7 @@ def widget_getter(widget_object, data_type=None):
             except:
                 dt=None
             widget_content = dt
-            
+
         if widget_content == '':
             widget_content = None
 
@@ -275,9 +281,7 @@ def widget_getter(widget_object, data_type=None):
                 widget_content = client_data
             except Exception, inst:
                 pass
-        
-        #else:
-        #    widget_content = widget_object.GetValue()
+
         if widget_content == '':
             widget_content = None
     

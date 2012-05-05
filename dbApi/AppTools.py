@@ -36,6 +36,14 @@ class iniTable(SQLdb.table):
         return value
         
     
+    def set_option(self, section, option, value):
+        result = self.select(where="section = '%s' AND option = '%s'" % (section, option))
+        if result <> []:
+            self.update({'value': value}, where="section = '%s' AND option = '%s'" % (section, option))
+        else:
+            self.insert('id', {'section': section, 'option': option, 'value': value})
+    
+    
     def get_section(self, section, options_dict):
         section_dict = {}
         
@@ -51,18 +59,13 @@ class iniTable(SQLdb.table):
             option = content_dict.get('option')
             value = content_dict.get('value')
             
-            self.get_option(section, option, value)
+            self.set_option(section, option, value)
         
         
     def save_section(self, section, options_dict):
         for option in options_dict:
             value = options_dict[option]
-            result = self.select(where="section = '%s' AND option = '%s'" % (section, option))
-            if result <> []:
-                self.update({'value': value}, where="section = '%s' AND option = '%s'" % (section, option))
-            else:
-                self.insert('id', {'section': section, 'option': option, 'value': value})
-            
+            self.set_option(section, option, value)            
 
 #class text_table:
 #    ''' This makes a table feel like a simple txt-file. There is no alternative if a

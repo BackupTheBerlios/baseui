@@ -14,7 +14,7 @@ from res import IconSet16
 
 from Transformations import *
 from XRC import XrcPanel
-from Widgets import widget_populator, widget_getter, widget_initializator
+from Widgets import populate_widget, widget_getter, widget_initializator
 from pprint import pprint
 
 
@@ -494,7 +494,7 @@ class Form(XrcPanel):
             if widget_object == None:
                 continue
             
-            widget_populator(widget_object, widget_content, data_type)
+            populate_widget(widget_object, widget_content, data_type)
             self.loaded_content_dict = self.get_content()
             
             
@@ -513,7 +513,6 @@ class Form(XrcPanel):
             dic = definition_row[1]
 
             widget_object = self.definition_lod[row].get('widget_object')
-            widget_name = self.definition_lod[row].get('widget_name')
             column_name = self.definition_lod[row].get('column_name')
             data_type = self.definition_lod[row].get('data_type')
             
