@@ -304,9 +304,6 @@ class Tree(hypertreelist.HyperTreeList):
                     if type(content) <> unicode:
                         content = str(content)
                     self.SetItemText(item, content, column_number)
-        
-        # It's better the data comes pre-sorted from SQL (content_lod)!
-        #self.SortChildren(self.root)
 
 
     def build_definition(self, content_lod, column_list=None):

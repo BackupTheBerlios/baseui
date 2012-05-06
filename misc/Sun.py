@@ -30,7 +30,7 @@ Solar flux, equation of time and import of python library
 
 SUN_PY_VERSION = 1.5
 
-import math
+import math, datetime
 from math import pi
 
 import calendar
@@ -523,9 +523,14 @@ class Sun:
         nJulian = lMonth[month-1] + day
         return nJulian
 
-
-    def decimal_to_hms(self, decimal_time):
-        hour = int(decimal_time)
+    
+    def decimal_to_time(self, decimal_time, altzone=0):
+        h, m, s = self.decimal_to_hms(decimal_time, altzone)
+        return datetime.time(h, m, s)
+        
+        
+    def decimal_to_hms(self, decimal_time, altzone=0):
+        hour = int(decimal_time) - altzone
         decimal_minute = (decimal_time - int(decimal_time)) * 60
         minute = int(decimal_minute)
         decimal_second = (decimal_minute - minute) * 60

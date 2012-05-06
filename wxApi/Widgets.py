@@ -179,12 +179,12 @@ def populate_widget(widget_object, widget_content, data_type=None):
         This function is especially used for populating the widgets of a form
         with database content or other external data.'''
         
-    # FilePickerCtrl ---------------------------------------------------
+    # FilePickerCtrl -----------------------------------------------------------
     if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
         if widget_content <> None:
             widget_object.SetPath(widget_content)
             
-    # DatePickerCtrl ---------------------------------------------------
+    # DatePickerCtrl -----------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.DatePickerCtrl:
         if widget_content <> None:
             widget_content = date_to_str(widget_content)
@@ -197,7 +197,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
             datetime.Set(day=day, month=month, year=year)
             widget_object.SetValue(datetime)
     
-    # TextCtrl --------------------------------------------------------- 
+    # TextCtrl -----------------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.TextCtrl:
         if data_type == 'money':
             widget_object.SetWindowStyleFlag(widget_object.GetWindowStyleFlag() | wx.TE_RIGHT)
@@ -212,7 +212,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
         else:
             widget_object.SetValue('')
     
-    # Combobox ---------------------------------------------------------
+    # Combobox -----------------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.ComboBox:
         # This works just if no foreign table is there, otherwise it will be overwritten!
         if widget_content <> None:
@@ -222,7 +222,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
         else:
             widget_object.SetValue('')
             
-    # Checkbox --------------------------------------------------------
+    # Checkbox -----------------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.CheckBox:
         if widget_content == '1' or \
            widget_content == 'Y' or \
@@ -232,7 +232,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
             widget_content = 0
         widget_object.SetValue(int(widget_content))
 
-    # Radiobutton ------------------------------------------------------
+    # Radiobutton --------------------------------------------------------------
     if widget_object.__class__ == wx._controls.RadioButton:
         if widget_content == '1' or \
            widget_content == 'Y' or \
@@ -242,7 +242,12 @@ def populate_widget(widget_object, widget_content, data_type=None):
             widget_content = 0
         widget_object.SetValue(int(widget_content))
         
-    # FilePickerCtrl ---------------------------------------------------
+    # Choice -------------------------------------------------------------------
+    if widget_object.__class__ == wx._controls.Choice:
+        if widget_content <> None:
+            widget_object.SetStringSelection(widget_content)
+        
+    # FilePickerCtrl -----------------------------------------------------------
     if widget_object.__class__ == wx._controls.ColourPickerCtrl:
         if widget_content <> None:
             widget_object.SetColour(widget_content)
@@ -251,7 +256,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
 def widget_getter(widget_object, data_type=None):
     widget_content = None
     
-    # Textctrl ---------------------------------------------------------
+    # Textctrl -----------------------------------------------------------------
     if widget_object.__class__ ==  wx._controls.TextCtrl:
         widget_content = widget_object.GetValue()
         if data_type == 'money':
@@ -267,7 +272,7 @@ def widget_getter(widget_object, data_type=None):
             widget_content = None
 
     
-    # Combobox ---------------------------------------------------------
+    # Combobox -----------------------------------------------------------------
     if widget_object.__class__ == wx._controls.ComboBox:
         # If this widget has a foreign relation, get client data, else get Value.
         # if dic.get('referenced_column_name') <> None:
@@ -285,15 +290,19 @@ def widget_getter(widget_object, data_type=None):
         if widget_content == '':
             widget_content = None
     
-    # Checkbox ---------------------------------------------------------
+    # Checkbox -----------------------------------------------------------------
     if widget_object.__class__ == wx._controls.CheckBox:
         widget_content = widget_object.GetValue()
         
-    # Radiobutton ------------------------------------------------------
+    # Radiobutton --------------------------------------------------------------
     if widget_object.__class__ == wx._controls.RadioButton:
         widget_content = widget_object.GetValue()
-        
-    # Datepicker -------------------------------------------------------
+    
+    # Choice -------------------------------------------------------------------
+    if widget_object.__class__ == wx._controls.Choice:
+        widget_content = widget_object.GetStringSelection()
+            
+    # Datepicker ---------------------------------------------------------------
     if widget_object.__class__ == wx._controls.DatePickerCtrl:
         widget_content = widget_object.GetValue()
         
@@ -307,11 +316,11 @@ def widget_getter(widget_object, data_type=None):
         day = widget_content.GetDay()
         widget_content = '%02i.%02i.%04i' % (day, month, year)
     
-    # Dir- and Filepicker ----------------------------------------------
+    # Dir- and Filepicker ------------------------------------------------------
     if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
         widget_content = widget_object.GetTextCtrlValue()
         
-    # Colourpicker -----------------------------------------------------
+    # Colourpicker -------------------------------------------------------------
     if widget_object.__class__ == wx._controls.ColourPickerCtrl:
         colour = widget_object.GetColour()
         r, g, b = colour.Get()
@@ -333,7 +342,25 @@ def widget_getter(widget_object, data_type=None):
     return widget_content
 
 
+def convert_length(entry, choice):
+    ''' This funtion converts the value of the entry into the unit of the 
+        choice. The ChoiceStringSelection can be m (meter) or ft (feet). '''
+    
+    value = entry.GetValue()
+    unit = choice.GetStringSelection()
+    feet = 0.3048
+    
+    if value <> '':
+        value = int(value)
+    
+    if unit == 'm':
+        value = round(value * feet, 0)
+    elif unit == 'ft':
+        value = round(value / feet, 0)
+    entry.SetValue(str(int(value)))
+    
 
+        
 class RedirectText(object):
     def __init__(self, entry):
         self.out = entry
