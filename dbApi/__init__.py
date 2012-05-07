@@ -3,4 +3,6 @@
 # contain all modules, which are accessed from outside of this module.
 # See Python tutorial (section packages) for more information.
 
-__all__ = ['SQLdb', 'appDB']
+__all__ = ['SQLdb', 'AppTools']
+
+import AppTools
