@@ -8,16 +8,17 @@
 import SQLdb
 
 
-class iniTable(SQLdb.table):
+class IniTable(SQLdb.table):
     ''' The options_table emulates an .ini-File. It makes a given table behave 
         like BaseUI.misc.FileSystem.iniFile and thus, has the same methods. '''
     
     attributes = \
     [
         {'column_name': 'id',          'data_type': 'bigint',    'is_primary_key': True},
-        {'column_name': 'section',     'data_type': 'varchar',   'character_maximum_length': 160},
-        {'column_name': 'option',      'data_type': 'varchar',   'character_maximum_length': 160},
-        {'column_name': 'value',       'data_type': 'varchar',   'character_maximum_length': 160},
+        {'column_name': '_section',     'data_type': 'varchar',   'character_maximum_length': 160}, 
+        {'column_name': '_option',      'data_type': 'varchar',   'character_maximum_length': 160},
+        # Underline added, because MSsql sucks around the word "option"!
+        {'column_name': '_value',       'data_type': 'varchar',   'character_maximum_length': 160},
     ]
     
     def __init__(self, db_object, table_name):
@@ -28,20 +29,20 @@ class iniTable(SQLdb.table):
     def get_option(self, section, option, default=''):
         value = str(default)
         
-        result = self.select(where="section = '%s' AND option = '%s'" % (section, option))
+        result = self.select(where="_section = '%s' AND _option = '%s'" % (section, option))
         if result == []:
-            self.insert('id', {'section': section, 'option': option, 'value': value})
+            self.insert('id', {'_section': section, '_option': option, '_value': value})
         else:
-            value = result[0].get('value')
+            value = result[0].get('_value')
         return value
         
     
     def set_option(self, section, option, value):
-        result = self.select(where="section = '%s' AND option = '%s'" % (section, option))
+        result = self.select(where="_section = '%s' AND _option = '%s'" % (section, option))
         if result <> []:
-            self.update({'value': value}, where="section = '%s' AND option = '%s'" % (section, option))
+            self.update({'_value': value}, where="_section = '%s' AND _option = '%s'" % (section, option))
         else:
-            self.insert('id', {'section': section, 'option': option, 'value': value})
+            self.insert('id', {'_section': section, '_option': option, '_value': value})
     
     
     def get_section(self, section, options_dict):
@@ -55,9 +56,9 @@ class iniTable(SQLdb.table):
         
     def save_lod(self, content_lod):
         for content_dict in content_lod:
-            section = content_dict.get('section')
-            option = content_dict.get('option')
-            value = content_dict.get('value')
+            section = content_dict.get('_section')
+            option = content_dict.get('_option')
+            value = content_dict.get('_value')
             
             self.set_option(section, option, value)
         
