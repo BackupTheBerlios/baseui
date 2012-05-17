@@ -386,3 +386,119 @@ class RedirectError:
         
         
         
+class wrap_time_slider(object):
+    def __init__(self, slider, entry, choice):
+        self.slider = slider
+        self.slider.Bind(wx.EVT_SLIDER, self.on_slider)
+        
+        self.entry = entry
+        self.entry.SetWindowStyle(wx.TE_PROCESS_ENTER)
+        self.entry.Bind(wx.EVT_TEXT_ENTER, self.on_entry_enter)
+        self.entry.Bind(wx.EVT_KILL_FOCUS, self.on_entry_kill_focus)
+        self.choice = choice
+        self.choice.Bind(wx.EVT_CHOICE, self.on_choice)
+        
+        self._change_function_list = []
+        self._units = [{'unit': 'ms',  'factor': 1,       'max': 1000},
+                       {'unit': 's',   'factor': 1000,    'max':   60},
+                       {'unit': 'min', 'factor': 60000,   'max':   60},
+                       {'unit': 'h',   'factor': 3600000, 'max':   24}]
+        self.init_choice()
+        self.init_slider()
+        
+        self._time = 1000
+        self.set_time(self._time)
+        
+        
+    def on_slider(self, event=None):
+        value = self.slider.GetValue()
+        self.set_time(self.calc_time(value * self._slider_factor), False)
+        
+        
+    def init_slider(self):
+        unit, factor, max = self.get_selected_unit()
+        self._slider_factor = 1
+        if max > 100:
+            self._slider_factor = max / 100
+        
+        
+    def on_entry_enter(self, event=None):
+        value = int(self.entry.GetValue())
+        self.set_time(self.calc_time(value), False)
+        
+    
+    def on_entry_kill_focus(self, event):
+        self.set_time(self._time, False)
+        event.Skip()
+        
+        
+    def get_time(self):
+        return self._time
+    
+    
+    def set_time(self, time, correct_unit=True):
+        ''' Set the widget to a time in ms. '''
+        
+        unit, factor, max = self.get_selected_unit()
+        if correct_unit == True:
+            unit, factor, max = self.set_time_unit(time)
+        
+        value = time / factor
+        self.entry.SetValue(str(value))
+        
+        self.slider.SetRange(1, max / self._slider_factor)
+        self.slider.SetValue(value / self._slider_factor)
+        self._time = time
+        
+        for function in self._change_function_list:
+            function()
+        
+        
+    def on_choice(self, event=None):
+        unit, factor, max = self.get_selected_unit()
+        value = int(self.entry.GetValue())
+        self.init_slider()
+        self.set_time(self._time, False)
+        
+        
+    def init_choice(self):
+        self.choice.Clear()
+        for unit_dict in self._units:
+            self.choice.Append(unit_dict['unit'], unit_dict)
+        self.choice.SetSelection(0)
+        
+        
+    def set_time_unit(self, time):
+        unit, factor, max = self.get_selected_unit()
+        if time > max * factor or time < factor:
+            for unit_dict in self._units:
+                unit, factor, max = self.unpack_unit_dict(unit_dict)
+                
+                if time <= factor * max:
+                    break
+                
+        self.choice.SetStringSelection(unit)
+        self.init_slider()
+        return unit, factor, max
+        
+        
+    def get_selected_unit(self):
+        selection = self.choice.GetSelection()
+        unit_dict = self.choice.GetClientData(selection)
+        return self.unpack_unit_dict(unit_dict)
+        
+        
+    def calc_time(self, value):
+        unit, factor, max = self.get_selected_unit()
+        return value * factor
+    
+    
+    def unpack_unit_dict(self, unit_dict):
+        return unit_dict['unit'], unit_dict['factor'], unit_dict['max']
+        
+
+    def add_change_function(self, function):
+        self._change_function_list.append(function)
+        
+        
+        
