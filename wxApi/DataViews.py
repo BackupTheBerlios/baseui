@@ -180,9 +180,9 @@ class Tree(hypertreelist.HyperTreeList):
             can be already contained in the definition_lod if desired!
     
             definition_lod = [{'column_name': 'id',
-
+            
                                'column_label': 'Primärschlüssel',
-
+                                
                                'visible': True,
                                'editable': True,
                                'sortable': True,
@@ -271,11 +271,14 @@ class Tree(hypertreelist.HyperTreeList):
                 data_type = definition_dict.get('data_type')
                 editable = definition_dict.get('editable')
                 widget = definition_dict.get('widget')
+                on_populate = definition_dict.get('on_populate')
                 content = content_dict.get(column_name)
+                if on_populate <> None:
+                    content = on_populate(content)
                 
                 if widget <> None:
                     self.SetItemWindow(item, widget, column_number)
-            
+                    
                 if content_dict.get('#bg_colour') <> None:
                     self.SetItemBackgroundColour(item, content_dict.get('#bg_colour'))
                 if content_dict.get('#fg_colour') <> None:
@@ -399,11 +402,14 @@ class Form(XrcPanel):
     ''' If data has to be inserted in a database, a input form is needed. This
         class defines a form from a JSON-Definition for easy access. '''
 
-    def __init__(self, parent, xrc_path, panel_name):
+    def __init__(self, parent, xrc_path, panel_name, autosize=True):
         # Preload a panel to subclass it from this class!
         XrcPanel.__init__(self, parent, xrc_path, panel_name)
         self.Layout()
-        parent.SetSize(self.GetSize()) 
+        
+        if autosize:
+            # Could autosize if parent is not panel?
+            parent.SetSize(self.GetSize()) 
         
         self.content_edited = False
         self.definition_lod = None

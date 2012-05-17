@@ -109,13 +109,13 @@ class database(object):
             
         delegate_object(__database, self)
         
-
-            
+        
+        
 class generic_database(object):
     def __init__(self, base_object, engine='', debug=False):
         self.base_object = base_object
         self.engine = engine.lower()
-        self.driver = None
+        #self.driver = None
         #self.connection_dict = {}
         self.debug = debug
         
@@ -156,7 +156,7 @@ class generic_database(object):
     def drop(self, database):
         ''' Drops the given database and returns the SQLcommand.
             NOTICE: You never can drop the database which is connected! '''
-
+        
         sql_command = "DROP DATABASE %s" % database
         self.cursor.execute(sql_command)
         return sql_command
@@ -431,7 +431,7 @@ class mssql_database(generic_database):
         'float':    'FLOAT',
         'numeric':  'NUMERIC',
         'date':     'DATETIME',
-        'time':     'CHAR(8)',
+        'time':     'DATETIME',
         'datetime': 'DATETIME',
         'blob':     'IMAGE',
         }
@@ -691,6 +691,10 @@ class odbc_mssql_database(odbc_generic_database):
         'blob':     'IMAGE',
         }
     
+#    python_types = {
+#        int: ['int', 'tinyint', 'bigint'],
+#        str: 
+#        }
     def __init__(self, base_object):
         # Write from generic_odbc instance to self to get the cursor etc.
         base_object.base_object.encoding = 'cp1252'
@@ -728,6 +732,10 @@ class table(object):
             __table = sqlite_table(self, db_object, table_name)
         if engine == "odbc":
             __table = odbc_generic_table(self, db_object, table_name)
+            if driver <> None:
+                if driver.lower() == 'sql server':
+                    __table = odbc_mssql_table(self, db_object, table_name)
+                    
             
         delegate_object(__table, self)
         
@@ -871,7 +879,7 @@ CREATE TABLE """ + self.name + """
         numeric_precision_list        = self.db_object.listresult("SELECT numeric_precision FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         numeric_scale_list            = self.db_object.listresult("SELECT numeric_scale FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         is_nullable_list              = self.db_object.listresult("SELECT is_nullable FROM information_schema.columns WHERE table_name = '" + self.name + "'")
-
+        
         # Create a list of primary key columns.
         primary_key_columns_list = self.get_primary_key_columns()
         
@@ -901,6 +909,7 @@ CREATE TABLE """ + self.name + """
                 self.primary_key_list.append(attributes_dict['column_name'])
 
             attributes_lod.append(attributes_dict)
+        attributes_lod = self.transform_attributes(attributes_lod)
         return attributes_lod
         
         
@@ -980,6 +989,11 @@ CREATE TABLE """ + self.name + """
                     except:
                         raise
         return not_in_database_lod, not_in_definition_lod
+    
+    
+    def transform_attributes(self, attributes_lod):
+        print 'GENERIC DOES NOT TRANSFORM'
+        return attributes_lod
         
         
     def get_content(self, fetch=None):
@@ -1150,8 +1164,7 @@ CREATE TABLE """ + self.name + """
         try:
             if listresult == False:
                 content_lod = self.db_object.dictresult(sql_command, fetch)
-                has_attributes = dir(self)
-                if 'attributes' in has_attributes:
+                if 'attributes' in dir(self):
                     content_lod = Transformations.normalize_content(self.attributes, content_lod, self.db_object)
                 else:
                     #print has_attributes
@@ -1374,6 +1387,14 @@ class odbc_generic_table(generic_table):
                 attributes_dict['is_primary_key'] = True
             
             attributes_lod.append(attributes_dict)
+            self.transform_attributes(attributes_lod)
+        return attributes_lod
+    
+    
+    def transform_attributes(self, attributes_lod):
+        ''' This has to be overridden by the db-specialized classes and is only
+            here to prevent errors. '''
+        print 'gen odbc transform?'
         return attributes_lod
     
     
@@ -1408,6 +1429,22 @@ class odbc_generic_table(generic_table):
 class odbc_mssql_table(odbc_generic_table):
     def __init__(self, base_object, db_object, table_name):
         odbc_generic_table.__init__(self, base_object, db_object, table_name)
+        
+        
+    def transform_attributes(self, attributes_lod):
+#        for attribute_dict in attributes_lod:
+#            data_type = attributes_dict.get('data_type')
+#            # Integer type -----------------------------------------------------
+#            if data_type in ['int', 'tinyint']:
+#                data_type = 'integer'
+#            if data_type in ['nvarchar']:
+#                data_type = 'varchar'
+#            if data_type in ['bit']:
+#                data_type = 'bool'
+#            if data_type in ['ntext']:
+#                data_type = 'text'
+                
+        return attributes_lod
         
         
         
