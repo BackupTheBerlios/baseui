@@ -10,7 +10,7 @@ import json
 
 from wxApi import DataViews, XRC
 from misc.FileSystem import iniFile
-from wxApi.Widgets import populate_widget, widget_getter
+from wxApi.Widgets import populate_widget, get_widget_value
 from pprint import pprint
 
 
@@ -211,7 +211,7 @@ class IniPanel(XRC.XrcPanel):
             
     def save(self):
         for definition_dict in self.definition_lod:
-            value = widget_getter(definition_dict.get('widget_object'))
+            value = get_widget_value(definition_dict.get('widget_object'))
             if value == None:
                 value = ''
             if value == False:

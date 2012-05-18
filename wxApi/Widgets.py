@@ -89,9 +89,9 @@ class TrayIcon(wx.TaskBarIcon):
         
     def on_resume(self, event):
         self.RemoveIcon()
-        self.frame.Show(True)
         self.frame.Iconize(False)
-
+        #self.frame.Show(True)
+        
  
     def on_close(self, event):
         self.RemoveIcon()
@@ -101,7 +101,8 @@ class TrayIcon(wx.TaskBarIcon):
  
     def on_minimize(self, event):
         self.SetIcon(self.icon)
-        self.frame.Show(False)
+        self.frame.Iconize(True)
+        #self.frame.Show(False)
  
  
     # def on_size(self, event):   
@@ -111,7 +112,7 @@ class TrayIcon(wx.TaskBarIcon):
     #     event.Skip()
         
         
-def widget_initializator(definition_dict):
+def init_widgets(definition_dict):
     widget_object = definition_dict.get('widget_object')
     data_type = definition_dict.get('data_type')
     character_maximum_length = definition_dict.get('character_maximum_length')
@@ -151,7 +152,7 @@ class ValidateDataType(wx.PyValidator):
         if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
             event.Skip()
             return
-
+        
         if self.data_type in ['integer', 'bigint']:
             if chr(key) in '-' + string.digits:
                 event.Skip()
@@ -166,7 +167,7 @@ class ValidateDataType(wx.PyValidator):
         
         if not wx.Validator_IsSilent():
             wx.Bell()
-
+            
         # Returning without calling event.Skip eats the event before it
         # gets to the text control
         return
@@ -256,7 +257,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
             widget_object.SetColour(widget_content)
 
     
-def widget_getter(widget_object, data_type=None):
+def get_widget_value(widget_object, data_type=None):
     widget_content = None
     
     # Textctrl -----------------------------------------------------------------
