@@ -115,6 +115,7 @@ def widget_initializator(definition_dict):
     widget_object = definition_dict.get('widget_object')
     data_type = definition_dict.get('data_type')
     character_maximum_length = definition_dict.get('character_maximum_length')
+    referenced_table_object = definition_dict.get('referenced_table_object')
     
     # Handle the textctrl
     if widget_object.__class__ in [wx._controls.TextCtrl]:
@@ -125,7 +126,9 @@ def widget_initializator(definition_dict):
         
     # Handle the combobox
     if widget_object.__class__ in [wx._controls.ComboBox]:
-        widget_object.SetValidator(ValidateDataType(data_type))
+        # On a foreign key column validation makes no sense!
+        if referenced_table_object == None:
+            widget_object.SetValidator(ValidateDataType(data_type))
 
 
 
