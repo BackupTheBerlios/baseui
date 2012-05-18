@@ -225,7 +225,7 @@ def populate_widget(widget_object, widget_content, data_type=None):
         if widget_content <> None:
             widget_object.SetStringSelection(widget_content)
         
-    # FilePickerCtrl -----------------------------------------------------------
+    # ColourPickerCtrl -----------------------------------------------------------
     if widget_object.__class__ == wx._controls.ColourPickerCtrl:
         if widget_content <> None:
             widget_object.SetColour(widget_content)
@@ -294,11 +294,11 @@ def get_widget_value(widget_object, data_type=None):
         day = widget_content.GetDay()
         widget_content = '%02i.%02i.%04i' % (day, month, year)
     
-    # Dir- and Filepicker ------------------------------------------------------
+    # Dir- and FilePicker ------------------------------------------------------
     if widget_object.__class__ in [wx._controls.FilePickerCtrl, wx._controls.DirPickerCtrl]:
         widget_content = widget_object.GetTextCtrlValue()
         
-    # Colourpicker -------------------------------------------------------------
+    # ColourPicker -------------------------------------------------------------
     if widget_object.__class__ == wx._controls.ColourPickerCtrl:
         colour = widget_object.GetColour()
         r, g, b = colour.Get()
