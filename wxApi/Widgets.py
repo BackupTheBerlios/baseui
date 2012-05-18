@@ -395,6 +395,12 @@ class wrap_time_slider(object):
         self.entry.SetWindowStyle(wx.TE_PROCESS_ENTER)
         self.entry.Bind(wx.EVT_TEXT_ENTER, self.on_entry_enter)
         self.entry.Bind(wx.EVT_KILL_FOCUS, self.on_entry_kill_focus)
+        
+        # This wraps the SetValue method of the entry to override it with set_time.
+        self.set_entry_value = self.entry.SetValue
+        self.entry.SetValue = self.set_time
+        self.entry.GetValue = self.get_time
+        
         self.choice = choice
         self.choice.Bind(wx.EVT_CHOICE, self.on_choice)
         
@@ -424,7 +430,7 @@ class wrap_time_slider(object):
         
     def on_entry_enter(self, event=None):
         value = int(self.entry.GetValue())
-        self.set_time(self.calc_time(value), False)
+        self.set_time(self.calc_time(value), True)
         
     
     def on_entry_kill_focus(self, event):
@@ -439,12 +445,16 @@ class wrap_time_slider(object):
     def set_time(self, time, correct_unit=True):
         ''' Set the widget to a time in ms. '''
         
+        # Time could come as string from SetValue on the entry widget.
+        time = int(time)
+        
+        # Set the best unit if correct_unit is True
         unit, factor, max = self.get_selected_unit()
         if correct_unit == True:
             unit, factor, max = self.set_time_unit(time)
         
         value = time / factor
-        self.entry.SetValue(str(value))
+        self.set_entry_value(str(value))
         
         self.slider.SetRange(1, max / self._slider_factor)
         self.slider.SetValue(value / self._slider_factor)
