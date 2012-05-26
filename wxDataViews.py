@@ -555,6 +555,7 @@ class DatabaseFormBase(object):
         self.permissions = permissions
         
         # This lists are made to get portlets going.
+        # TODO: Pubsub would be nice here!
         self.save_function_list = []
         self.delete_function_list = []
         self.populate_function_list = []
@@ -628,7 +629,7 @@ class DatabaseFormBase(object):
             content_dict = content_lod[0]
             self.form.populate(content_dict)
         
-        # This populates the dropdown of comboboxes.
+        # This populates the dropdown of comboboxes and gets the referenced column names.
         definition_lod = self.form.definition_lod
         for dic in definition_lod:
             populate_from = dic.get('populate_from')
@@ -636,6 +637,7 @@ class DatabaseFormBase(object):
             referenced_table_object = dic.get('referenced_table_object')
             if referenced_table_object <> None:
                 referenced_column_name = referenced_table_object.get_primary_key_columns()[0]
+                
             #referenced_column_name = dic.get('referenced_column_name')
             widget_object = dic.get('widget_object')
             column_name = dic.get('column_name')

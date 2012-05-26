@@ -49,12 +49,27 @@ class TableContentBase(object):
             if foreign_key in [None, 'NULL']:
                 continue
             
-            foreign_content_dict = referenced_table_object.select(column_list=get_columns, where='%s = %i' % (referenced_column_name, foreign_key))[0]
+            column_list = []
+            if type(get_columns[0]) <> dict:
+                column_list = get_columns
+            else:
+                for column_dict in get_columns:
+                    column_list.append(column_dict['from'])
+                
+            foreign_content_dict = referenced_table_object.select(column_list=column_list, where='%s = %i' % (referenced_column_name, foreign_key))[0]
             foreign_attributes_lod = referenced_table_object.attributes
             
             new_foreign_content_dict = {}
             for key in foreign_content_dict.keys():
-                new_key = '%s.%s' % (referenced_table_object.name, key)
+                # If get_columns is a dict, copy the value of the 'to'-key to the new_key !
+                if type(get_columns[0]) <> dict:
+                    new_key = '%s.%s' % (referenced_table_object.name, key)
+                else:
+                    for column_dict in get_columns:
+                        if column_dict['from'] == key:
+                            new_key = column_dict['to']
+                            break
+
                 new_foreign_content_dict[new_key] = foreign_content_dict[key]
                 for attributes_dict in foreign_attributes_lod:
                     if attributes_dict.get('column_name') == key:
