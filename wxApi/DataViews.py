@@ -40,6 +40,14 @@ class Tree(hypertreelist.HyperTreeList):
         
         self.Bind(wx.EVT_LIST_COL_CLICK, self.on_header_clicked, id=wx.ID_ANY)
         self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.on_row_right_clicked)
+        self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
+        
+        
+    def on_left_down(self, event):
+        ''' Deselects everything that is selected in case of clicking no row. '''
+        
+        self.UnselectAll()
+        event.Skip()
         
         
     def OnCompareItems(self, a, b):
