@@ -51,6 +51,10 @@ class XMLelement(object):
         return s
         
         
+    def read_xml(self, text, depth=0):
+        print text, self.tag
+        
+        
     def generate_xml(self, level=0, depth=0, header=False):
         ''' Generates pretty xml for this object and all subobjects. The ``level``
             tells, which intendation level is needed, ``depth`` stands for the
