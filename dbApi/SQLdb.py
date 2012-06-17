@@ -204,7 +204,8 @@ class generic_database(object):
             a little different from database to database! '''
         
         # cp1252 encoding for proper encoding, don't know exactly why!
-        sql_command = sql_command.encode('cp1252')
+        #sql_command = sql_command.encode('cp1252')
+        # With ODBCmssql this creates an ugly unicode-error (dunno why again)!
         
         try:
             if self.debug: print sql_command
@@ -826,13 +827,14 @@ CREATE TABLE """ + self.name + """
     def drop(self):
         ''' Drops a table in the given database and returns the SQLcommand. '''
 
-        sql_command = "DROP TABLE %s" % self.name
+        sql_command = 'DROP TABLE %s' % self.name
         self.db_object.execute(sql_command)
         return sql_command
 
 
     def alter(self, old_attributes_dict, new_attributes_dict):
         # TODO: Override this function from the SQLite-table-class and do it right!
+        
         if not 'sqlite' in self.db_object.engine.lower():
             old_column_name = old_attributes_dict.get('column_name')
             
@@ -939,7 +941,7 @@ CREATE TABLE """ + self.name + """
                     self.create(attributes_lod)
                 except:
                     raise
-
+        
         # Check correctness of attributes
         if alter == True:
             # print 'alter for table', self.name, 'is switched on!'
@@ -971,8 +973,13 @@ CREATE TABLE """ + self.name + """
                         if do_alter:
                             self.alter(old_column_dict, new_column_dict)
         
+        #-----------------------------------------------------------------------
+        # Unicode error is here before here!
+        
         # Compare given attributes with attributes in database. To do that, get attributes first.
         database_column_list = self.get_columns()
+        #-----------------------------------------------------------------------
+    
         for attributes_dic in attributes_lod:
             #print attributes_dic
             column_name = attributes_dic['column_name']
@@ -1106,12 +1113,17 @@ CREATE TABLE """ + self.name + """
         
         if self.db_object.engine <> 'sqlite':
             if self.db_object.engine == 'odbc':
+                #---------------------------------------------------------------
+                # Unicode error is before here
+                # print type(self.name)
+                self.name = self.name.encode('cp1252')
                 column_attributes = self.db_object.cursor.columns(table=self.name)
+                #---------------------------------------------------------------
                 column_list = []
                 for column in column_attributes:
                     column_list.append(column[3])
             else:
-                column_list = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
+                column_list = self.db_object.listresult(u"SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         else:
             attributes_lod = self.db_object.dictresult("PRAGMA TABLE_INFO(%s)" % self.name)
             column_list = []
