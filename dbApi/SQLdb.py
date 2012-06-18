@@ -6,7 +6,7 @@
 #===============================================================================
 
 import Transformations 
-   
+
 from copy import copy
 from pprint import pprint
 
@@ -874,7 +874,7 @@ CREATE TABLE """ + self.name + """
 #            if attribute.get('column_name') in primary_key_columns_list:
 #                attribute['is_primary_key'] = True
 #                
-            
+        
         column_name_list              = self.db_object.listresult("SELECT column_name FROM information_schema.columns WHERE table_name = '" + self.name + "'")
         data_type_list                = self.db_object.listresult("SELECT data_type FROM information_schema.columns WHERE table_name = '" + self.name + "';")
         character_maximum_length_list = self.db_object.listresult("SELECT character_maximum_length FROM information_schema.columns WHERE table_name = '" + self.name + "'")
