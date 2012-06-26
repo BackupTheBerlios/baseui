@@ -1193,14 +1193,12 @@ CREATE TABLE """ + self.name + """
     
     
     # Data manipulation -------------------------------------------------------
-    def insert(self, key_column='', content=None):
-        ''' Inserts content in this table.
-                content            = Content to insert in form of a list_of_dictionarys or
-                                     as a single dictionary, where the dict-keys are the
-                                     column-names of the table.
-                key_column = Name of the key_column for auto-incrementation. 
-                                     If it is not given, there has to be no pk-field in the
-                                     target table! '''
+    def insert(self, content=None, auto_increment_column=''):
+        ''' Inserts content in this table, which can be a dictionary or a list
+            of dictionarys. Auto_increment_column is the name of the column
+            which should be auto-incremented manually and is used, if no 
+            database-side-autoincrement is available. If this column is given,
+            this function returns the primary key. If not, None is returned.'''
 
         # If content is a dictionary, pack it into a list to get a lod.
         if type(content) == dict:
@@ -1211,9 +1209,9 @@ CREATE TABLE """ + self.name + """
         # Iterate the rows and insert it in the table.
         actual_pk = None
         for content_dict in content_lod:
-            if key_column <> '':
-                actual_pk = self.get_last_primary_key(primary_key_column=key_column) + 1
-                content_dict[key_column] = actual_pk
+            if auto_increment_column <> '':
+                actual_pk = self.get_last_primary_key(primary_key_column=auto_increment_column) + 1
+                content_dict[auto_increment_column] = actual_pk
                 
             sql_command = 'INSERT INTO %s (\n' % self.name
             column_list = content_dict.keys()

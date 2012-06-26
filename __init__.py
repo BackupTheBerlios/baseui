@@ -6,3 +6,4 @@ __author__ = 'Mark Muzenhardt'
 __appname__ = 'BaseUI'
 __license__ = 'LGPL'
 
+__all__ = ['wxApi']

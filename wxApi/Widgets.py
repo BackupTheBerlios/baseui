@@ -342,8 +342,8 @@ def convert_length(entry, choice):
 class RedirectText(object):
     def __init__(self, entry):
         self.out = entry
- 
- 
+        
+        
     def write(self, string):
         self.out.SetStyle(self.out.GetLastPosition(), self.out.GetLastPosition(), wx.TextAttr(wx.BLACK, wx.WHITE))
         self.out.WriteText(string)
@@ -356,7 +356,7 @@ class RedirectError:
     def __init__(self, entry):
         self.out=entry
         
-
+        
     def write(self, string):
         self.out.SetStyle(self.out.GetLastPosition(), self.out.GetLastPosition(), wx.TextAttr(wx.RED, wx.WHITE))
         self.out.WriteText(string)
