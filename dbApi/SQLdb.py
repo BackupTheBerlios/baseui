@@ -1200,6 +1200,9 @@ CREATE TABLE """ + self.name + """
             database-side-autoincrement is available. If this column is given,
             this function returns the primary key. If not, None is returned.'''
 
+        if type(auto_increment_column) <> str:
+            raise Exception, 'Wrong value for auto_increment_column!'
+        
         # If content is a dictionary, pack it into a list to get a lod.
         if type(content) == dict:
             content_lod = [content]

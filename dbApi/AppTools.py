@@ -42,7 +42,7 @@ class IniTable(SQLdb.table):
         if result <> []:
             self.update({'_value': value}, where="_section = '%s' AND _option = '%s'" % (section, option))
         else:
-            self.insert('id', {'_section': section, '_option': option, '_value': value})
+            self.insert({'_section': section, '_option': option, '_value': value}, 'id')
             
             
     def get_section(self, section, options_dict=None, prefix_section=False):

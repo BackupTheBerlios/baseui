@@ -490,3 +490,16 @@ class wrap_time_slider(object):
         
         
         
+class wrap_log_entry(object):
+    def __init__(self, entry):
+        self.entry = entry
+        
+        
+    def write(self, string):
+        self.entry.SetStyle(self.out.GetLastPosition(), self.out.GetLastPosition(), wx.TextAttr(wx.BLACK, wx.WHITE))
+        self.entry.ShowPosition(self.out.GetLastPosition())
+        self.entry.WriteText(string)
+        
+        
+        
+        
