@@ -219,7 +219,6 @@ class IniPanel(XRC.XrcPanel):
             if value == True:
                 value = 1
             definition_dict['value'] = value
-        
         self.parent.iniFile.save_lod(self.definition_lod)
         
         

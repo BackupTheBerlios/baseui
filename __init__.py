@@ -7,3 +7,6 @@ __appname__ = 'BaseUI'
 __license__ = 'LGPL'
 
 __all__ = ['wxApi']
+
+
+import wxDataViews

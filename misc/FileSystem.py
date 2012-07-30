@@ -33,6 +33,7 @@ class iniFile(ConfigParser.RawConfigParser):
     def get_option(self, section, option, default=''):
         self.read(self._filepath)
         
+        #print 'getopt', section, option, default
         section_error = False
         option_error = False
         value = default
@@ -87,26 +88,25 @@ class iniFile(ConfigParser.RawConfigParser):
             section = content_dict.get('section')
             option = content_dict.get('option')
             value = content_dict.get('value')
-            
             self.set(section, option, value)
         
         try:
-            self.write(open(self._filepath, 'w'))
-        except:
+            self.write(open(self._filepath, 'wb'))
+        except Exception, inst:
             raise
             
             
     def save_section(self, section, options_dict):
         for key in options_dict:
             self.set(section, key, options_dict[key])
-                    
+            
         try:
-            self.write(open(self._filepath, 'w'))
+            self.write(open(self._filepath, 'wb'))
         except:
             raise
-
-
-
+        
+        
+        
 class xlsFile(Base):
     ''' Helps to get data out of xlsFiles. Needs pyExcelerator, hope someday
         a kind of pyWord will appear! '''

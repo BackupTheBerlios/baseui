@@ -233,13 +233,13 @@ class DatabaseTableBase(TableContentBase):
     def set_search_columns(self, search_columns):
         self.search_columns = search_columns
         
-
+        
     def set_search_string(self, search_string):
         self.search_string = search_string
         self.populate()
         
         
-        
+
 class SubTable(DatabaseTableBase):
     def __init__(self, db_table, form=None, portlet_parent=None, parent_form=None, editable=True, permissions={}):
         DatabaseTableBase.__init__(self, db_table, form, portlet_parent, editable, permissions)
@@ -398,8 +398,8 @@ class FormTable(DatabaseTableBase):
     def on_help(self, event=None):
         if self.help_path <> None:
             self.HTMLhelp.show(self.help_path)
-    
-    
+        
+        
     def on_combobox_filter_changed(self, event=None):
         selection = self.combobox_filter.GetSelection()
         if selection == 0:
@@ -488,8 +488,8 @@ class FormTable(DatabaseTableBase):
     # This has to come back here!
     # def add_filter(self, filter_name=None, filter_function=None):
         # self.filter_lod.append({'filter_name': filter_name, 'filter_function': filter_function})
-
-
+        
+        
     # def set_filter(self, filter_name=None):
         # pass
         #print 'set filter to:', filter_name
