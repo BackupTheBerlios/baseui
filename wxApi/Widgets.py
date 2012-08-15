@@ -61,7 +61,6 @@ class BufferedWindow(wx.ScrolledWindow):
 class FontStyleCombobox(wx.combo.OwnerDrawnComboBox):
     def __init__(self, parent):
         self._font_list = self.get_font_list()
-        print self._font_list
         wx.combo.OwnerDrawnComboBox.__init__(self, parent, choices=self._font_list, size=(180, 26))
         
         
@@ -69,7 +68,7 @@ class FontStyleCombobox(wx.combo.OwnerDrawnComboBox):
         if item == wx.NOT_FOUND:
             # painting the control, but there is no valid item selected yet
             return
-
+            
         r = wx.Rect(*rect)  # make a copy
         r.Deflate(3, 14)
         
