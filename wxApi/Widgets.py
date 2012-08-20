@@ -2,10 +2,10 @@
 
 #===============================================================================
 # BaseUI.wxApi.Widgets
-# by Mark Muzenhardt, published under LGPL license.
+# by Mark Muzenhardt, published under BSD license.
 #===============================================================================
 
-import wx, string
+import wx, string, wx.combo
 import datetime
 
 from Transformations import date_to_str
@@ -48,16 +48,86 @@ class BufferedWindow(wx.ScrolledWindow):
         
     def SaveToFile(self, FileName, FileType):
         self._Buffer.SaveFile(FileName, FileType)
-
+        
         
     def UpdateDrawing(self):
         dc = wx.BufferedDC(wx.ClientDC(self), self._Buffer)
         self.DoPrepareDC(dc)
         dc.Clear()
         self.Draw(dc)
+        
+        
 
+class FontStyleCombobox(wx.combo.OwnerDrawnComboBox):
+    def __init__(self, parent):
+        self._font_list = self.get_font_list()
+        wx.combo.OwnerDrawnComboBox.__init__(self, parent, choices=self._font_list, size=(180, 26))
+        
+        
+    def OnDrawItem(self, dc, rect, item, flags):
+        if item == wx.NOT_FOUND:
+            # painting the control, but there is no valid item selected yet
+            return
             
+        r = wx.Rect(*rect)  # make a copy
+        r.Deflate(3, 14)
+        
+        face = self._font_list[item]
+        
+        if flags & wx.combo.ODCB_PAINTING_CONTROL:
+            # for painting the control itself
+            #dc.DrawLine( r.x+5, r.y+r.height/2, r.x+r.width - 5, r.y+r.height/2 )
+            pass
+        else:
+            font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, face)
+            dc.SetFont(font)
+            # for painting the items in the popup
+            dc.DrawText(self.GetString(item),
+                        r.x + 3,
+                        (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2)
+            
+           
+    # Overridden from OwnerDrawnComboBox, called for drawing the
+    # background area of each item.
+    def OnDrawBackground(self, dc, rect, item, flags):
+        # If the item is selected, or its item # iseven, or we are painting the
+        # combo control itself, then use the default rendering.
+        if (item & 1 == 0 or flags & (wx.combo.ODCB_PAINTING_CONTROL |
+                                      wx.combo.ODCB_PAINTING_SELECTED)):
+            wx.combo.OwnerDrawnComboBox.OnDrawBackground(self, dc, rect, item, flags)
+            return
 
+        # Otherwise, draw every other background with different colour.
+        bgCol = wx.Colour(240,240,250)
+        dc.SetBrush(wx.Brush(bgCol))
+        dc.SetPen(wx.Pen(bgCol))
+        dc.DrawRectangleRect(rect);
+
+
+    def get_font_list(self):
+        e = wx.FontEnumerator()
+        e.EnumerateFacenames()
+        font_list = e.GetFacenames()
+        font_list.sort()
+        #print font_list
+        return font_list
+        
+    # Overridden from OwnerDrawnComboBox, should return the height
+    # needed to display an item in the popup, or -1 for default
+    def OnMeasureItem(self, item):
+        # Simply demonstrate the ability to have variable-height items
+    #    if item & 1:
+    #        return 36
+    #    else:
+            return 32
+
+    # Overridden from OwnerDrawnComboBox.  Callback for item width, or
+    # -1 for default/undetermined
+    #def OnMeasureItemWidth(self, item):
+    #    return -1; # default - will be measured from text width
+    
+    
+    
 class TrayIcon(wx.TaskBarIcon):
     def __init__(self, frame, icon, tooltip=''):
         wx.TaskBarIcon.__init__(self)
