@@ -66,6 +66,9 @@ class TrayIcon(wx.TaskBarIcon):
         self.icon = icon
         self.tooltip = tooltip
         
+        self._mintotray = True
+        self._evertray = False
+        
         self.Bind(wx.EVT_TASKBAR_LEFT_UP, self.on_left_up)
         self.frame.Bind(wx.EVT_ICONIZE, self.on_minimize)
         

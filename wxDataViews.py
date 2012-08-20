@@ -66,8 +66,10 @@ class DatabaseTableBase(TableContentBase):
 
     def on_cursor_changed(self, content_dic=None):
         self.selected_row_content = content_dic
+        if content_dic == None:
+            return
+        
         self.primary_key = content_dic[self.primary_key_column]
-        #print self.selected_row_content
         
         
     # Actions -----------------------------------------------------------------
