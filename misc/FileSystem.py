@@ -53,7 +53,7 @@ class iniFile(ConfigParser.RawConfigParser):
         return value
     
         
-    def get_section(self, section, option_dict):
+    def get_section(self, section, option_dict=None):
         ''' section is simply the section as string,
             option_dict is a dict of defaults, f.e.:
             {'engine': 'SQLite',
@@ -62,6 +62,12 @@ class iniFile(ConfigParser.RawConfigParser):
         self.read(self._filepath)
         section_dict = {}
         
+        if options_dict == None:
+            options_dict = {}
+            for option in self.options(section):
+                options_dict[option] = self.get(section, option)
+            return sections_dict
+            
         for option in option_dict:
             # TODO: Should work if just get_option is called here!
             section_error = False
