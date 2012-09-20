@@ -31,7 +31,7 @@ class IniTable(SQLdb.table):
         
         result = self.select(where="_section = '%s' AND _option = '%s'" % (section, option))
         if result == []:
-            self.insert('id', {'_section': section, '_option': option, '_value': value})
+            self.insert({'_section': section, '_option': option, '_value': value}, 'id')
         else:
             value = result[0].get('_value')
         return value
