@@ -62,11 +62,12 @@ class iniFile(ConfigParser.RawConfigParser):
         self.read(self._filepath)
         section_dict = {}
         
-        if options_dict == None:
-            options_dict = {}
+        if option_dict == None:
+            option_dict = {}
+            #print 'ergo', self.options(section)
             for option in self.options(section):
-                options_dict[option] = self.get(section, option)
-            return sections_dict
+                option_dict[option] = self.get(section, option)
+            return option_dict
             
         for option in option_dict:
             # TODO: Should work if just get_option is called here!
