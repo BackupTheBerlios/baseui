@@ -64,8 +64,14 @@ class iniFile(ConfigParser.RawConfigParser):
         
         if option_dict == None:
             section_dict = {}
-            for option in self.options(section):
-                section_dict[option] = self.get(section, option)
+            try:
+                option_dict = self.options(section)
+            except:
+                return section_dict
+            
+            for option in option_dict:
+                value = self.get(section, option)
+                section_dict[option] = value
             return section_dict
             
         for option in option_dict:
@@ -87,7 +93,7 @@ class iniFile(ConfigParser.RawConfigParser):
                     self.set(section, option, option_dict[option])
                     section_dict[option] = option_dict[option]
         return section_dict
-    
+        
     
     def save_lod(self, content_lod):
         for content_dict in content_lod:
@@ -105,7 +111,6 @@ class iniFile(ConfigParser.RawConfigParser):
     def save_section(self, section, options_dict):
         for key in options_dict:
             self.set(section, key, options_dict[key])
-            
         try:
             self.write(open(self._filepath, 'wb'))
         except:

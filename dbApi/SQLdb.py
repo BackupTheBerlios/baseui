@@ -1209,7 +1209,7 @@ CREATE TABLE """ + self.name + """
     
     
     # Data manipulation -------------------------------------------------------
-    def insert(self, content=None, auto_increment_column=None):
+    def insert(self, content=None, auto_increment_column=''):
         ''' Inserts content in this table, which can be a dictionary or a list
             of dictionarys. Auto_increment_column is the name of the column
             which should be auto-incremented manually and is used, if no 
