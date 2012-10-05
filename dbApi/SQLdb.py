@@ -93,7 +93,7 @@ def delegate_object(from_object, into_object):
         if not argument.startswith('__') and argument not in into_arguments:
             into_object.__setattr__(argument, from_object.__getattribute__(argument))
             
-            
+        
 
 class database(object):
     ''' This class connects SQL databases and unifies the commands to query SQL statements. '''
@@ -101,11 +101,14 @@ class database(object):
     def __init__(self, engine='', encoding='cp1252', debug=False):
         ''' Initializes database object by importing db_connector.
                 engine = Database to connect (currently MySQL or PostgreSQL). '''
-          
+        
+        if engine == None:
+            engine = ''
         self.engine = engine.lower()
         self.encoding = encoding
         self.debug = debug
         
+        __database = None
         if self.engine == 'postgresql':
             __database = postgresql_database(self, self.engine)
         if self.engine == "mysql":
@@ -122,8 +125,10 @@ class database(object):
             __database = sqlite_database(self)
         if self.engine == "odbc":
             __database = odbc_generic_database(self)
-            
-        delegate_object(__database, self)
+        
+        #TODO: Kick away delegate crap someday. Using a base object is much better!
+        if __database <> None:
+            delegate_object(__database, self)
         
         
         

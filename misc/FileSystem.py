@@ -109,8 +109,13 @@ class iniFile(ConfigParser.RawConfigParser):
             
             
     def save_section(self, section, options_dict):
+        # Saves a whole section. If the section not exists, create it.
         for key in options_dict:
-            self.set(section, key, options_dict[key])
+            try:
+                self.set(section, key, options_dict[key])
+            except ConfigParser.NoSectionError:
+                self.add_section(section)
+                self.set(section, key, options_dict[key])
         try:
             self.write(open(self._filepath, 'wb'))
         except:
