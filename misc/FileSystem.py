@@ -8,6 +8,15 @@
 import os, ConfigParser
 
 
+def get_approot(file):
+    ''' file is __file__ in reality! '''
+    
+    file_path = os.path.abspath(file)
+    app_root = file_path.split('library.zip')[0]
+    app_root = app_root.split('src')[0]
+    return app_root
+    
+    
 class Base:
     ''' This Base is the parent class of all file objects. '''
     
