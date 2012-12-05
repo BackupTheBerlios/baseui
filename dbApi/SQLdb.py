@@ -768,7 +768,7 @@ class generic_table(object):
         self.base_object = base_object
         self.db_object = db_object
         self.db_cursor = db_object.cursor
-        self.name = table_name
+        self.name = table_name #.encode('cp1252')
         
         self.primary_key_list = []
         
@@ -1173,7 +1173,7 @@ CREATE TABLE """ + self.name + """
             distinct = 'DISTINCT '
             
         if join == []:
-            from_str = self.name
+            from_str = self.name.decode('cp1252')
         else:
             from_str = self.name
             for table in join:
